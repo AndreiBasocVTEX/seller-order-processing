@@ -1,0 +1,13 @@
+{
+  "section": "products",
+  "subSection": "catalog",
+  "titleId": "admin-example.navigation.seller-dashboard",
+  "subSectionItems": [
+    {
+      "isNew": true,
+      "labelId": "admin-example.navigation.seller-dashboard",
+      "path": "/admin/seller-dashboard"
+    }
+  ],
+  "searchKeyWordsHelpers": "admin-example.navigation.search.kws"
+}

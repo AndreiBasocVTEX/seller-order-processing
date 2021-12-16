@@ -1,7 +1,20 @@
 {
   "extends": "vtex",
   "root": true,
-  "env": {
-    "node": true
+  "plugins": [
+    "prettier"
+  ],
+  "rules": {
+    "no-console": "warn",
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "lf"
+      }
+    ]
   }
 }

@@ -1,0 +1,6 @@
+{
+  "admin.app.sellerDashboard": {
+    "component": "sellerDashboard",
+    "path": "/admin/app/seller-dashboard"
+  }
+}
