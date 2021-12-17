@@ -1,25 +1,17 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 import type { FC } from 'react'
-import axios from 'axios'
+import { Layout, PageBlock, PageHeader } from 'vtex.styleguide'
+
+import OrdersList from './OrdersList'
 
 const SellerDashboard: FC = () => {
-  const [orderList, setOrderList] = useState([])
-
-  const getOrderList = useCallback(async () => {
-    try {
-      const { data } = await axios.get(`/api/oms/pvt/orders?f_creationdate`, {
-        headers: { Accept: 'application/json' },
-      })
-
-      setOrderList(data)
-    } catch (e) {
-      console.log(e)
-    }
-  }, [])
-
-  console.log(orderList)
-
-  return <button onClick={getOrderList}>Click Me</button>
+  return (
+    <Layout fullWidth pageHeader={<PageHeader title="Orders" />}>
+      <PageBlock>
+        <OrdersList />
+      </PageBlock>
+    </Layout>
+  )
 }
 
 export default SellerDashboard
