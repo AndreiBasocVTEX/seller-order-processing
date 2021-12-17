@@ -16,6 +16,14 @@
     "vtex.search-graphql": "0.x"
   },
   "registries": ["smartcheckout"],
-  "policies": [],
+  "policies": [
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "urgentcargus.azure-api.net",
+        "path": "/*"
+      }
+    }
+  ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }
