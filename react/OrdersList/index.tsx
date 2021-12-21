@@ -53,7 +53,7 @@ const OrdersList: FC = () => {
       return <Tag type="success">Shipped</Tag>
     }
 
-    return <span>no</span>
+    return <span>yes</span>
   }
 
   const tableOrdersSchema = useMemo(
