@@ -19,7 +19,7 @@ const OrdersList: FC = () => {
 
       data.list.forEach((el: IOrder): void => {
         el.totalValue /= 100
-        // placeholders
+        // placeholders:
         el.orderId = `GCB-${(
           Math.floor(Math.random() * 9000000000000) + 1000000000000
         ).toString()}-01`
@@ -67,12 +67,12 @@ const OrdersList: FC = () => {
           },
         },
         orderIdElefant: {
-          title: 'Or.# Elefant',
+          title: 'Elefant #',
           width: 90,
         },
         orderId: {
-          title: 'Or.# VTEX',
-          // width: 200,
+          title: 'VTEX #',
+          width: 170,
         },
         creationDate: {
           title: 'Creation Date',
@@ -91,7 +91,7 @@ const OrdersList: FC = () => {
         },
         ShippingEstimatedDateMax: {
           title: 'Shipping ETA',
-          width: 100,
+          width: 120,
           cellRenderer: ({ cellData }: { cellData: string }): string => {
             return new Intl.DateTimeFormat('en-GB', {
               year: 'numeric',
@@ -107,9 +107,18 @@ const OrdersList: FC = () => {
         },
         totalItems: {
           title: 'Items',
-          width: 50,
+          width: 70,
           cellRenderer: ({ cellData }: SchemeDataType) => {
-            return <Tag size="small">{cellData}</Tag>
+            return (
+              <span className="f6 lh-copy">
+                <Tag
+                  style={{ fontSize: '14px', lineHeight: '1.15rem' }}
+                  size="small"
+                >
+                  {cellData}
+                </Tag>
+              </span>
+            )
           },
         },
         totalValue: {
@@ -121,12 +130,12 @@ const OrdersList: FC = () => {
         },
         paymentNames: {
           // Payment method ?
-          title: 'Pay. Method',
+          title: 'Pay Method',
           width: 100,
         },
         awbShipping: {
           title: 'AWB Shipping',
-          // width: 200,
+          width: 150,
           cellRenderer: ({ cellData }: SchemeDataType) => {
             return (
               <Button
@@ -145,13 +154,12 @@ const OrdersList: FC = () => {
           title: 'AWB Status',
           width: 100,
           cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-            // селлрендерер ожидает селлДату как параметр функции, мы пишем деструктуризацию и он берет из объекта
             return displayStatus(cellData)
           },
         },
         invoice: {
           title: 'Invoice',
-          // width: 200,
+          width: 150,
           cellRenderer: ({ cellData }: SchemeDataType) => {
             return (
               <Button
@@ -175,19 +183,48 @@ const OrdersList: FC = () => {
     getOrdersList()
   }, [getOrdersList])
 
-  console.log('ORDERLIST', ordersList)
-  ordersList.forEach((el) => {
-    console.log('4ECH', el.totalValue / 100)
-    setOrdersList
-  })
-
   return (
-    <Table
-      density="medium"
-      fullWidth
-      items={ordersList}
-      schema={tableOrdersSchema}
-    />
+    <div className="f6 lh-copy">
+      <Table
+        density="medium"
+        fullWidth
+        items={ordersList}
+        schema={tableOrdersSchema}
+        bulkActions={{
+          texts: {
+            secondaryActionsLabel: 'Actions',
+            rowsSelected: (qty: React.ReactNode) => (
+              <React.Fragment>Selected rows: {qty}</React.Fragment>
+            ),
+            selectAll: 'Select all',
+            allRowsSelected: (qty: React.ReactNode) => (
+              <React.Fragment>All rows selected: {qty}</React.Fragment>
+            ),
+          },
+          totalItems: 122,
+          onChange: (params: any) => console.log(params),
+          main: {
+            label: 'Main Action',
+            handleCallback: (params: any) => console.log(params),
+          },
+          others: [
+            {
+              label: 'Action 1',
+              handleCallback: (params: any) => console.log(params),
+            },
+            {
+              label: 'Action 2',
+              handleCallback: (params: any) => console.log(params),
+            },
+            {
+              label: 'Dangerous action',
+              isDangerous: true,
+              handleCallback: (params: any) => console.log(params),
+            },
+          ],
+        }}
+      />
+    </div>
   )
 }
 
