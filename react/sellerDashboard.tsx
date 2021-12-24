@@ -6,7 +6,10 @@ import OrdersList from './OrdersList'
 
 const SellerDashboard: FC = () => {
   return (
-    <Layout fullWidth pageHeader={<PageHeader title="Orders" />}>
+    <Layout
+      fullWidth
+      pageHeader={<PageHeader title="Tabloul de bord al vânzătorului" />}
+    >
       <PageBlock>
         <OrdersList />
       </PageBlock>
