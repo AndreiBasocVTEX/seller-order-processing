@@ -19,8 +19,6 @@ import { FormattedCurrency } from 'vtex.format-currency'
 import fancourier from '../logos/fancourier.png'
 import cargus from '../logos/cargus.png'
 import innoship from '../logos/innoship.png'
-// import ArrowUp from "@vtex/styleguide/lib/icon/ArrowUp"
-// import ArrowDown from "@vtex/styleguide/lib/icon/ArrowDown
 import '../src/style.css'
 import type { IOrder } from '../typings/order'
 
