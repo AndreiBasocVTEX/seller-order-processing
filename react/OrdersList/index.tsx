@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import type { FC } from 'react'
 import axios from 'axios'
 import {
@@ -23,20 +23,19 @@ import '../src/style.css'
 import type { IOrder } from '../typings/order'
 
 const OrdersList: FC = () => {
-  const [ordersList, setOrdersList] = useState<IOrder[]>([])
-  /*
   const [paginationParams, setPaginationParams] = useState({
+    items: [],
     currentItemFrom: 1,
-    currentItemTo: 0,
+    currentItemTo: 2,
     itemsLength: 0,
     paging: {
-        total: 0,
-        currentPage: 1,
-        perPage: 15,
-        pages: 1,
-    }
+      total: 0,
+      currentPage: 1,
+      perPage: 15,
+      pages: 1,
+    },
   })
-*/
+
   const courierOptions = [
     // useMemo
     {
@@ -50,8 +49,8 @@ const OrdersList: FC = () => {
           Cargus
         </>
       ),
-      onClick: () =>
-        alert('sure, everybody knows that the bird is the word...'),
+      // onClick: () =>{
+      // }
     },
     {
       label: (
@@ -64,8 +63,7 @@ const OrdersList: FC = () => {
           Innoship
         </>
       ),
-      onClick: () =>
-        alert('sure, everybody knows that the bird is the word...'),
+      // onClick: () =>{}
     },
     {
       label: (
@@ -78,52 +76,55 @@ const OrdersList: FC = () => {
           Fan Courier
         </>
       ),
-      onClick: () => alert('I’m sorry, Dave. I’m afraid I can’t do that.'),
+      // onClick: () => {},
     },
     {
       label: 'Download PDF',
       isDangerous: 'true',
-      onClick: () => alert('The cake is a lie'),
+      // onClick: ()=>{},
     },
   ]
 
   const downloadOptions = [
     {
       label: 'Descarca AWB',
-      onClick: () => alert('AWB Downloading'),
+      // onClick: () => {
+      // },
     },
     {
       label: 'Descarca Factura',
-      onClick: () => alert('Invoice Downloading'),
+      // onClick: () => {},
     },
   ]
 
-  const getOrdersList = useCallback(async () => {
+  const getItems = useCallback(async (newParams) => {
+    const url = `/api/oms/pvt/orders?f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
+
     try {
-      const { data } = await axios.get(`/api/oms/pvt/orders?f_creationdate`, {
+      const { data } = await axios.get(url, {
         headers: { Accept: 'application/json' },
-        params: {
-          per_page: 200,
-        },
+        params: {},
       })
 
-      data.list.forEach((el: IOrder): void => {
-        el.totalValue /= 100
-        // placeholders:
-        el.orderId = `GCB-${(
-          Math.floor(Math.random() * 9000000000000) + 1000000000000
-        ).toString()}-01`
-        el.awbShipping = 'CHR32534syfavc324'
-        el.invoice = 'CHR32534syfavc324' // placeholders
-        el.orderIdElefant = (
-          Math.floor(Math.random() * 90000000) + 10000000
-        ).toString()
-        el.awbStatus = 'livrat'
+      // placeholder values for demonstration purposes, delete me l8r!
+      data.list.forEach((item: IOrder) => {
+        if (Math.round(Math.random()) === 0) {
+          item.paymentNames = 'Card'
+        } else {
+          item.paymentNames = 'Ramburs'
+        }
       })
-      setOrdersList(data.list)
-      console.log(data.list)
-    } catch (e) {
-      console.log(e)
+
+      setPaginationParams({
+        ...newParams,
+        items: data.list,
+        paging: data.paging,
+        currentItemTo: data.paging.perPage * data.paging.currentPage,
+      })
+      console.log('getItems', data.list)
+      console.log('getItemsDATA', data)
+    } catch (err) {
+      console.log(err)
     }
   }, [])
 
@@ -207,133 +208,171 @@ const OrdersList: FC = () => {
     return <span>missing tag</span>
   }
 
-  const tableOrdersSchema = useMemo(
-    () => ({
-      properties: {
-        status: {
-          title: 'Status',
-          width: 100,
-          cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-            return displayStatus(cellData)
-          },
-        },
-        orderIdElefant: {
-          title: 'Elefant #',
-          width: 90,
-        },
-        orderId: {
-          title: 'VTEX #',
-          width: 170,
-        },
-        creationDate: {
-          title: 'Creation Date',
-          width: 140,
-          cellRenderer: ({ cellData }: { cellData: string }): string => {
-            return new Intl.DateTimeFormat('en-GB', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: false,
-              timeZone: 'Europe/Bucharest',
-            }).format(new Date(cellData))
-          },
-        },
-        ShippingEstimatedDateMax: {
-          title: 'Shipping ETA',
-          width: 120,
-          cellRenderer: ({ cellData }: { cellData: string }): string => {
-            return new Intl.DateTimeFormat('en-GB', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              timeZone: 'Europe/Bucharest',
-            }).format(new Date(cellData))
-          },
-        },
-        clientName: {
-          title: 'Receiver',
-          width: 150,
-        },
-        totalItems: {
-          title: 'Items',
-          width: 70,
-          cellRenderer: ({ cellData }: SchemeDataType) => {
-            return (
-              <span className="f6 lh-copy">
-                <Tag
-                  style={{ fontSize: '14px', lineHeight: '1.15rem' }}
-                  size="small"
-                >
-                  {cellData}
-                </Tag>
-              </span>
-            )
-          },
-        },
-        totalValue: {
-          title: 'Total Value',
-          width: 100,
-          cellRenderer: ({ cellData }: SchemeDataType) => {
-            return <FormattedCurrency key={cellData} value={cellData} />
-          },
-        },
-        paymentNames: {
-          // Payment method ?
-          title: 'Pay Method',
-          width: 100,
-        },
-        awbShipping: {
-          title: 'AWB Shipping',
-          width: 200,
-          cellRenderer: ({ cellData }: SchemeDataType) => {
-            console.log(cellData)
-
-            return (
-              <ActionMenu
-                label="Generate"
-                buttonProps={{
-                  variation: 'primary',
-                  size: 'small',
-                }}
-                options={courierOptions}
-              />
-            )
-          },
-        },
-        awbStatus: {
-          title: 'AWB Status',
-          width: 100,
-          cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-            return displayStatus(cellData)
-          },
-        },
-        invoice: {
-          title: 'Invoice',
-          width: 150,
-          cellRenderer: ({ cellData }: SchemeDataType) => {
-            return (
-              <Button
-                style={{ width: '100%', justifyContent: 'end' }}
-                variation="primary"
-                className="self-end pl7"
-                size="small"
-                onClick={{ cellData }}
-              >
-                Generate
-              </Button>
-            )
-          },
+  const tableOrdersSchema = {
+    properties: {
+      status: {
+        title: 'Status',
+        width: 100,
+        cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
+          return displayStatus(cellData)
         },
       },
-    }),
-    []
-  )
+      marketPlaceOrderId: {
+        title: 'Elefant #',
+        width: 90,
+      },
+      orderId: {
+        title: 'VTEX #',
+        width: 170,
+      },
+      creationDate: {
+        title: 'Creation Date',
+        width: 140,
+        cellRenderer: ({ cellData }: { cellData: string }): string => {
+          return new Intl.DateTimeFormat('en-GB', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: false,
+            timeZone: 'Europe/Bucharest',
+          }).format(new Date(cellData))
+        },
+      },
+      ShippingEstimatedDateMax: {
+        title: 'Shipping ETA',
+        width: 120,
+        cellRenderer: ({ cellData }: { cellData: string }): string => {
+          return new Intl.DateTimeFormat('en-GB', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'Europe/Bucharest',
+          }).format(new Date(cellData))
+        },
+      },
+      clientName: {
+        title: 'Receiver',
+        width: 150,
+      },
+      totalItems: {
+        title: 'Items',
+        width: 70,
+        cellRenderer: ({ cellData }: SchemeDataType) => {
+          return (
+            <span className="f6 lh-copy">
+              <Tag
+                style={{ fontSize: '14px', lineHeight: '1.15rem' }}
+                size="small"
+              >
+                {cellData}
+              </Tag>
+            </span>
+          )
+        },
+      },
+      totalValue: {
+        title: 'Total Value',
+        width: 100,
+        cellRenderer: ({ cellData }: SchemeDataType) => {
+          return <FormattedCurrency key={cellData} value={cellData} />
+        },
+      },
+      paymentNames: {
+        title: 'Pay Method',
+        width: 100,
+      },
+      awbShipping: {
+        title: 'AWB Shipping',
+        width: 200,
+        cellRenderer: ({ cellData }: SchemeDataType) => {
+          console.log(cellData)
+
+          return (
+            <ActionMenu
+              label="Generate"
+              buttonProps={{
+                variation: 'primary',
+                size: 'small',
+                id: 'dropdownBut',
+              }}
+              options={courierOptions}
+            />
+          )
+        },
+      },
+      awbStatus: {
+        title: 'AWB Status',
+        width: 100,
+        cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
+          return displayStatus(cellData)
+        },
+      },
+      invoice: {
+        title: 'Invoice',
+        width: 150,
+        cellRenderer: ({ cellData }: SchemeDataType) => {
+          return (
+            <Button
+              style={{ width: '100%', justifyContent: 'end' }}
+              variation="primary"
+              className="self-end pl7"
+              size="small"
+              onClick={{ cellData }}
+            >
+              Generate
+            </Button>
+          )
+        },
+      },
+    },
+  }
+
+  const handleNextClick = () => {
+    const { currentPage } = paginationParams.paging
+    const { currentItemTo } = paginationParams
+    const { perPage } = paginationParams.paging
+    const newParams = {
+      ...paginationParams,
+      currentItemFrom: currentPage * perPage,
+      currentItemTo: currentItemTo * perPage,
+      paging: { ...paginationParams.paging, currentPage: currentPage + 1 },
+    }
+
+    setPaginationParams(newParams)
+    getItems(newParams)
+  }
+
+  const handlePrevClick = () => {
+    const { currentPage } = paginationParams.paging
+    const { currentItemTo } = paginationParams
+    const { perPage } = paginationParams.paging
+    const newParams = {
+      ...paginationParams,
+      paging: { ...paginationParams.paging, currentPage: currentPage - 1 },
+      currentItemFrom: (currentPage - 2) * perPage,
+      currentItemTo: currentItemTo * perPage,
+    }
+
+    setPaginationParams(newParams)
+    getItems(newParams)
+  }
+
+  const handleRowsChange = useCallback((e: unknown, value: number) => {
+    console.log(e)
+    const newParams = {
+      ...paginationParams,
+      paging: { ...paginationParams.paging, perPage: Number(value) },
+    }
+
+    setPaginationParams(newParams)
+    getItems(newParams)
+  }, [])
 
   useEffect(() => {
-    getOrdersList()
-  }, [getOrdersList])
+    getItems(paginationParams)
+  }, [])
 
   return (
     <div className="f6 lh-copy">
@@ -371,7 +410,6 @@ const OrdersList: FC = () => {
         style={{
           display: 'flex',
           flexDirection: 'row',
-          // alignItems: "center",
           justifyContent: 'space-between',
         }}
       >
@@ -379,7 +417,6 @@ const OrdersList: FC = () => {
           style={{
             display: 'flex',
             flex: 1,
-            // alignItems: "flex-start",
             justifyContent: 'space-between',
           }}
         >
@@ -411,19 +448,15 @@ const OrdersList: FC = () => {
           </div>
           <div className="pagination" style={{ width: '300px' }}>
             <Pagination
-              rowsOptions={[5, 10, 15, 20]}
-              currentItemFrom={1}
-              currentItemTo={10}
+              rowsOptions={[15, 25, 50, 100]}
+              currentItemFrom={paginationParams.currentItemFrom}
+              currentItemTo={paginationParams.currentItemTo}
               textOf="of"
               textShowRows="Pe pagina"
-              totalItems={20}
-              // onNextClick: handleNextClick,
-              // onPrevClick: handlePrevClick,
-              // textShowRows: (formatMessage({id: messages.showRows.id})),
-              // textOf: (formatMessage({id: messages.of.id})),
-              // currentItemFrom: this.state.currentItemFrom,
-              // currentItemTo: this.state.currentItemTo,
-              // totalItems: paging.total,
+              totalItems={paginationParams.paging.total}
+              onRowsChange={handleRowsChange}
+              onNextClick={handleNextClick}
+              onPrevClick={handlePrevClick}
             />
           </div>
         </div>
@@ -431,31 +464,8 @@ const OrdersList: FC = () => {
       <Table
         density="medium"
         fullWidth
-        items={ordersList}
+        items={paginationParams.items}
         schema={tableOrdersSchema}
-        // totalizers={[
-        //   {
-        //     label: 'Account balance',
-        //     value: 23837,
-        //   },
-        //   {
-        //     label: 'Tickets',
-        //     value: '$ 36239,05',
-        //     iconBackgroundColor: '#eafce3',
-        //     icon: <ArrowUp color="#79B03A" size={14} />,
-        //   },
-        //
-        //   {
-        //     label: 'Outputs',
-        //     value: '-$ 13.485,26',
-        //     icon: <ArrowDown size={14} />,
-        //   },
-        //   {
-        //     label: 'Sales',
-        //     value: 23837,
-        //     isLoading: true,
-        //   },
-        // ]}
         bulkActions={{
           texts: {
             secondaryActionsLabel: 'Actions',
@@ -467,7 +477,7 @@ const OrdersList: FC = () => {
               <React.Fragment>All rows selected: {qty}</React.Fragment>
             ),
           },
-          totalItems: 122,
+          totalItems: paginationParams.paging.total,
           onChange: (params: unknown) => console.log(params),
           others: [
             {
