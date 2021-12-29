@@ -1,0 +1,15 @@
+body {
+  background-color: red;
+}
+.pagination .pt5 {
+  padding-top: 0;
+  background-color: red;
+}
+
+.pagination {
+  background-color: blue;
+}
+
+.c-muted-2.t-small {
+  margin-left: 6px;
+}

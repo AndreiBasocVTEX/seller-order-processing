@@ -1,4 +1,4 @@
-export interface Order {
+export interface IOrder {
   ShippingEstimatedDate: string
   ShippingEstimatedDateMax: string
   ShippingEstimatedDateMin: string
@@ -23,6 +23,7 @@ export interface Order {
   marketPlaceOrderId: string
   orderFormId: string
   orderId: string
+  orderIdElefant: string
   orderIsComplete: boolean
   origin: string
   paymentApprovedDate: string
@@ -36,4 +37,7 @@ export interface Order {
   totalValue: number
   workflowInErrorState: boolean
   workflowInRetry: boolean
+  awbShipping: string // nonexistent data
+  awbStatus: string // nonexistent data
+  invoice: string // nonexistent data
 }
