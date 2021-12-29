@@ -1,0 +1,9 @@
+export const awbContent = 'goods'
+export const awbSourceChannel = 'ONLINE'
+export const defaultCountryCode = 'RO'
+export const defaultEnvelopeCount = 0
+export const defaultAWBFormat = 'A4'
+export const shipmentPaymentMethod = 1
+export const totalOrderDiscount = 0
+export const priceMultiplier = 100
+export const promissory = 'promissory'
