@@ -16,7 +16,9 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": ["smartcheckout"],
+  "registries": [
+    "smartcheckout"
+  ],
   "policies": [
     {
       "name": "outbound-access",
@@ -24,7 +26,108 @@
         "host": "urgentcargus.azure-api.net",
         "path": "/*"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "sameday-api.demo.zitec.com",
+        "path": "/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.innoship.io",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.sameday.ro",
+        "path": "/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "www.selfawb.ro",
+        "path": "/*"
+      }
     }
   ],
+  "settingsSchema": {
+    "title": "Elefant Sellers Dashboard POC",
+    "type": "object",
+    "properties": {
+      "vtex_appKey": {
+        "title": "VTEX App Key",
+        "description": "",
+        "type": "string"
+      },
+      "vtex_appToken": {
+        "title": "VTEX App Token",
+        "description": "",
+        "type": "string"
+      },
+      "fancourier__username": {
+        "title": "FanCourier Username",
+        "description": "",
+        "type": "string"
+      },
+      "fancourier__password": {
+        "title": "FanCourier Password",
+        "description": "",
+        "type": "string"
+      },
+      "fancourier__clientId": {
+        "title": "FanCourier Client ID",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__username": {
+        "title": "Cargus Username",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__password": {
+        "title": "Cargus Password",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__primaryKey": {
+        "title": "Cargus Primary Key",
+        "description": "",
+        "type": "string"
+      },
+      "innoship__apiToken": {
+        "title": "Innoship API Token",
+        "description": "",
+        "type": "string"
+      },
+      "sameday__username": {
+        "title": "Sameday Username",
+        "description": "",
+        "type": "string"
+      },
+      "sameday__password": {
+        "title": "Sameday Password",
+        "description": "",
+        "type": "string"
+      },
+      "sameday__sandbox": {
+        "title": "Sandbox mode",
+        "description": "",
+        "type": "boolean"
+      }
+    }
+  },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }

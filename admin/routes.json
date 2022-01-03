@@ -2,5 +2,9 @@
   "admin.app.sellerDashboard": {
     "component": "sellerDashboard",
     "path": "/admin/app/seller-dashboard"
+  },
+  "admin.app.orderDetails": {
+    "component": "orderDetails",
+    "path": "/admin/app/order-details/:id"
   }
 }

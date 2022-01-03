@@ -3,9 +3,24 @@ import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
 import { status } from './middlewares/status'
-import { validate } from './middlewares/validate'
+import { getVtexOrderData } from './middlewares/orderApi'
+import {
+  getServicesFromFancourier,
+  printAwbFromFancourier,
+  sendInvoiceInfoFancourier,
+} from './middlewares/fancourier'
+import { printAwbFromCargus, sendInvoiceInfoCargus } from './middlewares/cargus'
+import {
+  printAwbFromSameday,
+  sendInvoiceInfoSameday,
+} from './middlewares/sameday'
+import { updateAWBInfo } from './middlewares/carrier'
+import {
+  printAwbFromInnoship,
+  sendInvoiceInfoInnoship,
+} from './middlewares/innoship'
 
-const TIMEOUT_MS = 800
+const TIMEOUT_MS = 1000 * 10
 
 // Create a LRU memory cache for the Status client.
 // The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
@@ -46,7 +61,40 @@ export default new Service({
   routes: {
     // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
     status: method({
-      GET: [validate, status],
+      GET: [status],
+    }),
+    updateAWBInfo: method({
+      PUT: [updateAWBInfo],
+    }),
+    getVtexOrderData: method({
+      GET: [getVtexOrderData],
+    }),
+    getServicesFromFancourier: method({
+      GET: [getServicesFromFancourier],
+    }),
+    printAwbFromFancourier: method({
+      GET: [printAwbFromFancourier],
+    }),
+    printAwbFromCargus: method({
+      GET: [printAwbFromCargus],
+    }),
+    sendInvoiceInfoCargus: method({
+      POST: [sendInvoiceInfoCargus],
+    }),
+    sendInvoiceInfoSameday: method({
+      POST: [sendInvoiceInfoSameday],
+    }),
+    sendInvoiceInfoFancourier: method({
+      POST: [sendInvoiceInfoFancourier],
+    }),
+    printAwbFromSameday: method({
+      GET: [printAwbFromSameday],
+    }),
+    sendInvoiceInfoInnoship: method({
+      POST: [sendInvoiceInfoInnoship],
+    }),
+    printAwbFromInnoship: method({
+      GET: [printAwbFromInnoship],
     }),
   },
 })

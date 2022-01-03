@@ -1,28 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { FC } from 'react'
 import axios from 'axios'
 import {
-  Button,
+  // Button,
   Table,
   Tag,
+  Link,
   ActionMenu,
   Tooltip,
   Pagination,
-  Toggle,
+  // Toggle,
   Totalizer,
-  InputSearch,
+  // InputSearch,
+  // FilterBar,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
+import RequestAwbModal from '../requestAwbModal'
 import fancourier from '../logos/fancourier.png'
 import cargus from '../logos/cargus.png'
 import innoship from '../logos/innoship.png'
+import sameday from '../logos/sameday.png'
 import '../src/style.css'
 import type { IOrder } from '../typings/order'
 
+interface ITrackingObj {
+  [orderId: string]: string
+}
+interface IOrderAwb {
+  orderId: string
+  orderValue: string
+  courier: string
+  payMethod?: any
+}
 const OrdersList: FC = () => {
+  const [currentRowData, setCurrentRowData] = useState<IOrder>()
+
+  const [searchValue, setSearchValue] = useState('')
+  // const [statements, setStatements] = useState<any>(['asd'])
+  const [isClosed, setIsClosed] = useState(false)
+  const [service, setService] = useState('')
+  const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
+  const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
   const [paginationParams, setPaginationParams] = useState({
     items: [],
     currentItemFrom: 1,
@@ -34,99 +55,96 @@ const OrdersList: FC = () => {
       perPage: 15,
       pages: 1,
     },
+    stats: {
+      stats: {
+        totalValue: { Sum: 1, Count: 1 },
+      },
+    },
   })
 
-  const courierOptions = [
-    // useMemo
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={cargus}
-          />{' '}
-          Cargus
-        </>
-      ),
-      // onClick: () =>{
-      // }
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={innoship}
-          />{' '}
-          Innoship
-        </>
-      ),
-      // onClick: () =>{}
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={fancourier}
-          />{' '}
-          Fan Courier
-        </>
-      ),
-      // onClick: () => {},
-    },
-    {
-      label: 'Download PDF',
-      isDangerous: 'true',
-      // onClick: ()=>{},
-    },
-  ]
+  // console.log(trackingNum)
+  const [isLoading, setisLoading] = useState(true)
 
-  const downloadOptions = [
-    {
-      label: 'Descarca AWB',
-      // onClick: () => {
-      // },
-    },
-    {
-      label: 'Descarca Factura',
-      // onClick: () => {},
-    },
-  ]
+  // const downloadOptions = [
+  //   {
+  //     label: 'Descarca AWB',
+  //     // onClick: () => {
+  //     // },
+  //   },
+  //   {
+  //     label: 'Descarca Factura',
+  //     // onClick: () => {},
+  //   },
+  // ]
 
-  const getItems = useCallback(async (newParams) => {
-    const url = `/api/oms/pvt/orders?f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
+  const fetchTrackingNumbers = useCallback((orders: any[]) => {
+    console.log('fetchedTrackingNumbers OK!', orders)
 
-    try {
-      const { data } = await axios.get(url, {
-        headers: { Accept: 'application/json' },
-        params: {},
-      })
+    orders.forEach(async (el) => {
+      const { data }: { data: any } = await axios.get(
+        `/api/oms/pvt/orders/${el.orderId}`
+      )
 
-      // placeholder values for demonstration purposes, delete me l8r!
-      data.list.forEach((item: IOrder) => {
-        if (Math.round(Math.random()) === 0) {
-          item.paymentNames = 'Card'
-        } else {
-          item.paymentNames = 'Ramburs'
-        }
-      })
+      const lastOrder = data.packageAttachment.packages.length - 1
 
-      setPaginationParams({
-        ...newParams,
-        items: data.list,
-        paging: data.paging,
-        currentItemTo: data.paging.perPage * data.paging.currentPage,
-      })
-      console.log('getItems', data.list)
-      console.log('getItemsDATA', data)
-    } catch (err) {
-      console.log(err)
-    }
+      // console.log('PPPPPPPPP', data.packageAttachment)
+      if (data.packageAttachment.packages[lastOrder]?.trackingNumber) {
+        setOrderAwb((prevState) => {
+          return [
+            ...prevState,
+            {
+              orderId: el.orderId.toString(),
+              // potentially has to be first element of the array
+              orderValue:
+                data.packageAttachment.packages[lastOrder].trackingNumber,
+              courier: data.packageAttachment.packages[lastOrder].courier,
+              payMethod: data.openTextField.value,
+            },
+          ]
+        })
+        // console.log(
+        //   '4EACH:AWB',
+        //   el.orderId,
+        //   data.packageAttachment.packages[lastOrder].trackingNumber
+        // )
+        // console.log(orderAwb)
+      }
+    })
   }, [])
+
+  const getItems = useCallback(
+    async (newParams) => {
+      let url = `/api/oms/pvt/orders?_stats=1&f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
+
+      // console.log('url_searchval', url, searchValue)
+
+      if (searchValue !== '') {
+        url += `&q=${searchValue}`
+      }
+
+      try {
+        const { data } = await axios.get(url, {
+          headers: { Accept: 'application/json' },
+          params: {},
+        })
+
+        setisLoading(false)
+        setPaginationParams({
+          ...newParams,
+          items: data.list,
+          paging: data.paging,
+          stats: data.stats,
+          currentItemTo: data.paging.perPage * data.paging.currentPage,
+        })
+        fetchTrackingNumbers(data.list)
+        // console.log('getItems', data.list)
+        console.log('getItemsDATA', data)
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    [fetchTrackingNumbers, searchValue]
+  )
 
   type SchemeDataType = {
     rowData: IOrder
@@ -155,8 +173,30 @@ const OrdersList: FC = () => {
       )
     }
 
-    if (cellData === 'livrat') {
-      return <Tag type="success">Shipped</Tag>
+    if (cellData === 'waiting-for-sellers-confirmation') {
+      return (
+        <>
+          <Tooltip label="Waiting for sellers confirmation" position="bottom">
+            <div
+              style={{
+                backgroundColor: '#44c767',
+                borderRadius: '14px',
+                display: 'inline-block',
+                color: '#fff',
+                fontSize: '14px',
+                padding: '4px 26px',
+                fontWeight: '500',
+              }}
+            >
+              WFSC
+            </div>
+          </Tooltip>
+        </>
+      )
+    }
+
+    if (cellData === 'payment-approved') {
+      return <Tag type="success">Paid</Tag>
     }
 
     if (cellData === 'canceled') {
@@ -179,6 +219,14 @@ const OrdersList: FC = () => {
       return (
         <Tag bgColor="#357EDD" color="#fff">
           Handling
+        </Tag>
+      )
+    }
+
+    if (cellData === 'payment-pending') {
+      return (
+        <Tag bgColor="#98b13d" color="#fff">
+          $ Pending
         </Tag>
       )
     }
@@ -208,126 +256,78 @@ const OrdersList: FC = () => {
     return <span>missing tag</span>
   }
 
-  const tableOrdersSchema = {
-    properties: {
-      status: {
-        title: 'Status',
-        width: 100,
-        cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-          return displayStatus(cellData)
-        },
-      },
-      marketPlaceOrderId: {
-        title: 'Elefant #',
-        width: 90,
-      },
-      orderId: {
-        title: 'VTEX #',
-        width: 170,
-      },
-      creationDate: {
-        title: 'Creation Date',
-        width: 140,
-        cellRenderer: ({ cellData }: { cellData: string }): string => {
-          return new Intl.DateTimeFormat('en-GB', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: false,
-            timeZone: 'Europe/Bucharest',
-          }).format(new Date(cellData))
-        },
-      },
-      ShippingEstimatedDateMax: {
-        title: 'Shipping ETA',
-        width: 120,
-        cellRenderer: ({ cellData }: { cellData: string }): string => {
-          return new Intl.DateTimeFormat('en-GB', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            timeZone: 'Europe/Bucharest',
-          }).format(new Date(cellData))
-        },
-      },
-      clientName: {
-        title: 'Receiver',
-        width: 150,
-      },
-      totalItems: {
-        title: 'Items',
-        width: 70,
-        cellRenderer: ({ cellData }: SchemeDataType) => {
-          return (
-            <span className="f6 lh-copy">
-              <Tag
-                style={{ fontSize: '14px', lineHeight: '1.15rem' }}
-                size="small"
-              >
-                {cellData}
-              </Tag>
-            </span>
-          )
-        },
-      },
-      totalValue: {
-        title: 'Total Value',
-        width: 100,
-        cellRenderer: ({ cellData }: SchemeDataType) => {
-          return <FormattedCurrency key={cellData} value={cellData} />
-        },
-      },
-      paymentNames: {
-        title: 'Pay Method',
-        width: 100,
-      },
-      awbShipping: {
-        title: 'AWB Shipping',
-        width: 200,
-        cellRenderer: ({ cellData }: SchemeDataType) => {
-          console.log(cellData)
+  const getOrderData = useCallback(async (orderId: string): Promise<any> => {
+    console.log('OrderData', orderId)
+    const { data }: { data: any } = await axios.get(
+      `/api/oms/pvt/orders/${orderId}`
+    )
 
-          return (
-            <ActionMenu
-              label="Generate"
-              buttonProps={{
-                variation: 'primary',
-                size: 'small',
-                id: 'dropdownBut',
-              }}
-              options={courierOptions}
-            />
-          )
-        },
-      },
-      awbStatus: {
-        title: 'AWB Status',
-        width: 100,
-        cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-          return displayStatus(cellData)
-        },
-      },
-      invoice: {
-        title: 'Invoice',
-        width: 150,
-        cellRenderer: ({ cellData }: SchemeDataType) => {
-          return (
-            <Button
-              style={{ width: '100%', justifyContent: 'end' }}
-              variation="primary"
-              className="self-end pl7"
-              size="small"
-              onClick={{ cellData }}
-            >
-              Generate
-            </Button>
-          )
-        },
-      },
+    console.log('GETORDERDATA_new_AWB!', data)
+  }, [])
+
+  const printAwb = useCallback(
+    async (orderId: string): Promise<any> => {
+      const printOrder = orderAwb.find((order) => order?.orderId === orderId)
+      const typeOfResponse =
+        printOrder?.courier === 'Innoship' ? undefined : 'blob'
+
+      console.log('printAwbOrder', orderAwb)
+      console.log('printAWBservice', printOrder?.courier)
+      try {
+        const { data } = await axios.get(
+          `/_${printOrder?.courier.toLowerCase()}/printPDF`,
+          {
+            params: {
+              awbTrackingNumber: printOrder?.orderValue.toString(),
+            },
+            responseType: typeOfResponse,
+          }
+        )
+
+        let buffer
+        let blob
+
+        console.log(data.contents)
+        if (printOrder?.courier === 'Innoship') {
+          buffer = Buffer.from(data.contents, 'base64')
+          blob = new Blob([buffer], { type: 'application/pdf' })
+        } else {
+          blob = new Blob([data], { type: 'application/pdf' })
+        }
+
+        const blobURL = URL.createObjectURL(blob)
+
+        window.open(blobURL)
+      } catch (e) {
+        console.log(e)
+      }
     },
-  }
+    [orderAwb]
+  )
+
+  const getLabelOrder = useCallback(
+    (rowData: IOrder) => {
+      const order = orderAwb.find(
+        (labelOrder) => labelOrder?.orderId === rowData?.orderId
+      )
+
+      return order
+        ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
+        : null
+    },
+    [orderAwb]
+  )
+
+  const getPayMethod = useCallback(
+    (rowData: IOrder) => {
+      const order = orderAwb.find(
+        (payOrder) => payOrder?.orderId === rowData?.orderId
+      )
+
+      return order ? order.payMethod?.match(/\b(\w+)$/g)[0] : ''
+    },
+    [orderAwb]
+  )
 
   const handleNextClick = () => {
     const { currentPage } = paginationParams.paging
@@ -342,6 +342,7 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
+    console.log('PAG_NEXT', newParams)
   }
 
   const handlePrevClick = () => {
@@ -357,6 +358,7 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
+    console.log('PAG_PREV', newParams)
   }
 
   const handleRowsChange = useCallback((e: unknown, value: number) => {
@@ -372,96 +374,409 @@ const OrdersList: FC = () => {
 
   useEffect(() => {
     getItems(paginationParams)
-  }, [])
+  }, [trackingNum])
+
+  const handleInputSearchChange = useCallback(
+    (e: any) => {
+      setSearchValue(e.target.value)
+      setPaginationParams({
+        ...paginationParams,
+        paging: {
+          total: paginationParams.paging.total,
+          currentPage: 1,
+          perPage: paginationParams.paging.perPage,
+          pages: paginationParams.paging.pages,
+        },
+      })
+      console.log('SEARCH_V', searchValue)
+    },
+    [paginationParams, searchValue]
+  )
+
+  const handleInputSearchClear = useCallback(() => {
+    setSearchValue('')
+    setPaginationParams({
+      ...paginationParams,
+      currentItemFrom: 1 * paginationParams.paging.perPage,
+      currentItemTo: 2 * paginationParams.paging.perPage,
+      paging: {
+        total: paginationParams.paging.total,
+        currentPage: 1,
+        perPage: paginationParams.paging.perPage,
+        pages: paginationParams.paging.pages,
+      },
+    })
+    getItems(paginationParams)
+    // setCurrentPage(1)
+  }, [getItems, paginationParams])
+
+  const handleInputSearchSubmit = useCallback(() => {
+    console.log('clicked+searchVal', searchValue)
+    setPaginationParams({
+      ...paginationParams,
+      currentItemFrom: 1 * paginationParams.paging.perPage,
+      currentItemTo: 2 * paginationParams.paging.perPage,
+      paging: {
+        total: paginationParams.paging.total,
+        currentPage: 1,
+        perPage: paginationParams.paging.perPage,
+        pages: paginationParams.paging.pages,
+      },
+    })
+    getItems(paginationParams)
+  }, [getItems, paginationParams, searchValue]) // getProductsList
+
+  // const avgTicketPrice = () => {}
+
+  const tableOrdersSchema = useMemo(
+    () => ({
+      properties: {
+        status: {
+          title: 'Status',
+          width: 100,
+          cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
+            return displayStatus(cellData)
+          },
+        },
+        marketPlaceOrderId: {
+          title: 'Elefant #',
+          width: 90,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {cellData}
+              </Link>
+            )
+          },
+        },
+        orderId: {
+          title: 'VTEX #',
+          width: 170,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {cellData}
+              </Link>
+            )
+          },
+        },
+        creationDate: {
+          title: 'Creation Date',
+          width: 140,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {new Intl.DateTimeFormat('en-GB', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  hour12: false,
+                  timeZone: 'Europe/Bucharest',
+                }).format(new Date(cellData))}
+              </Link>
+            )
+          },
+        },
+        ShippingEstimatedDateMax: {
+          title: 'Shipping ETA',
+          width: 120,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {' '}
+                {new Intl.DateTimeFormat('en-GB', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  timeZone: 'Europe/Bucharest',
+                }).format(new Date(cellData))}
+              </Link>
+            )
+          },
+        },
+        clientName: {
+          title: 'Receiver',
+          width: 150,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {cellData}
+              </Link>
+            )
+          },
+        },
+        totalItems: {
+          title: 'Items',
+          width: 70,
+          cellRenderer: ({ cellData }: SchemeDataType) => {
+            return (
+              <span className="f6 lh-copy">
+                <Tag
+                  style={{ fontSize: '14px', lineHeight: '1.15rem' }}
+                  size="small"
+                >
+                  {cellData}
+                </Tag>
+              </span>
+            )
+          },
+        },
+        totalValue: {
+          title: 'Total Value',
+          width: 100,
+          cellRenderer: ({ cellData }: SchemeDataType) => {
+            return <FormattedCurrency key={cellData} value={+cellData / 100} />
+          },
+        },
+        paymentNames: {
+          title: 'Pay Method',
+          width: 100,
+          cellRenderer: ({ rowData }: { rowData: IOrder }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {getPayMethod(rowData)}
+              </Link>
+            )
+          },
+        },
+        awbShipping: {
+          title: 'AWB Shipping',
+          width: 400,
+          cellRenderer: ({ rowData }: SchemeDataType) => {
+            return (
+              <>
+                <ActionMenu
+                  // label={labelAwb(rowData.orderId) || 'GENERATE'}
+                  // label={ (trackingNum[rowData.orderId] ? service + ' ' +  trackingNum[rowData.orderId] : trackingNum[rowData.orderId]) || 'GENERATE'}
+                  label={getLabelOrder(rowData) || 'GENERATE'} // trackingNum[rowData.orderId] ||
+                  buttonProps={{
+                    variation: trackingNum[rowData.orderId]
+                      ? 'secondary'
+                      : 'primary',
+                    size: 'small',
+                    id: 'dropdownBut',
+                    disabled: rowData.status === 'canceled',
+                  }}
+                  options={[
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={cargus}
+                          />{' '}
+                          Cargus
+                        </>
+                      ),
+                      onClick: () => {
+                        getOrderData(rowData.orderId)
+                        // console.log('STATELABELS', state.labels)
+                        setCurrentRowData(rowData)
+                        setIsClosed(!isClosed)
+                        setService('cargus')
+                        setTimeout(() => {
+                          console.log('orderAWB, after click', orderAwb)
+                        }, 4000)
+                      },
+                    },
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={sameday}
+                          />{' '}
+                          SameDay
+                        </>
+                      ),
+                      disabled: false,
+                      onClick: () => {
+                        getOrderData(rowData.orderId)
+                        setCurrentRowData(rowData)
+                        setIsClosed(!isClosed)
+                        setService('sameday')
+                      },
+                    },
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={innoship}
+                          />{' '}
+                          Innoship
+                        </>
+                      ),
+                      disabled: false,
+                      onClick: () => {
+                        getOrderData(rowData.orderId)
+                        setCurrentRowData(rowData)
+                        setIsClosed(!isClosed)
+                        setService('innoship')
+                      },
+                    },
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={fancourier}
+                          />{' '}
+                          Fan Courier
+                        </>
+                      ),
+                      disabled: false,
+                      onClick: () => {
+                        getOrderData(rowData.orderId)
+                        setCurrentRowData(rowData)
+                        setIsClosed(!isClosed)
+                        setService('fancourier')
+                      },
+                    },
+                    {
+                      label: 'Download PDF',
+                      isDangerous: 'true',
+                      onClick: () => {
+                        printAwb(rowData.orderId)
+                      },
+                    },
+                  ]}
+                />
+              </>
+            )
+          },
+        },
+      },
+    }),
+    [
+      getPayMethod,
+      getLabelOrder,
+      trackingNum,
+      getOrderData,
+      isClosed,
+      orderAwb,
+      printAwb,
+    ]
+  )
 
   return (
     <div className="f6 lh-copy">
-      <div className="mb5">
+      {/* <div className="mb5">
         <div style={{ width: '50%' }}>
           <InputSearch
             placeholder="Cautati numarul comenzii, destinatarul, plata"
-            value=""
+            value={searchValue}
             size="regular"
-            onChange={() => console.log('asd')}
+            onChange={handleInputSearchChange}
+            onClear={handleInputSearchClear}
+            onSubmit={handleInputSearchSubmit}
           />
         </div>
-      </div>
+      </div> */}
+      {/* <FilterBar
+        alwaysVisibleFilters={['status']}
+        statements={statements}
+        onChangeStatements={(st: any) => {
+          setStatements({ st })
+        }}
+        options={{
+          orderStatus: {
+            label: 'asd',
+          },
+          verbs: [
+            {
+              label: '111',
+            },
+          ],
+        }}
+      /> */}
       <Totalizer
         horizontalLayout
         items={[
           {
-            label: 'Orders',
-            value: '566',
+            label: 'Comenzi',
+            value: paginationParams.paging.total,
             inverted: true,
           },
           {
-            label: 'Average Ticket',
-            value: 'US$ 55.47',
+            label: 'Prețul mediu de comandă',
+            value: `${
+              Math.round(
+                (paginationParams.stats.stats.totalValue.Sum /
+                  100 /
+                  paginationParams.stats.stats.totalValue.Count) *
+                  100
+              ) / 100
+            } Lei`,
             inverted: true,
           },
           {
-            label: 'Gross',
-            value: 'US$ 554.70',
+            label: 'Brut',
+            value: `${paginationParams.stats.stats.totalValue.Sum / 100} Lei`,
             inverted: true,
           },
         ]}
       />
+
       <div
         style={{
           display: 'flex',
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'space-between',
-          }}
-        >
-          <div
-            className="dib pt5"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              width: '300px',
-            }}
-          >
-            <Toggle
-            // label={state.checked ? "Activated" : "Deactivated"}
-            // checked={state.checked}
-            // onChange={e => setState(prevState => ({ checked: !prevState.checked }))}
-            />
-            <span>&nbsp;&nbsp;Dezactivati actualizarea automata AWB</span>
-          </div>
-          <div className="pt5">
-            <ActionMenu
-              className="pt5"
-              label="Descarca"
-              buttonProps={{
-                variation: 'secondary',
-                size: 'small',
-              }}
-              options={downloadOptions}
-            />
-          </div>
-          <div className="pagination" style={{ width: '300px' }}>
-            <Pagination
-              rowsOptions={[15, 25, 50, 100]}
-              currentItemFrom={paginationParams.currentItemFrom}
-              currentItemTo={paginationParams.currentItemTo}
-              textOf="of"
-              textShowRows="Pe pagina"
-              totalItems={paginationParams.paging.total}
-              onRowsChange={handleRowsChange}
-              onNextClick={handleNextClick}
-              onPrevClick={handlePrevClick}
-            />
-          </div>
+        <div className="pagination" style={{ width: '300px' }}>
+          <Pagination
+            rowsOptions={[15, 25, 50, 100]}
+            currentItemFrom={paginationParams.currentItemFrom}
+            currentItemTo={paginationParams.currentItemTo}
+            textOf="of"
+            textShowRows="Pe pagina"
+            totalItems={paginationParams.paging.total}
+            onRowsChange={handleRowsChange}
+            onNextClick={handleNextClick}
+            onPrevClick={handlePrevClick}
+          />
         </div>
       </div>
       <Table
+        loading={isLoading}
         density="medium"
         fullWidth
         items={paginationParams.items}
@@ -490,6 +805,40 @@ const OrdersList: FC = () => {
             },
           ],
         }}
+        toolbar={{
+          fields: {
+            label: 'Toggle visible fields',
+            showAllLabel: 'Show All',
+            hideAllLabel: 'Hide All',
+            onToggleColumn: (params: any) => {
+              console.log(params.toggledField)
+              console.log(params.activeFields)
+            },
+            onHideAllColumns: (activeFields: any) => console.log(activeFields),
+            onShowAllColumns: (activeFields: any) => console.log(activeFields),
+          },
+          density: {
+            buttonLabel: 'Line density',
+            lowOptionLabel: 'Low',
+            mediumOptionLabel: 'Medium',
+            highOptionLabel: 'High',
+          },
+          inputSearch: {
+            placeholder: 'Cautati numarul comenzii, destinatarul, plata',
+            value: searchValue,
+            onChange: handleInputSearchChange,
+            onClear: handleInputSearchClear,
+            onSubmit: handleInputSearchSubmit,
+          },
+        }}
+      />
+      <RequestAwbModal
+        rowData={currentRowData}
+        isClosed={isClosed}
+        setIsClosed={setIsClosed}
+        service={service}
+        setTrackingNum={setTrackingNum}
+        setOrderAwb={setOrderAwb}
       />
     </div>
   )

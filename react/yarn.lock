@@ -6057,6 +6057,10 @@ vtex-tachyons@^3.2.0:
   resolved "https://registry.yarnpkg.com/vtex-tachyons/-/vtex-tachyons-3.2.2.tgz#e9e39d939778ef7d80a92c476cecf7417f79a6e8"
   integrity sha512-4M53uuvV+2XEjplVYiPgpBuaI5dtGksVgz/20NNjbZkXklJM7Lwgod/hOoh3PtIn36+95zZVVgXYfs3e6EU8YA==
 
+"vtex.checkout-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-graphql@0.60.0/public/@types/vtex.checkout-graphql":
+  version "0.60.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.checkout-graphql@0.60.0/public/@types/vtex.checkout-graphql#c394d5320883a16a34f77fd54e84d01a5f55c750"
+
 "vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public/@types/vtex.search-graphql":
   version "0.46.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.46.0/public/@types/vtex.search-graphql#00476e3d62c377df9cd9713f76dbfd531a019eff"

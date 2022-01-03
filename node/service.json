@@ -9,6 +9,50 @@
     "status": {
       "path": "/_v/status/:code",
       "public": true
+    },
+    "updateAWBInfo": {
+      "path": "/opa/:carrierName/updateAWBInfo",
+      "public": true
+    },
+    "getVtexOrderData": {
+      "path": "/orderApi/getVtexOrderData/:orderId",
+      "public": true
+    },
+    "getServicesFromFancourier": {
+      "path": "/_fancourier/get-services",
+      "public": true
+    },
+    "sendInvoiceInfoFancourier": {
+      "path": "/_fancourier/sendInvoiceInfo",
+      "public": true
+    },
+    "printAwbFromFancourier": {
+      "path": "/_fancourier/printPDF",
+      "public": true
+    },
+    "sendInvoiceInfoCargus": {
+      "path": "/_cargus/sendInvoiceInfo",
+      "public": true
+    },
+    "printAwbFromCargus": {
+      "path": "/_cargus/printPDF",
+      "public": true
+    },
+    "sendInvoiceInfoSameday": {
+      "path": "/_sameday/sendInvoiceInfo",
+      "public": true
+    },
+    "printAwbFromSameday": {
+      "path": "/_sameday/printPDF",
+      "public": true
+    },
+    "sendInvoiceInfoInnoship": {
+      "path": "/_innoship/sendInvoiceInfo",
+      "public": true
+    },
+    "printAwbFromInnoship": {
+      "path": "/_innoship/printPDF",
+      "public": true
     }
   }
 }

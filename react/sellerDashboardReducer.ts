@@ -14,6 +14,8 @@ export const initialState = {
   selectedService: 'Standard',
   order: {},
   fancourierPayload: {},
+  awbNumber: '',
+  labels: [],
 }
 
 const createOrderPayloadForFancourier = (state: any): any => {
@@ -118,6 +120,16 @@ export const fancourierReducer = (state: any, action: any) => {
       const fancourierPayload = createOrderPayloadForFancourier(state)
 
       return { ...state, fancourierPayload }
+    }
+
+    case 'awbInfo': {
+      const awbNumber = action.payload.split(',')[2]
+
+      return { ...state, awbNumber }
+    }
+
+    case 'label': {
+      return { ...state, labels: [...state.labels, action.payload] }
     }
 
     default:
