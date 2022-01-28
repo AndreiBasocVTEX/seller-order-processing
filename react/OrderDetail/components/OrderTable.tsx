@@ -1,5 +1,5 @@
+import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
-import { FC } from 'react'
 import { NumericStepper, Table } from 'vtex.styleguide'
 
 import type { IOrder } from '../../typings/order'
@@ -18,7 +18,7 @@ interface TableItem {
 }
 
 const OrderTable: FC<TableProps> = ({ orderData }) => {
-  const [tableData, setTableData] = useState<Array<TableItem>>([])
+  const [tableData, setTableData] = useState<TableItem[]>([])
 
   const customSchema = {
     properties: {
@@ -58,7 +58,8 @@ const OrderTable: FC<TableProps> = ({ orderData }) => {
   const normalizeTableData = (orderData: IOrder) => {
     const { items } = orderData
     const orderTotals: { [key: string]: number } = {}
-    const result: Array<TableItem> = []
+    const result: TableItem[] = []
+
     items.map((element, index) => {
       result.push(
         {
@@ -104,6 +105,7 @@ const OrderTable: FC<TableProps> = ({ orderData }) => {
     })
     setTableData(result)
   }
+
   useEffect(() => {
     orderData && normalizeTableData(orderData)
   }, [])
