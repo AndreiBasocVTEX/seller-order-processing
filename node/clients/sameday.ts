@@ -7,6 +7,7 @@ import type {
   IAuthDataSameday,
   ISamedayAwbPayload,
   ISamedayAwbResponse,
+  ISamedayTrackAWBResponse,
 } from '../types/sameday'
 import {
   pickupServiceId,
@@ -16,9 +17,11 @@ import {
 import type {
   Item,
   ITrackAwbInfoPayload,
+  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
+  VtexEvent,
 } from '../types/orderApi'
 import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
 
@@ -187,7 +190,7 @@ export default class Sameday extends ExternalClient {
     return county.id
   }
 
-  public async requestAwbFromSameday(
+  private async requestAwbFromSameday(
     bodyForRequestAwb: IBodyForRequestAwb
   ): Promise<ISamedayAwbResponse> {
     const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
@@ -277,6 +280,8 @@ export default class Sameday extends ExternalClient {
         trackingNumber,
         items,
         courier: body.courier,
+        // URL doesn't show data. Probably, because of using Sameday demo API
+        // trackingUrl: `https://sameday.ro/#awb=${trackingNumber}`,
       },
     }
   }
@@ -289,7 +294,7 @@ export default class Sameday extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }) {
+  }): Promise<ITrackAwbInfoResponse> {
     const { token } = await this.getAuthToken(settings)
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
@@ -301,12 +306,13 @@ export default class Sameday extends ExternalClient {
       orderId
     )
 
-    const packageItem = order?.packageAttachment?.packages?.[0]
-    const trackingNumber = '1SDY6H1126947' || packageItem?.trackingNumber
+    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+    const packageItem = order?.packageAttachment?.packages?.pop()
+    const trackingNumber = packageItem?.trackingNumber
 
     const invoiceNumber = packageItem?.invoiceNumber
 
-    const updatedAwbInfo = await this.http.get(
+    const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http.get(
       `/api/client/awb/${trackingNumber}/status`,
       {
         headers: {
@@ -315,6 +321,31 @@ export default class Sameday extends ExternalClient {
       }
     )
 
+    let trackingEvents: VtexEvent[] = []
+    let isDelivered = false
+
+    if (
+      updatedAwbInfo?.hasOwnProperty.call(
+        updatedAwbInfo,
+        'expeditionHistory'
+      ) &&
+      invoiceNumber
+    ) {
+      const {
+        expeditionHistory: trackingHistory,
+        expeditionSummary,
+      } = updatedAwbInfo
+
+      trackingEvents = trackingHistory.map((event) => {
+        return {
+          description: event.statusState,
+          date: event.statusDate.split('T')[0],
+        }
+      })
+
+      isDelivered = expeditionSummary.delivered
+    }
+
     const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
       vtexAuthData,
       pathParams: {
@@ -322,23 +353,11 @@ export default class Sameday extends ExternalClient {
         invoiceNumber,
       },
       payload: {
-        isDelivered: false,
-        deliveredDate: '',
-        events: [
-          {
-            city: 'city',
-            state: 'state',
-            description: 'description',
-            date: 'yyyy-mm-dd',
-          },
-        ],
+        isDelivered,
+        events: trackingEvents,
       },
     }
 
-    const response = await orderApi.trackAWBInfo(updateTrackingInfoPayload)
-
-    console.log('RESPONSE', response)
-
-    return updatedAwbInfo
+    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
   }
 }

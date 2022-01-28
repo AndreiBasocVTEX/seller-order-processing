@@ -4,6 +4,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   ITrackAwbInfoPayload,
+  ITrackAwbInfoResponse,
   IVtexInvoiceRequest,
 } from '../types/orderApi'
 
@@ -50,7 +51,7 @@ export default class OrderApi extends ExternalClient {
     payload,
     vtexAuthData,
     pathParams,
-  }: ITrackAwbInfoPayload) {
+  }: ITrackAwbInfoPayload): Promise<ITrackAwbInfoResponse> {
     const { orderId, invoiceNumber } = pathParams
 
     return this.http.put(

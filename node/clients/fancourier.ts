@@ -22,9 +22,11 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   Item,
   ITrackAwbInfoPayload,
+  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
+  VtexEvent,
 } from '../types/orderApi'
 import type { IPrintPDFRequest } from '../types/printPDFRequest'
 import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
@@ -174,7 +176,7 @@ export default class Fancourier extends ExternalClient {
   }
 
   // eslint-disable-next-line max-params
-  public async requestAwbFromFancourier(
+  private async requestAwbFromFancourier(
     bodyForRequestAwb: IBodyForRequestAwb
   ): Promise<{
     _: string
@@ -327,6 +329,7 @@ export default class Fancourier extends ExternalClient {
       trackingNumber,
       items,
       courier: 'Fancourier',
+      trackingUrl: `https://www.fancourier.ro/awb-tracking/?metoda=tracking&awb=${trackingNumber}`,
     }
 
     const invoiceInfo = await orderApi.sendInvoiceInfo(vtexAuthData, body)
@@ -350,7 +353,7 @@ export default class Fancourier extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }) {
+  }): Promise<ITrackAwbInfoResponse> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -367,13 +370,13 @@ export default class Fancourier extends ExternalClient {
       orderId
     )
 
-    const packageItem = order?.packageAttachment?.packages?.[0]
-
-    const trackingNumber = '2027200121941' || packageItem?.trackingNumber
+    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+    const packageItem = order?.packageAttachment?.packages?.pop()
+    const trackingNumber = packageItem?.trackingNumber
 
     const invoiceNumber = packageItem?.invoiceNumber
 
-    const updatedAwbInfo = await this.requestToFanCourier(
+    const updatedAwbInfo = (await this.requestToFanCourier(
       'awb_tracking_integrat.php',
       {
         ...formData,
@@ -381,7 +384,24 @@ export default class Fancourier extends ExternalClient {
         display_mode: 3,
       },
       { responseType: 'text' }
-    )
+    )) as string
+
+    const trackingHistory = updatedAwbInfo.split('\n')
+
+    let trackingEvents: VtexEvent[] = []
+    let isDelivered = false
+
+    if (trackingHistory.length) {
+      trackingEvents = trackingHistory.map((event) => {
+        const [, description] = event.split(',')
+
+        return {
+          description,
+        }
+      })
+
+      isDelivered = trackingHistory.some((event) => event.split(',')[0] === '2')
+    }
 
     const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
       vtexAuthData,
@@ -390,24 +410,12 @@ export default class Fancourier extends ExternalClient {
         invoiceNumber,
       },
       payload: {
-        isDelivered: false,
-        deliveredDate: '',
-        events: [
-          {
-            city: 'city',
-            state: 'state',
-            description: 'description',
-            date: 'yyyy-mm-dd',
-          },
-        ],
+        isDelivered,
+        events: trackingEvents,
       },
     }
 
-    const response = await orderApi.trackAWBInfo(updateTrackingInfoPayload)
-
-    console.log('RESPONSE', response)
-
-    return updatedAwbInfo
+    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
   }
 
   private requestToFanCourier(

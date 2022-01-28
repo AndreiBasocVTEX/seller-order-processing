@@ -16,6 +16,7 @@ import type {
   IVtexOrder,
   ITrackAwbInfoPayload,
   VtexEvent,
+  ITrackAwbInfoResponse,
 } from '../types/orderApi'
 import {
   cargusConstants,
@@ -174,7 +175,7 @@ export default class Cargus extends ExternalClient {
     })
   }
 
-  public async requestAwbFromCargus(
+  private async requestAwbFromCargus(
     bodyForRequestAwb: IBodyForRequestAwb
   ): Promise<ICargusAwbResponse[]> {
     const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
@@ -261,6 +262,8 @@ export default class Cargus extends ExternalClient {
         trackingNumber,
         items,
         courier: body.courier,
+        // Can't find tracking number
+        // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
       },
     }
   }
@@ -273,7 +276,7 @@ export default class Cargus extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }) {
+  }): Promise<ITrackAwbInfoResponse> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -284,6 +287,7 @@ export default class Cargus extends ExternalClient {
       orderId
     )
 
+    // TODO Change to the first element of an array after we will have only one packageAttachment per order
     const packageItem = order?.packageAttachment?.packages?.pop()
     const trackingNumber = packageItem?.trackingNumber
     const invoiceNumber = packageItem?.invoiceNumber
@@ -305,10 +309,10 @@ export default class Cargus extends ExternalClient {
       Object.prototype.hasOwnProperty.call(updatedAwbInfo[0], 'Event') &&
       invoiceNumber
     ) {
-      const trackingInfo: ICargusTrackAwbResponse['Event'] =
+      const trackingHistory: ICargusTrackAwbResponse['Event'] =
         updatedAwbInfo?.[0].Event
 
-      trackingEvents = trackingInfo.map((event) => {
+      trackingEvents = trackingHistory.map((event) => {
         return {
           description: event.Description,
           date: event.Date,
@@ -317,7 +321,7 @@ export default class Cargus extends ExternalClient {
       })
 
       // Cargus. EventId 21 === Delivered
-      isDelivered = trackingInfo.some((event) => event.EventId === 21)
+      isDelivered = trackingHistory.some((event) => event.EventId === 21)
     }
 
     const updateTrackingInfoPayload: ITrackAwbInfoPayload = {

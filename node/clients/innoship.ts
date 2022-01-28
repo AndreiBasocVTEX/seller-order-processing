@@ -6,9 +6,11 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   Item,
   ITrackAwbInfoPayload,
+  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
+  VtexEvent,
 } from '../types/orderApi'
 import {
   awbContent,
@@ -16,7 +18,10 @@ import {
   constants,
   defaultCountryCode,
 } from '../utils/fancourierConstants'
-import type { IInnoshipAwbResponse } from '../types/innoship'
+import type {
+  IInnoshipAwbResponse,
+  IInnoshipTrackAwbResponse,
+} from '../types/innoship'
 import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
 
 function getTotalWeight(order: IVtexOrder) {
@@ -119,7 +124,7 @@ export default class Innoship extends ExternalClient {
     return response
   }
 
-  public async requestAwbFromInnoship(
+  private async requestAwbFromInnoship(
     bodyForRequestAwb: IBodyForRequestAwb
   ): Promise<IInnoshipAwbResponse> {
     const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
@@ -207,7 +212,7 @@ export default class Innoship extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }) {
+  }): Promise<ITrackAwbInfoResponse> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -218,8 +223,9 @@ export default class Innoship extends ExternalClient {
       orderId
     )
 
-    const packageItem = order?.packageAttachment?.packages?.[0]
-    const trackingInfo = '2:80441270615' || packageItem?.trackingNumber
+    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+    const packageItem = order?.packageAttachment?.packages?.pop()
+    const trackingInfo = packageItem?.trackingNumber
 
     const [courierId, trackingNumber] = trackingInfo.split(':')
 
@@ -230,7 +236,7 @@ export default class Innoship extends ExternalClient {
       awbList: [trackingNumber],
     }
 
-    const updatedAwbInfo = await this.http.post(
+    const updatedAwbInfo: IInnoshipTrackAwbResponse[] = await this.http.post(
       '/Track/by-awb/with-return?api-version=1.0',
       body,
       {
@@ -241,6 +247,26 @@ export default class Innoship extends ExternalClient {
       }
     )
 
+    let trackingEvents: VtexEvent[] = []
+    let isDelivered = false
+
+    if (
+      updatedAwbInfo.length &&
+      Object.prototype.hasOwnProperty.call(updatedAwbInfo[0], 'history') &&
+      invoiceNumber
+    ) {
+      const trackingHistory = updatedAwbInfo[0].history
+
+      trackingEvents = trackingHistory.map((event) => {
+        return {
+          description: event.clientStatusDescription,
+          date: event.eventDate.toString().split('T')[0],
+        }
+      })
+
+      isDelivered = trackingHistory.some((event) => event.isFinalStatus)
+    }
+
     const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
       vtexAuthData,
       pathParams: {
@@ -248,23 +274,11 @@ export default class Innoship extends ExternalClient {
         invoiceNumber,
       },
       payload: {
-        isDelivered: false,
-        deliveredDate: '',
-        events: [
-          {
-            city: 'city',
-            state: 'state',
-            description: 'description',
-            date: 'yyyy-mm-dd',
-          },
-        ],
+        isDelivered,
+        events: trackingEvents,
       },
     }
 
-    const response = await orderApi.trackAWBInfo(updateTrackingInfoPayload)
-
-    console.log('RESPONSE', response)
-
-    return updatedAwbInfo
+    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
   }
 }

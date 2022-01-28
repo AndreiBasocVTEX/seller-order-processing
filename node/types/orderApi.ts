@@ -49,6 +49,12 @@ export interface VtexEvent {
   date?: string
 }
 
+export interface ITrackAwbInfoResponse {
+  date: string
+  orderId: string
+  receipt: string
+}
+
 // export interface IVtexOrder {
 //   emailTracked?: string
 //   approvedBy?: string

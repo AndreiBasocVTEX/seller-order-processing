@@ -60,3 +60,57 @@ interface ParcelSamedayRes {
   position: number
   awbNumber: string
 }
+
+export interface ISamedayTrackAWBResponse {
+  expeditionSummary: {
+    deliveredAt: string
+    lastDeliveryAttempt: string
+    delivered: boolean
+    canceled: boolean
+    deliveryAttempts: number
+    servicePayment: number
+    awbWeight: number
+    cashOnDelivery: number
+    awbNumber: string
+    redirectionsAttempts: number
+  }
+
+  expeditionStatus: {
+    statusId: number
+    status: string
+    statusState: string
+    statusLabel: string
+    statusDate: string
+    county: string
+    reason: string
+    transitLocation: string
+  }
+
+  parcelsStatus: ParcelStatus[]
+  expeditionHistory: ISamedayAwbEvent[]
+}
+
+interface ParcelStatus {
+  statusId: number
+  status: string
+  statusState: string
+  statusLabel: string
+  statusDate: string
+  reason: string
+  parcelAwbNumber: string
+  parcelDetails: string
+  county: string
+  transitLocation: string
+  inReturn: boolean
+}
+
+interface ISamedayAwbEvent {
+  statusId: number
+  status: string
+  statusLabel: string
+  statusState: string
+  statusDate: string
+  county: string
+  reason: string
+  transitLocation: string
+}

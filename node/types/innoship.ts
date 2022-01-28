@@ -18,3 +18,21 @@ interface Price {
   totalAmount: number
   currency: string
 }
+
+export interface IInnoshipTrackAwbResponse {
+  orderId: number
+  courier: number
+  shipmentAwb: number
+  carrierMeasuredWeight: number
+  history: IInnoshipTrackAwbEvent[]
+  ReturnAwb: string
+  ReturnAwbHistory: IInnoshipTrackAwbEvent[]
+  cashOnDeliveryHistory: IInnoshipTrackAwbEvent[]
+}
+
+interface IInnoshipTrackAwbEvent {
+  clientStatusId: number
+  clientStatusDescription: string
+  eventDate: Date
+  isFinalStatus: boolean
+}
