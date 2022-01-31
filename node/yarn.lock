@@ -5783,6 +5783,22 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
+"vtex.admin-example@https://csaramet--sell21octandrei113.myvtex.com/_v/private/typings/linked/v1/vtex.admin-example@0.0.13+build1643640521/public/@types/vtex.admin-example":
+  version "0.0.0"
+  resolved "https://csaramet--sell21octandrei113.myvtex.com/_v/private/typings/linked/v1/vtex.admin-example@0.0.13+build1643640521/public/@types/vtex.admin-example#0c8e91a9ff2d8d8403e8b75d263c9d3d2e13ec31"
+
+"vtex.format-currency@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.format-currency@0.3.0/public/@types/vtex.format-currency":
+  version "0.3.0"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.format-currency@0.3.0/public/@types/vtex.format-currency#1cb7360452552301237c16d32037bbac61798f20"
+
+"vtex.search-graphql@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.47.3/public/@types/vtex.search-graphql":
+  version "0.47.3"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.47.3/public/@types/vtex.search-graphql#1a9eac19686da9265490046f9245031671dc1cff"
+
+"vtex.styleguide@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.styleguide@9.145.2/public/@types/vtex.styleguide":
+  version "9.145.2"
+  resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.styleguide@9.145.2/public/@types/vtex.styleguide#ca64bf8408ad3eb487b0822dd68f77565c986a56"
+
 w3c-hr-time@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/w3c-hr-time/-/w3c-hr-time-1.0.1.tgz#82ac2bff63d950ea9e3189a58a65625fedf19045"
