@@ -5,7 +5,7 @@ import { useRuntime } from 'vtex.render-runtime'
 
 interface HeaderProps {
   orderId: string
-  orderStatus: string
+  orderStatus?: string
 }
 interface OrderStatus {
   tagBgColor: string
@@ -17,50 +17,58 @@ const OrderHeader: FC<HeaderProps> = ({ orderId, orderStatus }) => {
   const [status, setStatus] = useState<OrderStatus>()
   const { navigate } = useRuntime()
   const handleLinkClick = () => navigate({ to: '/admin/app/seller-dashboard' })
-  const getOrderStatus = (orderStatus: string) => {
-    switch (orderStatus) {
+
+  const getOrderStatus = (status: string | undefined) => {
+    switch (status) {
       case 'ready-for-handling':
         return {
           tagBgColor: '#44c767',
           tagColor: '#FFF',
           tagText: 'Ready for handling',
         }
+
       case 'waiting-for-sellers-confirmation':
         return {
           tagBgColor: '#44c767',
           tagColor: '#FFF',
           tagText: 'Waiting for sellers confirmation',
         }
+
       case ' payment-approved':
         return {
           tagBgColor: '#8bc34a',
           tagColor: '#FFF',
           tagText: 'Paid',
         }
+
       case 'canceled':
         return {
           tagBgColor: '#FF4136',
           tagColor: '#FFF',
           tagText: 'Canceled',
         }
+
       case 'invoiced':
         return {
           tagBgColor: '#00449E',
           tagColor: '#FFF',
           tagText: 'Invoiced',
         }
+
       case 'handling':
         return {
           tagBgColor: '#357EDD',
           tagColor: '#FFF',
           tagText: 'Handling',
         }
+
       case 'payment-pending':
         return {
           tagBgColor: '#98b13d',
           tagColor: '#FFF',
           tagText: 'Pending',
         }
+
       case 'cancellation-requested':
         return {
           tagBgColor: '#FF725C',
@@ -68,14 +76,21 @@ const OrderHeader: FC<HeaderProps> = ({ orderId, orderStatus }) => {
           tagText: 'Cancellation requested',
         }
 
+      case undefined:
+
       default:
-        return
+        return {
+          tagBgColor: '#979899',
+          tagColor: '#FFF',
+          tagText: 'Necunoscut',
+        }
     }
   }
+
   useEffect(() => {
     const handledOrderStatus = getOrderStatus(orderStatus)
     setStatus(handledOrderStatus)
-  }, [])
+  }, [orderStatus])
 
   return (
     <>

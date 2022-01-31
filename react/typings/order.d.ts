@@ -90,6 +90,9 @@ export interface IOrder {
   orderIdElefant: string
   orderIsComplete: boolean
   origin: string
+  openTextField: {
+    value: string
+  }
   paymentApprovedDate: string
   paymentNames: string
   readyForHandlingDate: string
