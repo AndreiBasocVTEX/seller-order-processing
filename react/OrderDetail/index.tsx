@@ -1,206 +1,18 @@
-import { FC, useEffect, useState } from 'react'
-import React from 'react'
-import OrderTable from './components/OrderTable'
+import type { FC } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Divider } from 'vtex.styleguide'
 
-import type { IOrder } from '../typings/order'
+import OrderTable from './components/OrderTable'
+import type { OrderDetailsData } from '../typings/normalizedOrder'
 
 interface OrderProps {
-  orderData?: IOrder
-}
-
-interface AddressData {
-  city: string
-  postalCode: string
-  phone: string
-  receiverName: string
-  state: string
-  street: string
-}
-export interface PackageData {
-  courier: string
-  invoiceNumber: string
-  invoiceUrl: string | null
-  invoiceValue: number
-  issuanceDate: string
-  trackingNumber: string
-  trackingUrl: string | null
-}
-
-interface OrderDetails {
-  clientData: {
-    firstName: string
-    lastName: string
-    phone: string
-    email: string
-  }
-  invoiceData: {
-    city: string
-    postalCode: string
-    invoicedEntityType: string
-    phone: string
-    state: string
-    street: string
-  }
-  orderDate?: string
-  orderTotals: {
-    [key: string]: number
-  }
-  marketPlaceOrderId: string
-  packageData?: PackageData
-  paymentMethod: string
-  shippingAddress: AddressData
-  shippingEstimatedDate?: string
+  orderData: OrderDetailsData
 }
 
 const OrderDetail: FC<OrderProps> = ({ orderData }) => {
-  const [data, setData] = useState<OrderDetails>()
+  const [data, setData] = useState<OrderDetailsData>()
 
-  const getPaymentMethod = (orderData: any) =>
-    orderData.openTextField.value.match(/\b(\w+)$/g).toString()
-
-  const getOrderTotals = (orderData: IOrder) => {
-    const orderTotals = {}
-    orderData.totals.map((element) => {
-      Object.assign(orderTotals, {
-        [element.id.toLocaleLowerCase()]: element.value,
-      })
-    })
-    return orderTotals
-  }
-
-  const getInvoicedEntityType = (isCorporate: boolean) =>
-    isCorporate ? 'Persoana juridica' : 'Persoana fizica'
-
-  const formatDate = (date: string) =>
-    new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      timeZone: 'Europe/Bucharest',
-    }).format(new Date(date))
-
-  const formatOrderState = (orderData: IOrder) => {
-    const { state } = orderData.shippingData.address
-    const states: { [key: string]: string } = {
-      AB: 'Alba',
-      AG: 'Argeș',
-      AR: 'Arad',
-      B: 'București',
-      BC: 'Bacău',
-      BH: 'Bihor',
-      BN: 'Bistrița - Năsăud',
-      BR: 'Brăila',
-      BT: 'Botoșani',
-      BV: 'Brașov',
-      BZ: 'Buzău',
-      CJ: 'Cluj',
-      CL: 'Călărași',
-      CS: 'Caraș - Severin',
-      CT: 'Constanța',
-      CV: 'Covasna',
-      DB: 'Dâmbovița',
-      DJ: 'Dolj',
-      GJ: 'Gorj',
-      GL: 'Galați',
-      GR: 'Giurgiu',
-      HD: 'Hunedoara',
-      HR: 'Harghita',
-      IF: 'Ilfov',
-      IL: 'Ialomița',
-      IS: 'Iași',
-      MH: 'Mehedinți',
-      MM: 'Maramureș',
-      MS: 'Mureș',
-      NT: 'Neamț',
-      OT: 'Olt',
-      PH: 'Prahova',
-      SB: 'Sibiu',
-      SJ: 'Sălaj',
-      SM: 'Satu - Mare',
-      SV: 'Suceava',
-      TL: 'Tulcea',
-      TM: 'Timiș',
-      TR: 'Teleorman',
-      VL: 'Vâlcea',
-      VN: 'Vrancea',
-      VS: 'Vaslui',
-    }
-    return states[state]
-  }
-
-  const normalizeOrderData = () => {
-    const orderDate = orderData && formatDate(orderData?.creationDate)
-    const estimatedShipDate =
-      orderData &&
-      new Intl.DateTimeFormat('en-GB', {
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        timeZone: 'Europe/Bucharest',
-      }).format(
-        new Date(orderData?.shippingData.logisticsInfo[0].shippingEstimateDate)
-      )
-
-    const packageData = orderData?.packageAttachment.packages.pop()
-    const invoiceIssuanceDate = new Intl.DateTimeFormat('en-GB', {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      timeZone: 'Europe/Bucharest',
-    }).format(new Date(packageData?.issuanceDate || ''))
-    console.log(packageData)
-
-    console.log(orderData)
-
-    if (orderData) {
-      setData({
-        clientData: {
-          firstName: orderData.clientProfileData.firstName,
-          lastName: orderData.clientProfileData.lastName,
-          phone: orderData.clientProfileData.phone,
-          email: orderData.clientProfileData.email,
-        },
-        invoiceData: {
-          city: orderData.invoiceData.address.city,
-          invoicedEntityType: getInvoicedEntityType(
-            orderData.clientProfileData.isCorporate
-          ),
-          postalCode: orderData.invoiceData.address.postalCode,
-          phone: orderData.invoiceData.address.number,
-
-          state: formatOrderState(orderData),
-          street: orderData.invoiceData.address.street,
-        },
-        orderDate: orderDate,
-        orderTotals: getOrderTotals(orderData),
-        marketPlaceOrderId: orderData.marketplaceOrderId,
-        packageData: {
-          courier: packageData?.courier || 'Lipsa Date',
-          invoiceNumber: packageData?.invoiceNumber || 'Lipsa Date',
-          invoiceUrl: packageData?.invoiceUrl || 'Lipsa Date',
-          invoiceValue: packageData?.invoiceValue || 0,
-          issuanceDate: invoiceIssuanceDate || 'Lipsa Date',
-          trackingNumber: packageData?.trackingNumber || 'Lipsa Date',
-          trackingUrl: packageData?.trackingUrl || 'Lipsa Date',
-        },
-        paymentMethod: getPaymentMethod(orderData),
-        shippingAddress: {
-          city: orderData.shippingData.address.city,
-          postalCode: orderData.shippingData.address.postalCode,
-          phone: orderData.shippingData.address.number,
-          receiverName: orderData.shippingData.address.receiverName,
-          state: formatOrderState(orderData),
-          street: orderData.shippingData.address.street,
-        },
-        shippingEstimatedDate: estimatedShipDate,
-      })
-    }
-  }
-  useEffect(() => normalizeOrderData(), [])
+  useEffect(() => setData(orderData), [])
 
   return (
     <>
@@ -235,10 +47,10 @@ const OrderDetail: FC<OrderProps> = ({ orderData }) => {
           <div className="w-50">
             <h3 className="t-heading-3">Cost total comanda</h3>
             <div className="mt2">
-              Articole: {(data?.orderTotals.items ?? 0) / 100} RON
+              Articole: {(data?.orderTotals.items ?? 0) / 100} Lei
             </div>
             <div className="mt2">
-              Expediere: {(data?.orderTotals.shipping ?? 0) / 100} RON
+              Expediere: {(data?.orderTotals.shipping ?? 0) / 100} Lei
             </div>
             <div className="w-50 mv4">
               <Divider />
@@ -297,7 +109,7 @@ const OrderDetail: FC<OrderProps> = ({ orderData }) => {
               </div>
               <div className="mt2">
                 Nume:{' '}
-                {orderData?.clientProfileData.isCorporate
+                {data?.clientData.isCorporate
                   ? 'Nume SRL'
                   : `${data?.clientData.firstName} ${data?.clientData.lastName}`}
               </div>
@@ -316,7 +128,7 @@ const OrderDetail: FC<OrderProps> = ({ orderData }) => {
               <div className="mt2">
                 Valoare:{' '}
                 {(data?.packageData?.invoiceValue ?? 0) / 100 || 'Lipsa date'}{' '}
-                RON
+                Lei
               </div>
               <div className="mt2">
                 Data factura: {data?.packageData?.issuanceDate}
@@ -328,7 +140,6 @@ const OrderDetail: FC<OrderProps> = ({ orderData }) => {
           </Box>
         </div>
       </div>
-
       <OrderTable orderData={orderData} />
     </>
   )

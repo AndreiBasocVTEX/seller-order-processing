@@ -1,24 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import type { FC } from 'react'
-import axios from 'axios'
 import { Layout, Spinner } from 'vtex.styleguide'
+import { getOrderDataById } from './utils/api/index'
+import { normalizeOrderData } from './utils/normalizeData/orderDetails'
 
 import OrderDetail from './OrderDetail/index'
 import OrderHeader from './OrderDetail/components/OrderHeader'
-import type { IOrder } from './typings/order'
+import type { OrderDetailsData } from './typings/normalizedOrder'
+import ErrorNotification from './components/ErrorNotification'
 
-const orderDetails: FC = () => {
-  const [order, setOrder] = useState<IOrder>()
+const OrderDetails: FC = () => {
+  const [order, setOrder] = useState<OrderDetailsData>()
   const [isLoading, setIsLoading] = useState(true)
   const getOrdeData = async () => {
-    const orderId = window.location.pathname.match(/GCB-[0-9]+-[0-9]+/g)
-    try {
-      const { data } = await axios.get(
-        `/api/oms/pvt/orders/${orderId?.toString()}`
-      )
-      setOrder(data)
-    } catch (error) {
-      console.log(error)
+    const orderId = window.location.pathname
+      .match(/GCB-[0-9]+-[0-9]+/g)
+      ?.toString()
+
+    const data = orderId && (await getOrderDataById(orderId))
+
+    if (data) {
+      const normalizedData = normalizeOrderData(data)
+      setOrder(normalizedData)
     }
     setIsLoading(false)
   }
@@ -36,15 +39,19 @@ const orderDetails: FC = () => {
         fullWidth
         pageHeader={
           <OrderHeader
-            orderId={order?.marketplaceOrderId ?? 'Lipsa ID'}
-            orderStatus={order?.status || 'Necunoscut'}
+            orderId={order?.marketPlaceOrderId ?? 'Lipsa ID'}
+            orderStatus={order?.status}
           />
         }
       >
-        <OrderDetail orderData={order} />
+        {order ? (
+          <OrderDetail orderData={order} />
+        ) : (
+          <ErrorNotification errorMessage="Eroare, incercati mai tarziu" />
+        )}
       </Layout>
     </>
   )
 }
 
-export default orderDetails
+export default OrderDetails

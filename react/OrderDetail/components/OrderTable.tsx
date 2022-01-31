@@ -2,10 +2,10 @@ import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
 import { NumericStepper, Table } from 'vtex.styleguide'
 
-import type { IOrder } from '../../typings/order'
+import type { OrderDetailsData } from '../../typings/normalizedOrder'
 
 interface TableProps {
-  orderData?: IOrder
+  orderData?: OrderDetailsData
 }
 
 interface TableItem {
@@ -55,38 +55,38 @@ const OrderTable: FC<TableProps> = ({ orderData }) => {
     },
   }
 
-  const normalizeTableData = (orderData: IOrder) => {
-    const { items } = orderData
+  const normalizeTableData = (data: OrderDetailsData) => {
+    const { items } = data
     const orderTotals: { [key: string]: number } = {}
     const result: TableItem[] = []
 
-    items.map((element, index) => {
+    items.forEach((element, index) => {
       result.push(
         {
           productSku: element.sellerSku,
           productName: element.name,
           productQuantity: element.quantity,
-          productPriceNoTva: `${element.priceDefinition.total / 100} RON`,
+          productPriceNoTva: `${element.priceDefinition.total / 100} Lei`,
           tvaProcent: `${element.tax}%`,
           productPriceTva: `${
             (element.priceDefinition.total + element.tax) / 100
-          } RON`,
+          } Lei`,
         },
         {
           productSku: '',
           productName: 'Taxa de livrare',
           productQuantity: 0,
           productPriceNoTva: `${
-            orderData.shippingData.logisticsInfo[index].price / 100
-          } RON`,
+            data.shippingData.logisticsInfo[index].price / 100
+          } Lei`,
           tvaProcent: '0%',
           productPriceTva: `${
-            orderData.shippingData.logisticsInfo[index].price / 100
-          } RON`,
+            data.shippingData.logisticsInfo[index].price / 100
+          } Lei`,
         }
       )
     })
-    orderData.totals.map((element) => {
+    data.totals.forEach((element) => {
       Object.assign(orderTotals, {
         [element.id.toLocaleLowerCase()]: element.value,
       })
@@ -97,11 +97,11 @@ const OrderTable: FC<TableProps> = ({ orderData }) => {
       productQuantity: 0,
       productPriceNoTva: `${
         (orderTotals.items + orderTotals.shipping) / 100
-      } RON`,
+      } Lei`,
       tvaProcent: '',
       productPriceTva: `${
         (orderTotals.items + orderTotals.shipping + orderTotals.tax) / 100
-      } RON`,
+      } Lei`,
     })
     setTableData(result)
   }
