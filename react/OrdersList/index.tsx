@@ -87,28 +87,26 @@ const OrdersList: FC = () => {
 
       const lastOrder = data.packageAttachment.packages.length - 1
 
-      // console.log('PPPPPPPPP', data.packageAttachment)
-      if (data.packageAttachment.packages[lastOrder]?.trackingNumber) {
-        setOrderAwb((prevState) => {
-          return [
-            ...prevState,
-            {
-              orderId: el.orderId.toString(),
-              // potentially has to be first element of the array
-              orderValue:
-                data.packageAttachment.packages[lastOrder].trackingNumber,
-              courier: data.packageAttachment.packages[lastOrder].courier,
-              payMethod: data.openTextField.value,
-            },
-          ]
-        })
-        // console.log(
-        //   '4EACH:AWB',
-        //   el.orderId,
-        //   data.packageAttachment.packages[lastOrder].trackingNumber
-        // )
-        // console.log(orderAwb)
-      }
+      console.log('PPPPPPPPP', data.packageAttachment)
+      console.log('AAAAAAAAA', data.openTextField.value)
+
+      // if (data.packageAttachment.packages[lastOrder]?.trackingNumber) {
+      setOrderAwb((prevState) => {
+        return [
+          ...prevState,
+          {
+            orderId: el.orderId.toString(),
+            // potentially has to be first element of the array
+            orderValue:
+              data.packageAttachment?.packages[lastOrder]?.trackingNumber ||
+              'GENERATE',
+            courier:
+              data.packageAttachment?.packages[lastOrder]?.courier || null,
+            payMethod: data.openTextField?.value,
+          },
+        ]
+      })
+      // }
     })
   }, [])
 
@@ -255,15 +253,6 @@ const OrdersList: FC = () => {
 
     return <span>missing tag</span>
   }
-
-  const getOrderData = useCallback(async (orderId: string): Promise<any> => {
-    console.log('OrderData', orderId)
-    const { data }: { data: any } = await axios.get(
-      `/api/oms/pvt/orders/${orderId}`
-    )
-
-    console.log('GETORDERDATA_new_AWB!', data)
-  }, [])
 
   const printAwb = useCallback(
     async (orderId: string): Promise<any> => {
@@ -602,8 +591,6 @@ const OrdersList: FC = () => {
                         </>
                       ),
                       onClick: () => {
-                        getOrderData(rowData.orderId)
-                        // console.log('STATELABELS', state.labels)
                         setCurrentRowData(rowData)
                         setIsClosed(!isClosed)
                         setService('cargus')
@@ -625,7 +612,6 @@ const OrdersList: FC = () => {
                       ),
                       disabled: false,
                       onClick: () => {
-                        getOrderData(rowData.orderId)
                         setCurrentRowData(rowData)
                         setIsClosed(!isClosed)
                         setService('sameday')
@@ -644,7 +630,6 @@ const OrdersList: FC = () => {
                       ),
                       disabled: false,
                       onClick: () => {
-                        getOrderData(rowData.orderId)
                         setCurrentRowData(rowData)
                         setIsClosed(!isClosed)
                         setService('innoship')
@@ -663,7 +648,6 @@ const OrdersList: FC = () => {
                       ),
                       disabled: false,
                       onClick: () => {
-                        getOrderData(rowData.orderId)
                         setCurrentRowData(rowData)
                         setIsClosed(!isClosed)
                         setService('fancourier')
@@ -684,15 +668,7 @@ const OrdersList: FC = () => {
         },
       },
     }),
-    [
-      getPayMethod,
-      getLabelOrder,
-      trackingNum,
-      getOrderData,
-      isClosed,
-      orderAwb,
-      printAwb,
-    ]
+    [getPayMethod, getLabelOrder, trackingNum, isClosed, orderAwb, printAwb]
   )
 
   return (

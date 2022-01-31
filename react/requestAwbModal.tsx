@@ -80,7 +80,7 @@ const RequestAwbModal: FC<Props> = ({
       )
 
       // console.log('GETORDERdata', data.updatedItems.trackingNumber)
-      console.log('GETORDERdata', data.updatedItems)
+      // console.log('GETORDERdata', data.updatedItems)
       setTrackingNum({
         [data.updatedItems.orderId]: data.updatedItems.trackingNumber,
       })
