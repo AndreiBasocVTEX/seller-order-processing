@@ -16,9 +16,7 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": [
-    "smartcheckout"
-  ],
+  "registries": ["smartcheckout"],
   "policies": [
     {
       "name": "outbound-access",
@@ -92,6 +90,11 @@
         "description": "",
         "type": "string"
       },
+      "fancourier__warehouseId": {
+        "title": "FanCourier Warehouse ID",
+        "description": "",
+        "type": "string"
+      },
       "cargus__username": {
         "title": "Cargus Username",
         "description": "",
@@ -109,6 +112,11 @@
       },
       "innoship__apiToken": {
         "title": "Innoship API Token",
+        "description": "",
+        "type": "string"
+      },
+      "innoship__warehouseId": {
+        "title": "Innoship Warehouse ID",
         "description": "",
         "type": "string"
       },

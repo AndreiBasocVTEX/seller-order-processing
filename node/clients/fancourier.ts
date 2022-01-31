@@ -56,6 +56,7 @@ function getTotalDiscount(order: IVtexOrder) {
 
 function createFancourierOrderPayload(
   order: IVtexOrder,
+  warehouseId: string,
   invoiceData: IVtexInvoiceData
 ): IFancourierAwbPayload {
   const totalWeight = invoiceData.weight
@@ -64,10 +65,7 @@ function createFancourierOrderPayload(
 
   const totalDiscount = getTotalDiscount(order)
   const { address } = order.shippingData
-  const {
-    warehouseId,
-    courierId,
-  } = order?.shippingData?.logisticsInfo?.[0].deliveryIds?.[0]
+  const { courierId } = order?.shippingData?.logisticsInfo?.[0].deliveryIds?.[0]
 
   const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
   const paymentPromissory =
@@ -197,9 +195,15 @@ export default class Fancourier extends ExternalClient {
       username: settings.fancourier__username,
     }
 
+    const warehouseId = settings.fancourier__warehouseId
+
     const vtexOrder = await orderApi.getVtexOrderData(vtexAuthData, orderId)
 
-    const order = createFancourierOrderPayload(vtexOrder, invoiceData)
+    const order = createFancourierOrderPayload(
+      vtexOrder,
+      warehouseId,
+      invoiceData
+    )
 
     // Order of the keys in fileData is important because of the generation column flow for the csv-object
     const fileData = [
