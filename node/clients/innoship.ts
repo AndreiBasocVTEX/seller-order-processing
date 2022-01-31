@@ -30,7 +30,11 @@ function getTotalWeight(order: IVtexOrder) {
   }, 0)
 }
 
-function createOrderPayload(order: IVtexOrder, invoiceData: IVtexInvoiceData) {
+function createOrderPayload(
+  order: IVtexOrder,
+  warehouseId: string,
+  invoiceData: IVtexInvoiceData
+) {
   const totalWeight = invoiceData.weight
     ? invoiceData.weight
     : getTotalWeight(order)
@@ -80,7 +84,7 @@ function createOrderPayload(order: IVtexOrder, invoiceData: IVtexInvoiceData) {
       contents: awbContent,
       parcels,
     },
-    externalClientLocation: 'RO',
+    externalClientLocation: warehouseId,
     // TODO Remove Date.now(). Needed for testing, Innoship doesn't take the same orderId twice
     externalOrderId: `${order.orderId}_${Date.now()}`,
     sourceChannel: awbSourceChannel,
@@ -135,7 +139,9 @@ export default class Innoship extends ExternalClient {
 
     const vtexOrder = await orderApi.getVtexOrderData(vtexAuthData, orderId)
 
-    const body = createOrderPayload(vtexOrder, invoiceData)
+    const warehouseId = settings.innoship__warehouseId
+
+    const body = createOrderPayload(vtexOrder, warehouseId, invoiceData)
 
     return this.http.post('/Order?api-version=1.0', body, {
       headers: {
