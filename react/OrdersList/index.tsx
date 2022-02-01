@@ -4,11 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { FC } from 'react'
 import axios from 'axios'
 import {
-  // Button,
+  Button,
   Table,
   Tag,
   Link,
-  ActionMenu,
+  // ActionMenu,
   Tooltip,
   Pagination,
   // Toggle,
@@ -19,12 +19,17 @@ import {
 import { FormattedCurrency } from 'vtex.format-currency'
 
 import RequestAwbModal from '../requestAwbModal'
-import fancourier from '../logos/fancourier.png'
-import cargus from '../logos/cargus.png'
-import innoship from '../logos/innoship.png'
-import sameday from '../logos/sameday.png'
+// import fancourier from '../logos/fancourier.png'
+// import cargus from '../logos/cargus.png'
+// import innoship from '../logos/innoship.png'
+// import sameday from '../logos/sameday.png'
 import '../src/style.css'
 import type { IOrder } from '../typings/order'
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const Save = require('@vtex/styleguide/lib/icon/Save').default
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const VisibilityOn = require('@vtex/styleguide/lib/icon/VisibilityOn').default
 
 interface ITrackingObj {
   [orderId: string]: string
@@ -34,14 +39,13 @@ interface IOrderAwb {
   orderValue: string
   courier: string
   payMethod?: any
+  invoiceNumber?: string
 }
 const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
 
   const [searchValue, setSearchValue] = useState('')
-  // const [statements, setStatements] = useState<any>(['asd'])
   const [isClosed, setIsClosed] = useState(false)
-  const [service, setService] = useState('')
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
   const [paginationParams, setPaginationParams] = useState({
@@ -63,19 +67,7 @@ const OrdersList: FC = () => {
   })
 
   // console.log(trackingNum)
-  const [isLoading, setisLoading] = useState(true)
-
-  // const downloadOptions = [
-  //   {
-  //     label: 'Descarca AWB',
-  //     // onClick: () => {
-  //     // },
-  //   },
-  //   {
-  //     label: 'Descarca Factura',
-  //     // onClick: () => {},
-  //   },
-  // ]
+  const [isLoading, setIsLoading] = useState(true)
 
   const fetchTrackingNumbers = useCallback((orders: any[]) => {
     console.log('fetchedTrackingNumbers OK!', orders)
@@ -88,9 +80,8 @@ const OrdersList: FC = () => {
       const lastOrder = data.packageAttachment.packages.length - 1
 
       console.log('PPPPPPPPP', data.packageAttachment)
-      console.log('AAAAAAAAA', data.openTextField.value)
+      // console.log('AAAAAAAAA', data.openTextField.value)
 
-      // if (data.packageAttachment.packages[lastOrder]?.trackingNumber) {
       setOrderAwb((prevState) => {
         return [
           ...prevState,
@@ -99,10 +90,13 @@ const OrdersList: FC = () => {
             // potentially has to be first element of the array
             orderValue:
               data.packageAttachment?.packages[lastOrder]?.trackingNumber ||
-              'GENERATE',
+              'Genereaza AWB & Factura',
             courier:
               data.packageAttachment?.packages[lastOrder]?.courier || null,
             payMethod: data.openTextField?.value,
+            invoiceNumber:
+              data.packageAttachment?.packages[lastOrder]?.invoiceNumber ||
+              'No invoice',
           },
         ]
       })
@@ -126,7 +120,7 @@ const OrdersList: FC = () => {
           params: {},
         })
 
-        setisLoading(false)
+        setIsLoading(false)
         setPaginationParams({
           ...newParams,
           items: data.list,
@@ -300,9 +294,22 @@ const OrdersList: FC = () => {
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
+      // console.log('INFOLABEL', order)
+
       return order
         ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
         : null
+    },
+    [orderAwb]
+  )
+
+  const getInvoiceNumber = useCallback(
+    (rowData: IOrder) => {
+      const order = orderAwb.find(
+        (labelOrder) => labelOrder?.orderId === rowData?.orderId
+      )
+
+      return order ? `${order.invoiceNumber ? order.invoiceNumber : ' '}` : null
     },
     [orderAwb]
   )
@@ -396,7 +403,6 @@ const OrdersList: FC = () => {
       },
     })
     getItems(paginationParams)
-    // setCurrentPage(1)
   }, [getItems, paginationParams])
 
   const handleInputSearchSubmit = useCallback(() => {
@@ -414,8 +420,6 @@ const OrdersList: FC = () => {
     })
     getItems(paginationParams)
   }, [getItems, paginationParams, searchValue]) // getProductsList
-
-  // const avgTicketPrice = () => {}
 
   const tableOrdersSchema = useMemo(
     () => ({
@@ -562,113 +566,85 @@ const OrdersList: FC = () => {
         },
         awbShipping: {
           title: 'AWB Shipping',
-          width: 400,
+          width: 350,
           cellRenderer: ({ rowData }: SchemeDataType) => {
             return (
               <>
-                <ActionMenu
-                  // label={labelAwb(rowData.orderId) || 'GENERATE'}
-                  // label={ (trackingNum[rowData.orderId] ? service + ' ' +  trackingNum[rowData.orderId] : trackingNum[rowData.orderId]) || 'GENERATE'}
-                  label={getLabelOrder(rowData) || 'GENERATE'} // trackingNum[rowData.orderId] ||
-                  buttonProps={{
-                    variation: trackingNum[rowData.orderId]
-                      ? 'secondary'
-                      : 'primary',
-                    size: 'small',
-                    id: 'dropdownBut',
-                    disabled: rowData.status === 'canceled',
+                <Button
+                  variation="secondary"
+                  block
+                  disabled={rowData.status === 'canceled'}
+                  onClick={() => {
+                    setCurrentRowData(rowData)
+                    setIsClosed(!isClosed)
                   }}
-                  options={[
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={cargus}
-                          />{' '}
-                          Cargus
-                        </>
-                      ),
-                      onClick: () => {
-                        setCurrentRowData(rowData)
-                        setIsClosed(!isClosed)
-                        setService('cargus')
-                        setTimeout(() => {
-                          console.log('orderAWB, after click', orderAwb)
-                        }, 4000)
-                      },
-                    },
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={sameday}
-                          />{' '}
-                          SameDay
-                        </>
-                      ),
-                      disabled: false,
-                      onClick: () => {
-                        setCurrentRowData(rowData)
-                        setIsClosed(!isClosed)
-                        setService('sameday')
-                      },
-                    },
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={innoship}
-                          />{' '}
-                          Innoship
-                        </>
-                      ),
-                      disabled: false,
-                      onClick: () => {
-                        setCurrentRowData(rowData)
-                        setIsClosed(!isClosed)
-                        setService('innoship')
-                      },
-                    },
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={fancourier}
-                          />{' '}
-                          Fan Courier
-                        </>
-                      ),
-                      disabled: false,
-                      onClick: () => {
-                        setCurrentRowData(rowData)
-                        setIsClosed(!isClosed)
-                        setService('fancourier')
-                      },
-                    },
-                    {
-                      label: 'Download PDF',
-                      isDangerous: 'true',
-                      onClick: () => {
-                        printAwb(rowData.orderId)
-                      },
-                    },
-                  ]}
-                />
+                >
+                  {getLabelOrder(rowData)}
+                </Button>
+              </>
+            )
+          },
+        },
+        awbStatus: {
+          title: 'AWB Status',
+          width: 250,
+          cellRenderer: ({ rowData }: SchemeDataType) => {
+            return (
+              <>
+                <Button
+                  variation="secondary"
+                  block
+                  disabled={rowData.status === 'canceled'}
+                  onClick={() => {
+                    // console.log('333333', rowData.status)
+                    printAwb(rowData.orderId)
+                  }}
+                >
+                  <span style={{ paddingRight: '10px' }}>
+                    {' '}
+                    <VisibilityOn />
+                  </span>
+                  {'Update Status'}
+                </Button>
+              </>
+            )
+          },
+        },
+        Invoice: {
+          title: 'Factura',
+          width: 250,
+          cellRenderer: ({ rowData }: SchemeDataType) => {
+            return (
+              <>
+                <Button
+                  variation="secondary"
+                  block
+                  disabled={rowData.status === 'canceled'}
+                  onClick={() => {
+                    printAwb(rowData.orderId)
+                  }}
+                >
+                  <span style={{ paddingRight: '10px' }}>
+                    {' '}
+                    <Save />
+                  </span>
+                  {getInvoiceNumber(rowData)}
+                </Button>
               </>
             )
           },
         },
       },
     }),
-    [getPayMethod, getLabelOrder, trackingNum, isClosed, orderAwb, printAwb]
+    [
+      getPayMethod,
+      getLabelOrder,
+      trackingNum,
+      isClosed,
+      orderAwb,
+      printAwb,
+      getInvoiceNumber,
+    ]
   )
 
   return (
@@ -812,7 +788,7 @@ const OrdersList: FC = () => {
         rowData={currentRowData}
         isClosed={isClosed}
         setIsClosed={setIsClosed}
-        service={service}
+        // service={service}
         setTrackingNum={setTrackingNum}
         setOrderAwb={setOrderAwb}
       />
