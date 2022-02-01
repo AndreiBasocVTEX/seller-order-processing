@@ -1,18 +1,69 @@
 import type { FC } from 'react'
-import React, { useEffect, useState } from 'react'
-import { Box, Divider } from 'vtex.styleguide'
+import React, { useCallback, useEffect, useState } from 'react'
+import { Box, Button, Divider } from 'vtex.styleguide'
 
 import OrderTable from './components/OrderTable'
 import type { OrderDetailsData } from '../typings/normalizedOrder'
+import RequestAwbModal from '../requestAwbModal'
+import type { IOrder } from '../typings/order'
 
 interface OrderProps {
   orderData: OrderDetailsData
+  rawOrderData?: IOrder
 }
 
-const OrderDetail: FC<OrderProps> = ({ orderData }) => {
-  const [data, setData] = useState<OrderDetailsData>()
+interface ITrackingObj {
+  [orderId: string]: string
+}
 
-  useEffect(() => setData(orderData), [])
+interface IOrderAwb {
+  orderId: string
+  orderValue: string
+  courier: string
+  payMethod?: string
+}
+
+const OrderDetail: FC<OrderProps> = ({ orderData, rawOrderData }) => {
+  const [data, setData] = useState<OrderDetailsData>()
+  const [isClosed, setIsClosed] = useState(false)
+  const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
+  const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
+
+  const getLabelOrder = useCallback(
+    (rowData: IOrder) => {
+      const order = orderAwb.find(
+        (labelOrder) => labelOrder?.orderId === rowData?.orderId
+      )
+
+      return order
+        ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
+        : null
+    },
+    [orderAwb]
+  )
+
+  useEffect(() => {
+    setData(orderData)
+    const lastOrder =
+      (rawOrderData && rawOrderData.packageAttachment.packages.length - 1) ?? 1
+
+    rawOrderData &&
+      setOrderAwb(() => {
+        return [
+          {
+            orderId: rawOrderData.orderId.toString(),
+            // potentially has to be first element of the array
+            orderValue:
+              rawOrderData.packageAttachment?.packages[lastOrder]
+                ?.trackingNumber ?? 'Genereaza AWB & Factura',
+            courier:
+              rawOrderData.packageAttachment?.packages[lastOrder]?.courier ??
+              null,
+            payMethod: rawOrderData.openTextField?.value,
+          },
+        ]
+      })
+  }, [trackingNum, orderData, rawOrderData])
 
   return (
     <>
@@ -93,15 +144,35 @@ const OrderDetail: FC<OrderProps> = ({ orderData }) => {
               <div className="mt2">
                 AWB: {data?.packageData?.trackingNumber}
               </div>
-              <div className="mt2 mb6">
+              <div className="mt2">
                 {' '}
                 Tracking URL: {data?.packageData?.trackingUrl}
+              </div>
+              <div className="flex w-50 mt5">
+                {rawOrderData && (
+                  <Button
+                    variation="secondary"
+                    disabled={rawOrderData.status === 'canceled'}
+                    onClick={() => {
+                      setIsClosed(!isClosed)
+                    }}
+                  >
+                    {getLabelOrder(rawOrderData)}
+                  </Button>
+                )}
+                <RequestAwbModal
+                  rowData={rawOrderData}
+                  isClosed={isClosed}
+                  setIsClosed={setIsClosed}
+                  setTrackingNum={setTrackingNum}
+                  setOrderAwb={setOrderAwb}
+                />
               </div>
             </div>
           </Box>
         </div>
         <div className="w-50">
-          <Box>
+          <Box fit="fill-vertical">
             <div className="flex flex-column">
               <h3 className="t-heading-3">Date facturare</h3>
               <div className="mt2">
