@@ -6057,10 +6057,6 @@ vtex-tachyons@^3.2.0:
   resolved "https://registry.yarnpkg.com/vtex-tachyons/-/vtex-tachyons-3.2.2.tgz#e9e39d939778ef7d80a92c476cecf7417f79a6e8"
   integrity sha512-4M53uuvV+2XEjplVYiPgpBuaI5dtGksVgz/20NNjbZkXklJM7Lwgod/hOoh3PtIn36+95zZVVgXYfs3e6EU8YA==
 
-"vtex.admin-example@https://csaramet--sell21octandrei113.myvtex.com/_v/private/typings/linked/v1/vtex.admin-example@0.0.13+build1643640521/public/@types/vtex.admin-example":
-  version "0.0.0"
-  resolved "https://csaramet--sell21octandrei113.myvtex.com/_v/private/typings/linked/v1/vtex.admin-example@0.0.13+build1643640521/public/@types/vtex.admin-example#0c8e91a9ff2d8d8403e8b75d263c9d3d2e13ec31"
-
 "vtex.format-currency@http://vtex.vtexassets.com/_v/public/typings/v1/vtex.format-currency@0.3.0/public/@types/vtex.format-currency":
   version "0.3.0"
   resolved "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.format-currency@0.3.0/public/@types/vtex.format-currency#1cb7360452552301237c16d32037bbac61798f20"

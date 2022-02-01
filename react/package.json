@@ -26,7 +26,6 @@
     "@vtex/test-tools": "^3.3.2",
     "@vtex/tsconfig": "^0.6.0",
     "typescript": "3.9.7",
-    "vtex.admin-example": "https://csaramet--sell21octandrei113.myvtex.com/_v/private/typings/linked/v1/vtex.admin-example@0.0.13+build1643640521/public/@types/vtex.admin-example",
     "vtex.format-currency": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.format-currency@0.3.0/public/@types/vtex.format-currency",
     "vtex.render-runtime": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.render-runtime@8.132.3/public/@types/vtex.render-runtime",
     "vtex.search-graphql": "http://vtex.vtexassets.com/_v/public/typings/v1/vtex.search-graphql@0.47.3/public/@types/vtex.search-graphql",
