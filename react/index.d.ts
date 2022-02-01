@@ -10,3 +10,11 @@ declare module '@vtex/styleguide/lib/icon/ArrowDown' {
   const value: any
   export default value
 }
+declare module '@vtex/styleguide/lib/icon/Save' {
+  const value: any
+  export default value
+}
+declare module '@vtex/styleguide/lib/icon/VisibilityOn' {
+  const value: any
+  export default value
+}
