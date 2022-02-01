@@ -17,7 +17,6 @@ import {
 import type {
   Item,
   ITrackAwbInfoPayload,
-  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
@@ -294,7 +293,7 @@ export default class Sameday extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }): Promise<ITrackAwbInfoResponse> {
+  }): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
@@ -358,6 +357,14 @@ export default class Sameday extends ExternalClient {
       },
     }
 
-    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
+    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
+      updateTrackingInfoPayload
+    )
+
+    return {
+      vtexResponse: trackAwbInfoVtexRes,
+      isDelivered,
+      trackingEvents,
+    }
   }
 }
