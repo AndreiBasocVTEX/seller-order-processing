@@ -22,7 +22,6 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   Item,
   ITrackAwbInfoPayload,
-  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
@@ -357,7 +356,7 @@ export default class Fancourier extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }): Promise<ITrackAwbInfoResponse> {
+  }): Promise<unknown> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -397,6 +396,7 @@ export default class Fancourier extends ExternalClient {
 
     if (trackingHistory.length) {
       trackingEvents = trackingHistory.map((event) => {
+        // event[0] is a status number (2 — is delivered)
         const [, description] = event.split(',')
 
         return {
@@ -419,7 +419,15 @@ export default class Fancourier extends ExternalClient {
       },
     }
 
-    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
+    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
+      updateTrackingInfoPayload
+    )
+
+    return {
+      trackAwbInfoVtexRes,
+      isDelivered,
+      trackingEvents,
+    }
   }
 
   private requestToFanCourier(

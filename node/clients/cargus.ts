@@ -16,7 +16,6 @@ import type {
   IVtexOrder,
   ITrackAwbInfoPayload,
   VtexEvent,
-  ITrackAwbInfoResponse,
 } from '../types/orderApi'
 import {
   cargusConstants,
@@ -276,7 +275,7 @@ export default class Cargus extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }): Promise<ITrackAwbInfoResponse> {
+  }): Promise<unknown> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -337,6 +336,14 @@ export default class Cargus extends ExternalClient {
       },
     }
 
-    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
+    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
+      updateTrackingInfoPayload
+    )
+
+    return {
+      vtexResponse: trackAwbInfoVtexRes,
+      isDelivered,
+      trackingEvents,
+    }
   }
 }

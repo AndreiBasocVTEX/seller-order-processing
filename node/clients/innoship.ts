@@ -6,7 +6,6 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   Item,
   ITrackAwbInfoPayload,
-  ITrackAwbInfoResponse,
   IVtexInvoiceData,
   IVtexInvoiceRequest,
   IVtexOrder,
@@ -218,7 +217,7 @@ export default class Innoship extends ExternalClient {
     settings: IOContext['settings']
     orderApi: OrderApi
     orderId: string
-  }): Promise<ITrackAwbInfoResponse> {
+  }): Promise<unknown> {
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
       vtex_appToken: settings.vtex_appToken,
@@ -285,6 +284,14 @@ export default class Innoship extends ExternalClient {
       },
     }
 
-    return orderApi.trackAWBInfo(updateTrackingInfoPayload)
+    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
+      updateTrackingInfoPayload
+    )
+
+    return {
+      vtexResponse: trackAwbInfoVtexRes,
+      isDelivered,
+      trackingEvents,
+    }
   }
 }
