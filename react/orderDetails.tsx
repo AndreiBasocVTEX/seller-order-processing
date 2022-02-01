@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import type { FC } from 'react'
 import { Layout, Spinner } from 'vtex.styleguide'
+
 import { getOrderDataById } from './utils/api/index'
 import { normalizeOrderData } from './utils/normalizeData/orderDetails'
-
 import OrderDetail from './OrderDetail/index'
 import OrderHeader from './OrderDetail/components/OrderHeader'
 import type { OrderDetailsData } from './typings/normalizedOrder'
 import ErrorNotification from './components/ErrorNotification'
+import type { IOrder } from './typings/order'
 
 const OrderDetails: FC = () => {
   const [order, setOrder] = useState<OrderDetailsData>()
+  const [rawData, setRawData] = useState<IOrder>()
   const [isLoading, setIsLoading] = useState(true)
   const getOrdeData = async () => {
     const orderId = window.location.pathname
@@ -20,11 +22,15 @@ const OrderDetails: FC = () => {
     const data = orderId && (await getOrderDataById(orderId))
 
     if (data) {
+      setRawData(data)
       const normalizedData = normalizeOrderData(data)
+
       setOrder(normalizedData)
     }
+
     setIsLoading(false)
   }
+
   useEffect(() => {
     getOrdeData()
   }, [])
@@ -45,7 +51,7 @@ const OrderDetails: FC = () => {
         }
       >
         {order ? (
-          <OrderDetail orderData={order} />
+          <OrderDetail orderData={order} rawOrderData={rawData} />
         ) : (
           <ErrorNotification errorMessage="Eroare, incercati mai tarziu" />
         )}
