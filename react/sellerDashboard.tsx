@@ -3,7 +3,7 @@ import React from 'react'
 import type { FC } from 'react'
 import { Layout, PageBlock, PageHeader } from 'vtex.styleguide'
 
-import OrdersList from './OrdersList/index'
+import OrdersList from './pages/OrdersList/index'
 
 const SellerDashboard: FC = () => {
   return (

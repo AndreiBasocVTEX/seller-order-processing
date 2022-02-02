@@ -8,38 +8,19 @@ import {
   Table,
   Tag,
   Link,
-  // ActionMenu,
   Tooltip,
   Pagination,
-  // Toggle,
   Totalizer,
-  // InputSearch,
-  FilterBar,
-  Input,
-  Checkbox,
-  DatePicker,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
-import RequestAwbModal from '../requestAwbModal'
-import '../src/style.css'
-import type { IOrder } from '../typings/order'
-import AwbStatus from '../components/AwbStatus'
+import RequestAwbModal from '../../components/AwbModal'
+import '../../src/style.css'
+import type { IOrder } from '../../typings/order'
+import type { IOrderAwb, ITrackingObj } from '../../typings/common'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Save = require('@vtex/styleguide/lib/icon/Save').default
-
-interface ITrackingObj {
-  [orderId: string]: string
-}
-
-interface IOrderAwb {
-  orderId: string
-  orderValue: string
-  courier: string
-  payMethod?: any
-  invoiceNumber?: string
-}
 
 const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
@@ -83,9 +64,6 @@ const OrdersList: FC = () => {
 
       const lastOrder = data.packageAttachment.packages.length - 1
 
-      console.log('PPPPPPPPP', data.packageAttachment)
-      // console.log('AAAAAAAAA', data.openTextField.value)
-
       setOrderAwb((prevState) => {
         return [
           ...prevState,
@@ -104,15 +82,12 @@ const OrdersList: FC = () => {
           },
         ]
       })
-      // }
     })
   }, [])
 
   const getItems = useCallback(
     async (newParams) => {
       let url = `/api/oms/pvt/orders?_stats=1&f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
-
-      // console.log('url_searchval', url, searchValue)
 
       if (searchValue !== '') {
         url += `&q=${searchValue}`
@@ -139,8 +114,6 @@ const OrdersList: FC = () => {
           currentItemTo: data.paging.perPage * data.paging.currentPage,
         })
         fetchTrackingNumbers(data.list)
-        // console.log('getItems', data.list)
-        console.log('getItemsDATA', data)
       } catch (err) {
         console.log(err)
       }
@@ -279,8 +252,6 @@ const OrdersList: FC = () => {
       const typeOfResponse =
         printOrder?.courier === 'Innoship' ? undefined : 'blob'
 
-      console.log('printAwbOrder', orderAwb)
-      console.log('printAWBservice', printOrder?.courier)
       try {
         const { data } = await axios.get(
           `/_${printOrder?.courier.toLowerCase()}/printPDF`,
@@ -319,7 +290,6 @@ const OrdersList: FC = () => {
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
-      // renders courier+value. Those values are stored in state in getTrackingNumber
       return order
         ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
         : null
@@ -391,7 +361,6 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
-    console.log('PAG_PREV', newParams)
   }
 
   const handleRowsChange = useCallback((e: unknown, value: number) => {
@@ -421,7 +390,6 @@ const OrdersList: FC = () => {
           pages: paginationParams.paging.pages,
         },
       })
-      console.log('SEARCH_V', searchValue)
     },
     [paginationParams, searchValue]
   )
@@ -999,7 +967,6 @@ const OrdersList: FC = () => {
         rowData={currentRowData}
         isClosed={isClosed}
         setIsClosed={setIsClosed}
-        // service={service}
         setTrackingNum={setTrackingNum}
         setOrderAwb={setOrderAwb}
       />

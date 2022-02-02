@@ -2,29 +2,17 @@ import type { FC } from 'react'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Box, Button, Divider } from 'vtex.styleguide'
 
-import OrderTable from './components/OrderTable'
-import type { OrderDetailsData } from '../typings/normalizedOrder'
-import RequestAwbModal from '../requestAwbModal'
-import type { IOrder } from '../typings/order'
-import AwbStatus from '../components/AwbStatus'
+import type { OrderDetailsData } from '../../typings/normalizedOrder'
+import type { IOrder } from '../../typings/order'
+import RequestAwbModal from '../../components/AwbModal'
+import { OrderTable } from '../../components/OrderDetail'
+import type {
+  IOrderAwb,
+  IOrderDetailProps,
+  ITrackingObj,
+} from '../../typings/common'
 
-interface OrderProps {
-  orderData: OrderDetailsData
-  rawOrderData?: IOrder
-}
-
-interface ITrackingObj {
-  [orderId: string]: string
-}
-
-interface IOrderAwb {
-  orderId: string
-  orderValue: string
-  courier: string
-  payMethod?: string
-}
-
-const OrderDetail: FC<OrderProps> = ({ orderData, rawOrderData }) => {
+const OrderDetail: FC<IOrderDetailProps> = ({ orderData, rawOrderData }) => {
   const [data, setData] = useState<OrderDetailsData>()
   const [isClosed, setIsClosed] = useState(false)
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
