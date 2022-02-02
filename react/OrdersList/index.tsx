@@ -468,67 +468,33 @@ const OrdersList: FC = () => {
         creationDate: {
           title: 'Creation Date',
           width: 140,
-          cellRenderer: ({
-            cellData,
-            rowData,
-          }: {
-            cellData: string
-            rowData: IOrder
-          }): JSX.Element => {
-            return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {new Intl.DateTimeFormat('en-GB', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  hour12: false,
-                  timeZone: 'Europe/Bucharest',
-                }).format(new Date(cellData))}
-              </Link>
-            )
+          cellRenderer: ({ cellData }: { cellData: string }): string => {
+            return new Intl.DateTimeFormat('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: false,
+              timeZone: 'Europe/Bucharest',
+            }).format(new Date(cellData))
           },
         },
         ShippingEstimatedDateMax: {
           title: 'Shipping ETA',
           width: 120,
-          cellRenderer: ({
-            cellData,
-            rowData,
-          }: {
-            cellData: string
-            rowData: IOrder
-          }): JSX.Element => {
-            return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {' '}
-                {new Intl.DateTimeFormat('en-GB', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  timeZone: 'Europe/Bucharest',
-                }).format(new Date(cellData))}
-              </Link>
-            )
+          cellRenderer: ({ cellData }: { cellData: string }): string => {
+            return new Intl.DateTimeFormat('en-GB', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              timeZone: 'Europe/Bucharest',
+            }).format(new Date(cellData))
           },
         },
         clientName: {
           title: 'Receiver',
           width: 150,
-          cellRenderer: ({
-            cellData,
-            rowData,
-          }: {
-            cellData: string
-            rowData: IOrder
-          }): JSX.Element => {
-            return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {cellData}
-              </Link>
-            )
-          },
         },
         totalItems: {
           title: 'Items',
@@ -557,11 +523,7 @@ const OrdersList: FC = () => {
           title: 'Pay Method',
           width: 100,
           cellRenderer: ({ rowData }: { rowData: IOrder }): JSX.Element => {
-            return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {getPayMethod(rowData)}
-              </Link>
-            )
+            return getPayMethod(rowData)
           },
         },
         awbShipping: {
