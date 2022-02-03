@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react'
 import type { FC } from 'react'
 import { Layout, Spinner } from 'vtex.styleguide'
 
-import { getOrderDataById } from './utils/api/index'
-import { normalizeOrderData } from './utils/normalizeData/orderDetails'
-import OrderDetail from './pages/OrderDetail/index'
-import { OrderHeader } from './components/OrderDetail'
-import type { OrderDetailsData } from './typings/normalizedOrder'
-import ErrorNotification from './components/ErrorNotification'
-import type { IOrder } from './typings/order'
+import { getOrderDataById } from './src/utils/api/index'
+import { normalizeOrderData } from './src/utils/normalizeData/orderDetails'
+import OrderDetail from './src/pages/OrderDetail/index'
+import { OrderHeader } from './src/components/OrderDetail'
+import type { OrderDetailsData } from './src/typings/normalizedOrder'
+import ErrorNotification from './src/components/ErrorNotification'
+import type { IOrder } from './src/typings/order'
 
 const OrderDetails: FC = () => {
   const [order, setOrder] = useState<OrderDetailsData>()

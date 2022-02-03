@@ -12,14 +12,14 @@ import {
 import axios from 'axios'
 import type { FC } from 'react'
 
-import fancourier from '../../logos/fancourier.png'
-import cargus from '../../logos/cargus.png'
-import innoship from '../../logos/innoship.png'
-import sameday from '../../logos/sameday.png'
-import facturis from '../../logos/facturis.png'
-import smartbill from '../../logos/smartbill.png'
-import download from '../../logos/download.png'
-import type { IOrderAwbProps } from './types'
+import fancourier from '../../public/logos/fancourier.png'
+import cargus from '../../public/logos/cargus.png'
+import innoship from '../../public/logos/innoship.png'
+import sameday from '../../public/logos/sameday.png'
+import facturis from '../../public/logos/facturis.png'
+import smartbill from '../../public/logos/smartbill.png'
+import download from '../../public/logos/download.png'
+import type { IOrderAwbProps } from '../../types/awbModal'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
   rowData,

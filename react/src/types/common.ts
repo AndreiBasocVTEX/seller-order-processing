@@ -1,5 +1,5 @@
-import type { OrderDetailsData } from './normalizedOrder'
-import type { IOrder } from './order'
+import type { OrderDetailsData } from '../typings/normalizedOrder'
+import type { IOrder } from '../typings/order'
 
 export interface IOrderDetailProps {
   orderData: OrderDetailsData
@@ -14,7 +14,6 @@ export interface IOrderAwb {
   orderId: string
   orderValue: string
   courier: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  payMethod?: string | any
+  payMethod?: string
   invoiceNumber?: string
 }

@@ -34,7 +34,7 @@ const OrderHeader: FC<HeaderProps> = ({ orderId, orderStatus }) => {
           tagText: 'Waiting for sellers confirmation',
         }
 
-      case ' payment-approved':
+      case 'payment-approved':
         return {
           tagBgColor: '#8bc34a',
           tagColor: '#FFF',

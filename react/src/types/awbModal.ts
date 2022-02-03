@@ -1,5 +1,5 @@
-import type { IOrderAwb } from '../../typings/common'
-import type { IOrder } from '../../typings/order'
+import type { IOrder } from '../typings/order'
+import type { IOrderAwb } from './common'
 
 export type IOrderAwbProps = {
   rowData: IOrder | undefined

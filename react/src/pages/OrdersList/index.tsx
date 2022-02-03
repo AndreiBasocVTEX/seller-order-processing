@@ -11,13 +11,18 @@ import {
   Tooltip,
   Pagination,
   Totalizer,
+  Input,
+  DatePicker,
+  FilterBar,
+  Checkbox,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
 import RequestAwbModal from '../../components/AwbModal'
-import '../../src/style.css'
+import '../../public/style.css'
 import type { IOrder } from '../../typings/order'
-import type { IOrderAwb, ITrackingObj } from '../../typings/common'
+import type { IOrderAwb, ITrackingObj } from '../../types/common'
+import AwbStatus from '../../components/AwbStatus'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Save = require('@vtex/styleguide/lib/icon/Save').default
@@ -314,9 +319,13 @@ const OrdersList: FC = () => {
         (payOrder) => payOrder?.orderId === rowData?.orderId
       )
 
-      console.log(order)
+      if (order?.payMethod) {
+        const orderMatched = order.payMethod.match(/\b(\w+)$/g) as string[]
 
-      return order ? order.payMethod?.match(/\b(\w+)$/g)[0] : ''
+        return orderMatched[0] || ''
+      }
+
+      return ''
     },
     [orderAwb]
   )
@@ -327,7 +336,13 @@ const OrdersList: FC = () => {
         (payOrder) => payOrder?.orderId === rowData?.orderId
       )
 
-      return order ? order.payMethod?.match(/\d/g).join('') : ''
+      if (order?.payMethod) {
+        const orderMatched = order.payMethod.match(/\d/g) as string[]
+
+        return orderMatched.join('') || ''
+      }
+
+      return ''
     },
     [orderAwb]
   )
@@ -530,7 +545,7 @@ const OrdersList: FC = () => {
         paymentNames: {
           title: 'Pay Method',
           width: 100,
-          cellRenderer: ({ rowData }: { rowData: IOrder }): JSX.Element => {
+          cellRenderer: ({ rowData }: { rowData: IOrder }): string => {
             return getPayMethod(rowData)
           },
         },
