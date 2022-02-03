@@ -59,11 +59,11 @@ export interface OrderDetailsData {
     street: string
   }
   items: [OrderItem]
-  orderDate: string;
-  orderId: string;
+  orderDate: string
+  orderId: string
   orderTotals: {
     [key: string]: number
-  };
+  }
   marketPlaceOrderId: string
   packageData?: PackageData
   paymentMethod: string
