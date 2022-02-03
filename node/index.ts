@@ -4,7 +4,6 @@ import { LRUCache, method, Service } from '@vtex/api'
 import { Clients } from './clients'
 import { status } from './middlewares/status'
 import { getVtexOrderData } from './middlewares/orderApi'
-import { getServicesFromFancourier } from './middlewares/fancourier'
 import {
   printAWBMiddleware,
   sendInvoiceInfoMiddleware,
@@ -62,9 +61,6 @@ export default new Service({
     }),
     getVtexOrderData: method({
       GET: [getVtexOrderData],
-    }),
-    getServicesFromFancourier: method({
-      GET: [getServicesFromFancourier],
     }),
     printAWB: method({
       GET: [printAWBMiddleware],

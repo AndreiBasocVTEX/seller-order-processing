@@ -25,10 +25,6 @@
     "getVtexOrderData": {
       "path": "/orderApi/getVtexOrderData/:orderId",
       "public": true
-    },
-    "getServicesFromFancourier": {
-      "path": "/_fancourier/get-services",
-      "public": true
     }
   }
 }
