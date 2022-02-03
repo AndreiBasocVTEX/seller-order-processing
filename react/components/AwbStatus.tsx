@@ -46,7 +46,7 @@ const AwbStatus: FC<Props> = ({ courier, orderId, size }) => {
 
   useEffect(() => {
     getAwbStatus()
-  })
+  }, [])
 
   switch (size) {
     case 'small':
