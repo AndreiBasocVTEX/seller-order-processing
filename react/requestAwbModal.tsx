@@ -81,7 +81,7 @@ const RequestAwbModal: FC<Props> = ({
         }
       )
 
-      // console.log('GETORDERdata', data.updatedItems.trackingNumber)
+      // console.log('GETORDERdata', data.updatedIt03c2116e632fc88631c50b9bc58d32a2182149e7ems.trackingNumber)
       // console.log('GETORDERdata', data.updatedItems)
       setTrackingNum({
         [data.updatedItems.orderId]: data.updatedItems.trackingNumber,
@@ -207,6 +207,22 @@ const RequestAwbModal: FC<Props> = ({
                       setService('fancourier')
                     },
                   },
+                  {
+                    label: (
+                      <>
+                        <img
+                          alt="logo"
+                          style={{ width: '20px', paddingRight: '6px' }}
+                          src={download}
+                        />{' '}
+                        Incarca AWB Manual
+                      </>
+                    ),
+                    disabled: false,
+                    onClick: () => {
+                      setService('manual')
+                    },
+                  },
                 ]}
               />
             </div>
@@ -231,7 +247,7 @@ const RequestAwbModal: FC<Props> = ({
                           ? sameday
                           : service === 'fancourier'
                           ? fancourier
-                          : null
+                          : download
                       }
                     />
                   </div>
@@ -249,7 +265,7 @@ const RequestAwbModal: FC<Props> = ({
             })()}
 
             {((): JSX.Element | void => {
-              if (service) {
+              if (service !== 'manual') {
                 return (
                   <>
                     <p>Tip pachet:</p>
@@ -286,6 +302,40 @@ const RequestAwbModal: FC<Props> = ({
                   </>
                 )
               }
+
+              if (service === 'manual') {
+                return (
+                  <>
+                    <p>Curier:</p>
+                    <Dropdown
+                      options={[
+                        { value: 'FanCourier', label: 'FanCourier' },
+                        { value: 'Cargus', label: 'Cargus' },
+                        { value: 'SameDay', label: 'SameDay' },
+                        { value: 'TNT', label: 'TNT' },
+                        { value: 'DHL', label: 'DHL' },
+                        { value: 'GLS', label: 'GLS' },
+                        { value: 'DPD', label: 'DPD' },
+                      ]}
+                      value=""
+                      // onChange={(_: any, v: React.SetStateAction<string>) =>
+                      //   setPackageType(v)
+                      // }
+                    />
+                    <p>AWB :</p>
+                    <Input
+                      placeholder="AWB"
+                      // onChange={(e: React.SetStateAction<any>) =>
+                      //   setInvoiceNum(e.target.value)
+                      // }
+                      // value={invoiceNum}
+                      // required
+                    />
+                    <p>Track URL :</p>
+                    <Input placeholder="Track URL" />
+                  </>
+                )
+              }
             })()}
 
             <br />
@@ -297,6 +347,7 @@ const RequestAwbModal: FC<Props> = ({
                 zIndex={999999}
                 options={[
                   {
+                    disabled: true,
                     label: (
                       <>
                         <img
@@ -348,7 +399,19 @@ const RequestAwbModal: FC<Props> = ({
             </div>
 
             {((): JSX.Element | void => {
-              if (courier) {
+              if (courier === 'smartbill') {
+                return (
+                  <div className="pa7">
+                    <img
+                      alt="logo"
+                      style={{ width: '100px', marginTop: '40px' }}
+                      src={smartbill}
+                    />
+                  </div>
+                )
+              }
+
+              if (courier === 'manual') {
                 return (
                   <>
                     <span>
