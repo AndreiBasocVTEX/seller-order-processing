@@ -2,11 +2,11 @@ import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type { VtexAuthData } from '../types/VtexAuthData'
+import type { ITrackAwbInfoResponse } from '../types/orderApi'
 import type {
   ITrackAwbInfoPayload,
-  ITrackAwbInfoResponse,
-  IVtexInvoiceRequest,
-} from '../types/orderApi'
+  SendInvoiceInfoResponse,
+} from '../types/carrier-client'
 
 export default class OrderApi extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -35,7 +35,7 @@ export default class OrderApi extends ExternalClient {
 
   public async sendInvoiceInfo(
     vtexAuthData: VtexAuthData,
-    body: IVtexInvoiceRequest
+    body: SendInvoiceInfoResponse
   ): Promise<unknown> {
     const { orderId } = body
 
@@ -51,7 +51,9 @@ export default class OrderApi extends ExternalClient {
     payload,
     vtexAuthData,
     pathParams,
-  }: ITrackAwbInfoPayload): Promise<ITrackAwbInfoResponse> {
+  }: ITrackAwbInfoPayload & {
+    vtexAuthData: VtexAuthData
+  }): Promise<ITrackAwbInfoResponse> {
     const { orderId, invoiceNumber } = pathParams
 
     return this.http.put(

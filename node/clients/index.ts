@@ -1,11 +1,11 @@
 import { IOClients } from '@vtex/api'
 
-import Cargus from './cargus'
+import Cargus from './carriers/cargus'
 import Carrier from './carrier'
-import Fancourier from './fancourier'
-import Innoship from './innoship'
+import Fancourier from './carriers/fancourier'
+import Innoship from './carriers/innoship'
 import OrderApi from './orderApi'
-import Sameday from './sameday'
+import Sameday from './carriers/sameday'
 import Status from './status'
 
 // Extend the default IOClients implementation with our own custom clients.

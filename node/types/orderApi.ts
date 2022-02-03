@@ -1,5 +1,3 @@
-import type { VtexAuthData } from './VtexAuthData'
-
 export type IVtexOrder = any
 export type Item = any
 
@@ -15,31 +13,6 @@ export interface IVtexInvoiceData {
   type: string
   weight?: number
   numberOfParcels?: number
-}
-
-export interface IVtexInvoiceRequest {
-  issuanceDate: string
-  invoiceNumber: string
-  trackingNumber: string
-  trackingUrl?: string
-  invoiceValue: string
-  type: string
-  courier?: string
-  orderId: string
-  items: Item[]
-}
-
-export interface ITrackAwbInfoPayload {
-  vtexAuthData: VtexAuthData
-  pathParams: {
-    orderId: string
-    invoiceNumber: string
-  }
-  payload: {
-    isDelivered: boolean
-    deliveredDate?: string
-    events?: VtexEvent[]
-  }
 }
 
 export interface VtexEvent {

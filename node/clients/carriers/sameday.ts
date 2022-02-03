@@ -1,28 +1,28 @@
-import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { VtexAuthData } from '../types/VtexAuthData'
-import type OrderApi from './orderApi'
 import type {
   IAuthDataSameday,
   ISamedayAwbPayload,
   ISamedayAwbResponse,
   ISamedayTrackAWBResponse,
-} from '../types/sameday'
+} from '../../types/sameday'
 import {
   pickupServiceId,
   samedayConstants,
   selectedPickup,
-} from '../utils/samedayConstants'
+} from '../../utils/samedayConstants'
 import type {
   Item,
-  ITrackAwbInfoPayload,
   IVtexInvoiceData,
-  IVtexInvoiceRequest,
   IVtexOrder,
   VtexEvent,
-} from '../types/orderApi'
-import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
+} from '../../types/orderApi'
+import { CarrierClient } from '../../types/carrier-client'
+import type {
+  GetAWBInfoParams,
+  IBodyForRequestAwb,
+  PrintAWBParams,
+} from '../../types/carrier-client'
 
 function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {
@@ -140,7 +140,7 @@ function createOrderPayload(
   return samedayPayload
 }
 
-export default class Sameday extends ExternalClient {
+export default class Sameday extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     // URL for demo environment
     super('https://sameday-api.demo.zitec.com', ctx, {
@@ -189,28 +189,18 @@ export default class Sameday extends ExternalClient {
     return county.id
   }
 
-  private async requestAwbFromSameday(
-    bodyForRequestAwb: IBodyForRequestAwb
-  ): Promise<ISamedayAwbResponse> {
-    const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
-
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
+  protected async requestAWB({
+    settings,
+    invoiceData,
+    order,
+  }: IBodyForRequestAwb): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
-    const vtexOrder: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
     const countyId = await this.getCountyId(
       token,
-      vtexOrder.shippingData.address.state
+      order.shippingData.address.state
     )
 
-    const body = createOrderPayload(vtexOrder, countyId, invoiceData)
+    const body = createOrderPayload(order, countyId, invoiceData)
 
     return this.http.post('/api/awb', body, {
       headers: {
@@ -219,93 +209,51 @@ export default class Sameday extends ExternalClient {
     })
   }
 
-  public async printAwbFromSameday(
-    settings: IOContext['settings'],
-    awbTrackingNumber: string
-  ): Promise<unknown> {
+  public async printAWB({
+    settings,
+    payload,
+  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
 
-    return this.http.getStream(`/api/awb/download/${awbTrackingNumber}/A4`, {
-      headers: {
-        'X-AUTH-TOKEN': token,
-      },
-    })
+    return this.http.getStream(
+      `/api/awb/download/${payload.awbTrackingNumber}/A4`,
+      {
+        headers: {
+          'X-AUTH-TOKEN': token,
+        },
+      }
+    )
   }
 
-  // eslint-disable-next-line max-params
-  public async sendInvoiceInfoSameday(
-    orderApi: OrderApi,
-    settings: IOContext['settings'],
-    orderId: string,
+  public async requestAWBForInvoice({
+    order,
+    settings,
+    invoiceData,
+  }: {
+    order: IVtexOrder
+    settings: IOContext['settings']
     invoiceData: IVtexInvoiceData
-  ) {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const bodyForRequestAwb = {
-      orderApi,
+  }) {
+    const { awbNumber: trackingNumber } = await this.requestAWB({
       settings,
-      orderId,
+      order,
       invoiceData,
-    }
-
-    const { awbNumber: trackingNumber } = await this.requestAwbFromSameday(
-      bodyForRequestAwb
-    )
-
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
+    })
 
     const { items } = order
 
-    const body: IVtexInvoiceRequest = {
-      ...invoiceData,
-      orderId,
+    return {
+      orderId: order.orderId,
       trackingNumber,
       items,
       courier: 'Sameday',
     }
-
-    const invoiceInfo = await orderApi.sendInvoiceInfo(vtexAuthData, body)
-
-    return {
-      invoiceInfo,
-      updatedItems: {
-        orderId,
-        trackingNumber,
-        items,
-        courier: body.courier,
-        // URL doesn't show data. Probably, because of using Sameday demo API
-        // trackingUrl: `https://sameday.ro/#awb=${trackingNumber}`,
-      },
-    }
   }
 
-  public async getAWBInfo({
-    settings,
-    orderApi,
-    orderId,
-  }: {
-    settings: IOContext['settings']
-    orderApi: OrderApi
-    orderId: string
-  }): Promise<unknown> {
+  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
     const { token } = await this.getAuthToken(settings)
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
 
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
-    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
     const packageItem = order?.packageAttachment?.packages?.pop()
     const trackingNumber = packageItem?.trackingNumber
 
@@ -345,26 +293,15 @@ export default class Sameday extends ExternalClient {
       isDelivered = expeditionSummary.delivered
     }
 
-    const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
-      vtexAuthData,
+    return {
       pathParams: {
-        orderId,
+        orderId: order.orderId,
         invoiceNumber,
       },
       payload: {
         isDelivered,
         events: trackingEvents,
       },
-    }
-
-    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
-      updateTrackingInfoPayload
-    )
-
-    return {
-      vtexResponse: trackAwbInfoVtexRes,
-      isDelivered,
-      trackingEvents,
     }
   }
 }

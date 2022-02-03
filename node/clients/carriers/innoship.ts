@@ -1,27 +1,27 @@
-import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type OrderApi from './orderApi'
-import type { VtexAuthData } from '../types/VtexAuthData'
 import type {
   Item,
-  ITrackAwbInfoPayload,
   IVtexInvoiceData,
-  IVtexInvoiceRequest,
   IVtexOrder,
   VtexEvent,
-} from '../types/orderApi'
+} from '../../types/orderApi'
 import {
   awbContent,
   awbSourceChannel,
   constants,
   defaultCountryCode,
-} from '../utils/fancourierConstants'
+} from '../../utils/fancourierConstants'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,
-} from '../types/innoship'
-import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
+} from '../../types/innoship'
+import type {
+  GetAWBInfoParams,
+  IBodyForRequestAwb,
+  PrintAWBParams,
+} from '../../types/carrier-client'
+import { CarrierClient } from '../../types/carrier-client'
 
 function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {
@@ -57,7 +57,7 @@ function createOrderPayload(
   })
 
   // TODO interface for InnoshipPayload
-  const innoshipPayload = {
+  return {
     serviceId: 1,
     shipmentDate: new Date().toISOString(),
     addressFrom: null,
@@ -91,11 +91,9 @@ function createOrderPayload(
       bankRepaymentAmount: payment,
     },
   }
-
-  return innoshipPayload
 }
 
-export default class Innoship extends ExternalClient {
+export default class Innoship extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://api.innoship.io/api', ctx, {
       ...options,
@@ -108,13 +106,13 @@ export default class Innoship extends ExternalClient {
     })
   }
 
-  public async printAwbFromInnoship(
-    settings: IOContext['settings'],
-    data: string
-  ) {
-    const [courierId, awbTrackingNumber] = data.split(':')
+  public async printAWB({
+    settings,
+    payload,
+  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+    const [courierId, awbTrackingNumber] = payload.awbTrackingNumber.split(':')
 
-    const response = this.http.get(
+    return this.http.get(
       `/Label/by-courier/${courierId}/awb/${awbTrackingNumber}?type=PDF&format=A4&useFile=false&api-version=1.0`,
       {
         headers: {
@@ -123,24 +121,16 @@ export default class Innoship extends ExternalClient {
         },
       }
     )
-
-    return response
   }
 
-  private async requestAwbFromInnoship(
-    bodyForRequestAwb: IBodyForRequestAwb
-  ): Promise<IInnoshipAwbResponse> {
-    const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const vtexOrder = await orderApi.getVtexOrderData(vtexAuthData, orderId)
-
+  protected async requestAWB({
+    settings,
+    invoiceData,
+    order,
+  }: IBodyForRequestAwb): Promise<IInnoshipAwbResponse> {
     const warehouseId = settings.innoship__warehouseId
 
-    const body = createOrderPayload(vtexOrder, warehouseId, invoiceData)
+    const body = createOrderPayload(order, warehouseId, invoiceData)
 
     return this.http.post('/Order?api-version=1.0', body, {
       headers: {
@@ -150,28 +140,20 @@ export default class Innoship extends ExternalClient {
     })
   }
 
-  // eslint-disable-next-line max-params
-  public async sendInvoiceInfoInnoship(
-    orderApi: OrderApi,
-    settings: IOContext['settings'],
-    orderId: string,
+  public async requestAWBForInvoice({
+    order,
+    settings,
+    invoiceData,
+  }: {
+    order: IVtexOrder
+    settings: IOContext['settings']
     invoiceData: IVtexInvoiceData
-  ) {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const bodyForRequestAwb = {
-      orderApi,
+  }) {
+    const awbInfo: IInnoshipAwbResponse = await this.requestAWB({
       settings,
-      orderId,
+      order,
       invoiceData,
-    }
-
-    const awbInfo: IInnoshipAwbResponse = await this.requestAwbFromInnoship(
-      bodyForRequestAwb
-    )
+    })
 
     const {
       courierShipmentId: trackingNumber,
@@ -179,56 +161,19 @@ export default class Innoship extends ExternalClient {
       courier: courierId,
     } = awbInfo
 
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
     const { items } = order
 
-    const body: IVtexInvoiceRequest = {
-      ...invoiceData,
-      orderId,
+    return {
+      orderId: order.orderId,
       trackingNumber: `${courierId}:${trackingNumber}`,
       trackingUrl,
       items,
       courier: 'Innoship',
     }
-
-    const invoiceInfo = await orderApi.sendInvoiceInfo(vtexAuthData, body)
-
-    return {
-      invoiceInfo,
-      updatedItems: {
-        orderId,
-        trackingNumber: `${courierId}:${trackingNumber}`,
-        items,
-        courier: body.courier,
-        trackingUrl,
-      },
-    }
   }
 
-  public async getAWBInfo({
-    settings,
-    orderApi,
-    orderId,
-  }: {
-    settings: IOContext['settings']
-    orderApi: OrderApi
-    orderId: string
-  }): Promise<unknown> {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
-    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
+    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
     const packageItem = order?.packageAttachment?.packages?.pop()
     const trackingInfo = packageItem?.trackingNumber
 
@@ -272,26 +217,15 @@ export default class Innoship extends ExternalClient {
       isDelivered = trackingHistory.some((event) => event.isFinalStatus)
     }
 
-    const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
-      vtexAuthData,
+    return {
       pathParams: {
-        orderId,
+        orderId: order.orderId,
         invoiceNumber,
       },
       payload: {
         isDelivered,
         events: trackingEvents,
       },
-    }
-
-    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
-      updateTrackingInfoPayload
-    )
-
-    return {
-      vtexResponse: trackAwbInfoVtexRes,
-      isDelivered,
-      trackingEvents,
     }
   }
 }

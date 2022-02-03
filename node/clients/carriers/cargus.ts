@@ -1,4 +1,3 @@
-import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
@@ -6,23 +5,24 @@ import type {
   ICargusAwbPayload,
   ICargusAwbResponse,
   ICargusTrackAwbResponse,
-} from '../types/cargus'
-import type { VtexAuthData } from '../types/VtexAuthData'
-import type OrderApi from './orderApi'
+} from '../../types/cargus'
 import type {
   Item,
   IVtexInvoiceData,
-  IVtexInvoiceRequest,
   IVtexOrder,
-  ITrackAwbInfoPayload,
   VtexEvent,
-} from '../types/orderApi'
+} from '../../types/orderApi'
 import {
   cargusConstants,
   defaultEnvelopeCount,
   shipmentPaymentMethod,
-} from '../utils/cargusConstants'
-import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
+} from '../../utils/cargusConstants'
+import type {
+  GetAWBInfoParams,
+  IBodyForRequestAwb,
+  PrintAWBParams,
+} from '../../types/carrier-client'
+import { CarrierClient } from '../../types/carrier-client'
 
 function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {
@@ -115,7 +115,7 @@ function createOrderPayload(
     locality = address.city
   }
 
-  const cargusPayload = {
+  return {
     DeliveryPudoPoint: null,
     SenderClientId: null,
     TertiaryClientId: null,
@@ -142,11 +142,9 @@ function createOrderPayload(
     CustomString: order.orderId,
     ParcelCodes: parcels,
   }
-
-  return cargusPayload
 }
 
-export default class Cargus extends ExternalClient {
+export default class Cargus extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://urgentcargus.azure-api.net/api', ctx, {
       ...options,
@@ -174,20 +172,17 @@ export default class Cargus extends ExternalClient {
     })
   }
 
-  private async requestAwbFromCargus(
-    bodyForRequestAwb: IBodyForRequestAwb
-  ): Promise<ICargusAwbResponse[]> {
-    const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const { senderLocationId } = settings
-
+  protected async requestAWB({
+    settings,
+    invoiceData,
+    order,
+  }: IBodyForRequestAwb): Promise<ICargusAwbResponse[]> {
     const token = await this.getBearerToken(settings)
-    const vtexOrder = await orderApi.getVtexOrderData(vtexAuthData, orderId)
-    const body = createOrderPayload(vtexOrder, senderLocationId, invoiceData)
+    const body = createOrderPayload(
+      order,
+      settings.senderLocationId,
+      invoiceData
+    )
 
     return this.http.post('/Awbs/WithGetAwb', body, {
       headers: {
@@ -197,14 +192,14 @@ export default class Cargus extends ExternalClient {
     })
   }
 
-  public async printAwbFromCargus(
-    settings: IOContext['settings'],
-    awbTrackingNumber: string
-  ): Promise<unknown> {
+  public async printAWB({
+    settings,
+    payload,
+  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
     const token = await this.getBearerToken(settings)
 
     return this.http.getStream(
-      `/PDF/AwbDocuments?Token=${token}&barCodes=${awbTrackingNumber}&format=0`,
+      `/PDF/AwbDocuments?Token=${token}&barCodes=${payload.awbTrackingNumber}&format=0`,
       {
         headers: {
           'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
@@ -213,80 +208,36 @@ export default class Cargus extends ExternalClient {
     )
   }
 
-  // eslint-disable-next-line max-params
-  public async sendInvoiceInfoCargus(
-    orderApi: OrderApi,
-    settings: IOContext['settings'],
-    orderId: string,
+  public async requestAWBForInvoice({
+    order,
+    settings,
+    invoiceData,
+  }: {
+    order: IVtexOrder
+    settings: IOContext['settings']
     invoiceData: IVtexInvoiceData
-  ) {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const bodyForRequestAwb = {
-      orderApi,
+  }) {
+    const awbInfo: ICargusAwbResponse[] = await this.requestAWB({
+      order,
       settings,
-      orderId,
       invoiceData,
-    }
-
-    const awbInfo: ICargusAwbResponse[] = await this.requestAwbFromCargus(
-      bodyForRequestAwb
-    )
-
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
+    })
 
     const { items } = order
     const trackingNumber = awbInfo?.[0]?.BarCode
 
-    const body: IVtexInvoiceRequest = {
-      ...invoiceData,
-      orderId,
+    return {
+      orderId: order.orderId,
       trackingNumber,
       items,
       courier: 'Cargus',
-    }
-
-    const invoiceInfo = await orderApi.sendInvoiceInfo(vtexAuthData, body)
-
-    return {
-      invoiceInfo,
-      updatedItems: {
-        orderId,
-        trackingNumber,
-        items,
-        courier: body.courier,
-        // Can't find tracking number
-        // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
-      },
+      // Can't find tracking number
+      // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
     }
   }
 
-  public async getAWBInfo({
-    settings,
-    orderApi,
-    orderId,
-  }: {
-    settings: IOContext['settings']
-    orderApi: OrderApi
-    orderId: string
-  }): Promise<unknown> {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
-    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
+    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
     const packageItem = order?.packageAttachment?.packages?.pop()
     const trackingNumber = packageItem?.trackingNumber
     const invoiceNumber = packageItem?.invoiceNumber
@@ -300,7 +251,7 @@ export default class Cargus extends ExternalClient {
       }
     )
 
-    let trackingEvents: VtexEvent[] = []
+    let trackingEvents: VtexEvent[] | undefined
     let isDelivered = false
 
     if (
@@ -323,27 +274,16 @@ export default class Cargus extends ExternalClient {
       isDelivered = trackingHistory.some((event) => event.EventId === 21)
     }
 
-    const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
-      vtexAuthData,
+    return {
       pathParams: {
-        orderId,
+        orderId: order.orderId,
         invoiceNumber,
       },
       payload: {
         isDelivered,
         // We are unable to update events field therefore we are not sending empty array
-        events: trackingEvents.length ? trackingEvents : undefined,
+        events: trackingEvents,
       },
-    }
-
-    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
-      updateTrackingInfoPayload
-    )
-
-    return {
-      vtexResponse: trackAwbInfoVtexRes,
-      isDelivered,
-      trackingEvents,
     }
   }
 }

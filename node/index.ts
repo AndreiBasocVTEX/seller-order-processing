@@ -4,21 +4,12 @@ import { LRUCache, method, Service } from '@vtex/api'
 import { Clients } from './clients'
 import { status } from './middlewares/status'
 import { getVtexOrderData } from './middlewares/orderApi'
+import { getServicesFromFancourier } from './middlewares/fancourier'
 import {
-  getServicesFromFancourier,
-  printAwbFromFancourier,
-  sendInvoiceInfoFancourier,
-} from './middlewares/fancourier'
-import { printAwbFromCargus, sendInvoiceInfoCargus } from './middlewares/cargus'
-import {
-  printAwbFromSameday,
-  sendInvoiceInfoSameday,
-} from './middlewares/sameday'
-import { updateAWBInfo } from './middlewares/carrier'
-import {
-  printAwbFromInnoship,
-  sendInvoiceInfoInnoship,
-} from './middlewares/innoship'
+  printAWBMiddleware,
+  sendInvoiceInfoMiddleware,
+  updateAWBInfoMiddleware,
+} from './middlewares/carrier.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -64,7 +55,10 @@ export default new Service({
       GET: [status],
     }),
     updateAWBInfo: method({
-      PUT: [updateAWBInfo],
+      PUT: [updateAWBInfoMiddleware],
+    }),
+    sendInvoiceInfo: method({
+      POST: [sendInvoiceInfoMiddleware],
     }),
     getVtexOrderData: method({
       GET: [getVtexOrderData],
@@ -72,29 +66,8 @@ export default new Service({
     getServicesFromFancourier: method({
       GET: [getServicesFromFancourier],
     }),
-    printAwbFromFancourier: method({
-      GET: [printAwbFromFancourier],
-    }),
-    printAwbFromCargus: method({
-      GET: [printAwbFromCargus],
-    }),
-    sendInvoiceInfoCargus: method({
-      POST: [sendInvoiceInfoCargus],
-    }),
-    sendInvoiceInfoSameday: method({
-      POST: [sendInvoiceInfoSameday],
-    }),
-    sendInvoiceInfoFancourier: method({
-      POST: [sendInvoiceInfoFancourier],
-    }),
-    printAwbFromSameday: method({
-      GET: [printAwbFromSameday],
-    }),
-    sendInvoiceInfoInnoship: method({
-      POST: [sendInvoiceInfoInnoship],
-    }),
-    printAwbFromInnoship: method({
-      GET: [printAwbFromInnoship],
+    printAWB: method({
+      GET: [printAWBMiddleware],
     }),
   },
 })

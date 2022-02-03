@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
-import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 import FormData from 'form-data'
 import ObjectsToCsv from 'objects-to-csv'
@@ -12,23 +11,23 @@ import {
   defaultEnvelopeCount,
   pickupServiceId,
   shipmentPaymentMethod,
-} from '../utils/fancourierConstants'
+} from '../../utils/fancourierConstants'
 import type {
   IAuthDataFancourier,
   IFancourierAwbPayload,
-} from '../types/fancourier'
-import type OrderApi from './orderApi'
-import type { VtexAuthData } from '../types/VtexAuthData'
+} from '../../types/fancourier'
 import type {
   Item,
-  ITrackAwbInfoPayload,
   IVtexInvoiceData,
-  IVtexInvoiceRequest,
   IVtexOrder,
   VtexEvent,
-} from '../types/orderApi'
-import type { IPrintPDFRequest } from '../types/printPDFRequest'
-import type { IBodyForRequestAwb } from '../types/bodyForRequestAwb'
+} from '../../types/orderApi'
+import type {
+  GetAWBInfoParams,
+  IBodyForRequestAwb,
+  PrintAWBParams,
+} from '../../types/carrier-client'
+import { CarrierClient } from '../../types/carrier-client'
 
 function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {
@@ -53,6 +52,9 @@ function getTotalDiscount(order: IVtexOrder) {
   )
 }
 
+/**
+ * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
+ */
 function createFancourierOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
@@ -154,7 +156,7 @@ type FormDataAcceptedTypes =
 
 type FanCourierRequestPayloadType = { [key: string]: FormDataAcceptedTypes }
 
-export default class Fancourier extends ExternalClient {
+export default class Fancourier extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('', ctx, options)
   }
@@ -172,65 +174,51 @@ export default class Fancourier extends ExternalClient {
     )
   }
 
-  // eslint-disable-next-line max-params
-  private async requestAwbFromFancourier(
-    bodyForRequestAwb: IBodyForRequestAwb
-  ): Promise<{
+  protected async requestAWB({
+    settings,
+    invoiceData,
+    order,
+  }: IBodyForRequestAwb): Promise<{
     _: string
     lineNumber: string
     rate: string
     trackingNumber: string
   }> {
-    const { orderApi, settings, orderId, invoiceData } = bodyForRequestAwb
-
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const formData: IAuthDataFancourier = {
-      client_id: settings.fancourier__clientId,
-      user_pass: settings.fancourier__password,
-      username: settings.fancourier__username,
-    }
-
-    const warehouseId = settings.fancourier__warehouseId
-
-    const vtexOrder = await orderApi.getVtexOrderData(vtexAuthData, orderId)
-
-    const order = createFancourierOrderPayload(
-      vtexOrder,
-      warehouseId,
+    const fancourierOrderPayload = createFancourierOrderPayload(
+      order,
+      settings.fancourier__warehouseId,
       invoiceData
     )
 
     // Order of the keys in fileData is important because of the generation column flow for the csv-object
     const fileData = [
       {
-        'Type of service': order?.service,
+        'Type of service': fancourierOrderPayload?.service,
         Bank: '',
         IBAN: '',
-        'Nr. of envelopes': order?.content?.envelopeCount,
-        'Nr. of parcels': order?.content?.parcelsCount,
-        Weight: order?.content?.totalWeight,
+        'Nr. of envelopes': fancourierOrderPayload?.content?.envelopeCount,
+        'Nr. of parcels': fancourierOrderPayload?.content?.parcelsCount,
+        Weight: fancourierOrderPayload?.content?.totalWeight,
         'Payment of shipment': 'destinatar',
-        Reimbursement: order?.extra?.bankRepaymentAmount,
+        Reimbursement: fancourierOrderPayload?.extra?.bankRepaymentAmount,
         'Reimbursement transport payment': 'destinatar',
-        'Declared Value': order?.extra?.declaredValue,
-        'Contact person': order?.addressTo?.name,
+        'Declared Value': fancourierOrderPayload?.extra?.declaredValue,
+        'Contact person': fancourierOrderPayload?.addressTo?.name,
         Observations: '',
-        Contains: order?.content?.contents,
-        'Recipient name': order?.addressTo?.name,
-        'Contact person 1': order?.addressTo?.name,
-        Phone: order?.addressTo?.phone,
+        Contains: fancourierOrderPayload?.content?.contents,
+        'Recipient name': fancourierOrderPayload?.addressTo?.name,
+        'Contact person 1': fancourierOrderPayload?.addressTo?.name,
+        Phone: fancourierOrderPayload?.addressTo?.phone,
         Fax: '',
-        Email: order?.addressTo?.email,
-        County: order?.addressTo?.countyName,
-        Town: order?.addressTo?.localityName.replace(/\(.*\)/, '').trim(),
-        Street: order?.addressTo?.street,
-        Number: order?.addressTo?.number,
-        'Postal Code': order?.addressTo?.postalCode,
-        'Block(building)': order?.addressTo?.reference,
+        Email: fancourierOrderPayload?.addressTo?.email,
+        County: fancourierOrderPayload?.addressTo?.countyName,
+        Town: fancourierOrderPayload?.addressTo?.localityName
+          .replace(/\(.*\)/, '')
+          .trim(),
+        Street: fancourierOrderPayload?.addressTo?.street,
+        Number: fancourierOrderPayload?.addressTo?.number,
+        'Postal Code': fancourierOrderPayload?.addressTo?.postalCode,
+        'Block(building)': fancourierOrderPayload?.addressTo?.reference,
         Entrance: '',
         Floor: '',
         Flat: '',
@@ -246,7 +234,9 @@ export default class Fancourier extends ExternalClient {
     const res = await this.requestToFanCourier(
       'import_awb_integrat.php',
       {
-        ...formData,
+        client_id: settings.fancourier__clientId,
+        user_pass: settings.fancourier__password,
+        username: settings.fancourier__username,
         fisier: {
           isFile: true,
           filename: 'fisier.csv',
@@ -258,6 +248,7 @@ export default class Fancourier extends ExternalClient {
     )
 
     if (typeof res !== 'string') {
+      // eslint-disable-next-line no-console
       console.log(
         'Fancourier validation failed, please check if the sent fileData was right.',
         JSON.stringify(fileData, null, 2)
@@ -279,16 +270,18 @@ export default class Fancourier extends ExternalClient {
     }
   }
 
-  public async printAwbFromFancourier(
-    formData: IAuthDataFancourier,
-    req: IPrintPDFRequest
-  ): Promise<unknown> {
-    const { awbTrackingNumber } = req
+  public async printAWB({
+    settings,
+    payload,
+  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+    const { awbTrackingNumber } = payload
 
     return this.requestToFanCourier(
       'view_awb_integrat_pdf.php',
       {
-        ...formData,
+        client_id: settings.fancourier__clientId,
+        user_pass: settings.fancourier__password,
+        username: settings.fancourier__username,
         nr: awbTrackingNumber,
         page: 'A4',
       },
@@ -296,84 +289,40 @@ export default class Fancourier extends ExternalClient {
     )
   }
 
-  // eslint-disable-next-line max-params
-  public async sendInvoiceInfoFancourier(
-    orderApi: OrderApi,
-    settings: IOContext['settings'],
-    orderId: string,
+  public async requestAWBForInvoice({
+    order,
+    settings,
+    invoiceData,
+  }: {
+    order: IVtexOrder
+    settings: IOContext['settings']
     invoiceData: IVtexInvoiceData
-  ) {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
-    const bodyForRequestAwb = {
-      orderApi,
+  }) {
+    const { trackingNumber } = await this.requestAWB({
       settings,
-      orderId,
+      order,
       invoiceData,
-    }
-
-    const { trackingNumber } = await this.requestAwbFromFancourier(
-      bodyForRequestAwb
-    )
-
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
+    })
 
     const { items } = order
 
-    const body: IVtexInvoiceRequest = {
-      ...invoiceData,
-      orderId,
+    return {
+      orderId: order.orderId,
       trackingNumber,
       items,
       courier: 'Fancourier',
       trackingUrl: `https://www.fancourier.ro/awb-tracking/?metoda=tracking&awb=${trackingNumber}`,
     }
-
-    const invoiceInfo = await orderApi.sendInvoiceInfo(vtexAuthData, body)
-
-    return {
-      invoiceInfo,
-      updatedItems: {
-        orderId,
-        trackingNumber,
-        items,
-        courier: body.courier,
-      },
-    }
   }
 
-  public async getAWBInfo({
-    settings,
-    orderApi,
-    orderId,
-  }: {
-    settings: IOContext['settings']
-    orderApi: OrderApi
-    orderId: string
-  }): Promise<unknown> {
-    const vtexAuthData: VtexAuthData = {
-      vtex_appKey: settings.vtex_appKey,
-      vtex_appToken: settings.vtex_appToken,
-    }
-
+  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
     const formData: IAuthDataFancourier = {
       client_id: settings.fancourier__clientId,
       user_pass: settings.fancourier__password,
       username: settings.fancourier__username,
     }
 
-    const order: IVtexOrder = await orderApi.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
-    // TODO Change to the first element of an array after we will have only one packageAttachment per order
+    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
     const packageItem = order?.packageAttachment?.packages?.pop()
     const trackingNumber = packageItem?.trackingNumber
 
@@ -407,26 +356,15 @@ export default class Fancourier extends ExternalClient {
       isDelivered = trackingHistory.some((event) => event.split(',')[0] === '2')
     }
 
-    const updateTrackingInfoPayload: ITrackAwbInfoPayload = {
-      vtexAuthData,
+    return {
       pathParams: {
-        orderId,
+        orderId: order.orderId,
         invoiceNumber,
       },
       payload: {
         isDelivered,
         events: trackingEvents,
       },
-    }
-
-    const trackAwbInfoVtexRes = await orderApi.trackAWBInfo(
-      updateTrackingInfoPayload
-    )
-
-    return {
-      trackAwbInfoVtexRes,
-      isDelivered,
-      trackingEvents,
     }
   }
 
