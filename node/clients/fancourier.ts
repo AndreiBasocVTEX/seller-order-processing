@@ -389,7 +389,7 @@ export default class Fancourier extends ExternalClient {
       { responseType: 'text' }
     )) as string
 
-    const trackingHistory = updatedAwbInfo.split('\n')
+    const trackingHistory = updatedAwbInfo.split('\n').filter(Boolean)
 
     let trackingEvents: VtexEvent[] = []
     let isDelivered = false
