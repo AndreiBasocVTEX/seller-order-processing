@@ -6,6 +6,7 @@ import OrderTable from './components/OrderTable'
 import type { OrderDetailsData } from '../typings/normalizedOrder'
 import RequestAwbModal from '../requestAwbModal'
 import type { IOrder } from '../typings/order'
+import AwbStatus from '../components/AwbStatus'
 
 interface OrderProps {
   orderData: OrderDetailsData
@@ -124,7 +125,7 @@ const OrderDetail: FC<OrderProps> = ({ orderData, rawOrderData }) => {
                 Nume: {data?.shippingAddress.receiverName}
               </div>
               <div className="mt2">
-                Telefon: {data?.shippingAddress.phone || data?.clientData.phone}
+                Telefon: {data?.shippingAddress.phone ?? data?.clientData.phone}
               </div>
               <div className="mt2">Adresa: {data?.shippingAddress.street}</div>
               <div className="mt2">
@@ -137,9 +138,18 @@ const OrderDetail: FC<OrderProps> = ({ orderData, rawOrderData }) => {
               <div className="mv6">
                 <Divider />
               </div>
-              <h3 className="t-heading-3">AWB Livrare</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="t-heading-3">AWB Livrare</h3>
+                {data?.packageData?.courier && data?.marketPlaceOrderId && (
+                  <AwbStatus
+                    courier={data?.packageData?.courier}
+                    orderId={data?.orderId}
+                    size="large"
+                  />
+                )}
+              </div>
               <div className="mt2">
-                Curier: {data?.packageData?.courier || 'Lipsa date'}
+                Curier: {data?.packageData?.courier ?? 'Lipsa date'}
               </div>
               <div className="mt2">
                 AWB: {data?.packageData?.trackingNumber}
