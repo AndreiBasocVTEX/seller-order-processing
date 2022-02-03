@@ -25,15 +25,15 @@ import RequestAwbModal from '../requestAwbModal'
 // import sameday from '../logos/sameday.png'
 import '../src/style.css'
 import type { IOrder } from '../typings/order'
+import AwbStatus from '../components/AwbStatus'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Save = require('@vtex/styleguide/lib/icon/Save').default
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const VisibilityOn = require('@vtex/styleguide/lib/icon/VisibilityOn').default
 
 interface ITrackingObj {
   [orderId: string]: string
 }
+
 interface IOrderAwb {
   orderId: string
   orderValue: string
@@ -41,6 +41,7 @@ interface IOrderAwb {
   payMethod?: any
   invoiceNumber?: string
 }
+
 const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
 
@@ -551,24 +552,24 @@ const OrdersList: FC = () => {
           title: 'AWB Status',
           width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
+            const rowAwbInfo = orderAwb.find(
+              (order) => order?.orderId === rowData.orderId
+            )
+
+            if (rowAwbInfo?.courier) {
+              return (
+                <AwbStatus
+                  courier={rowAwbInfo.courier}
+                  orderId={rowAwbInfo.orderId}
+                  size="small"
+                />
+              )
+            }
+
             return (
-              <>
-                <Button
-                  variation="secondary"
-                  block
-                  disabled={rowData.status === 'canceled'}
-                  onClick={() => {
-                    // console.log('333333', rowData.status)
-                    printAwb(rowData.orderId)
-                  }}
-                >
-                  <span style={{ paddingRight: '10px' }}>
-                    {' '}
-                    <VisibilityOn />
-                  </span>
-                  {'Update Status'}
-                </Button>
-              </>
+              <div className="br-pill bg-muted-2 w-100 tc white-90 truncate fw4 ph4 pv2">
+                AWB nu a fost generat
+              </div>
             )
           },
         },

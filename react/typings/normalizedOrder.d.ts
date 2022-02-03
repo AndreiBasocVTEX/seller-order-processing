@@ -60,6 +60,7 @@ export interface OrderDetailsData {
   }
   items: [OrderItem]
   orderDate: string
+  orderId: string
   orderTotals: {
     [key: string]: number
   }
