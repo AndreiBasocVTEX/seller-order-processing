@@ -5,7 +5,7 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import type { ITrackAwbInfoResponse } from '../types/orderApi'
 import type {
   ITrackAwbInfoPayload,
-  SendInvoiceInfoResponse,
+  RequestAWBForInvoiceResponse,
 } from '../types/carrier-client'
 
 export default class OrderApi extends ExternalClient {
@@ -33,9 +33,9 @@ export default class OrderApi extends ExternalClient {
     })
   }
 
-  public async sendInvoiceInfo(
+  public async trackAndInvoice(
     vtexAuthData: VtexAuthData,
-    body: SendInvoiceInfoResponse
+    body: RequestAWBForInvoiceResponse
   ): Promise<unknown> {
     const { orderId } = body
 

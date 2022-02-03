@@ -7,7 +7,7 @@ import type { VtexAuthData } from '../types/VtexAuthData'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
-export async function updateAWBInfoMiddleware(
+export async function updateTrackingStatusMiddleware(
   ctx: Context,
   next: () => Promise<unknown>
 ) {
@@ -72,29 +72,30 @@ export async function updateAWBInfoMiddleware(
   await next()
 }
 
-export async function sendInvoiceInfoMiddleware(
+export async function trackAndInvoiceMiddleware(
   ctx: Context,
   next: () => Promise<unknown>
 ) {
   const {
     vtex: {
       logger,
-      route: {
-        params: { carrierName },
-      },
+      route: { params },
     },
     clients: { orderApi: vtexOrderClient, carrier: carrierClient },
-    query: { orderId },
   } = ctx
 
+  const orderId = params.orderId as string
+
   const invoiceData: IVtexInvoiceData = await json(ctx.req)
+
+  const { invoice, tracking } = invoiceData
 
   try {
     const settings = await getVtexAppSettings(ctx)
 
     const carrier = carrierClient.getCarrierClientByName(
       ctx,
-      carrierName as CarrierValues
+      tracking.provider as CarrierValues
     )
 
     const vtexAuthData: VtexAuthData = {
@@ -102,20 +103,38 @@ export async function sendInvoiceInfoMiddleware(
       vtex_appToken: settings.vtex_appToken,
     }
 
-    const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
+    let trackingInfoPayload: RequestAWBForInvoiceResponse
 
-    const trackingInfoPayload: RequestAWBForInvoiceResponse = await carrier.requestAWBForInvoice(
-      {
+    if (tracking.generate) {
+      const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
+        vtexAuthData,
+        orderId
+      )
+
+      trackingInfoPayload = await carrier.requestAWBForInvoice({
         settings,
         order,
         invoiceData,
+      })
+    } else {
+      trackingInfoPayload = {
+        orderId,
+        courier: tracking.provider,
+        trackingNumber: tracking.params.trackingNumber as string,
+        trackingUrl: tracking.params.trackingUrl ?? '',
       }
-    )
+    }
 
-    const invoiceInfo = await vtexOrderClient.sendInvoiceInfo(
+    if (invoice.provider === 'smartbill') {
+      // add Smartbill integration
+    } else {
+      trackingInfoPayload = {
+        ...trackingInfoPayload,
+        ...invoice.params,
+      }
+    }
+
+    const invoiceInfo = await vtexOrderClient.trackAndInvoice(
       vtexAuthData,
       trackingInfoPayload
     )
@@ -123,12 +142,14 @@ export async function sendInvoiceInfoMiddleware(
     ctx.status = 200
     ctx.body = {
       invoiceInfo,
-      updatedItems: {
+      trackAndInvoiceDetails: {
         orderId,
         trackingNumber: trackingInfoPayload.trackingNumber,
-        items: trackingInfoPayload.items,
-        courier: trackingInfoPayload.courier,
         trackingUrl: trackingInfoPayload.trackingUrl,
+        courier: trackingInfoPayload.courier,
+        invoiceNumber: invoice.params.invoiceNumber,
+        invoiceUrl: invoice.params.invoiceUrl,
+        items: trackingInfoPayload.items,
       },
     }
   } catch (e) {
@@ -141,19 +162,14 @@ export async function sendInvoiceInfoMiddleware(
   await next()
 }
 
-export async function printAWBMiddleware(
+export async function trackingLabelMiddleware(
   ctx: Context,
   next: () => Promise<unknown>
 ) {
   const {
-    vtex: {
-      logger,
-      route: {
-        params: { carrierName },
-      },
-    },
+    vtex: { logger },
     clients: { carrier: carrierClient },
-    query: { awbTrackingNumber },
+    query: { awbTrackingNumber, provider },
   } = ctx
 
   try {
@@ -161,10 +177,10 @@ export async function printAWBMiddleware(
 
     const carrier = carrierClient.getCarrierClientByName(
       ctx,
-      carrierName as CarrierValues
+      provider as CarrierValues
     )
 
-    const pdfData = await carrier.printAWB({
+    const pdfData = await carrier.trackingLabel({
       settings,
       payload: { awbTrackingNumber },
     })

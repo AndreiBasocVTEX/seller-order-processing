@@ -11,7 +11,7 @@ import type {
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
-  PrintAWBParams,
+  TrackingLabelParams,
 } from '../../types/carrier-client'
 import { CarrierClient } from '../../types/carrier-client'
 import { createFancourierOrderPayload } from '../../dto/fancourier-order.dto'
@@ -124,10 +124,10 @@ export default class Fancourier extends CarrierClient {
     }
   }
 
-  public async printAWB({
+  public async trackingLabel({
     settings,
     payload,
-  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
     const { awbTrackingNumber } = payload
 
     return this.requestToFanCourier(

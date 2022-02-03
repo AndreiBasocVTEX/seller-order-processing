@@ -3,11 +3,10 @@ import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
 import { status } from './middlewares/status'
-import { getVtexOrderData } from './middlewares/orderApi'
 import {
-  printAWBMiddleware,
-  sendInvoiceInfoMiddleware,
-  updateAWBInfoMiddleware,
+  trackingLabelMiddleware,
+  trackAndInvoiceMiddleware,
+  updateTrackingStatusMiddleware,
 } from './middlewares/carrier.middleware'
 
 const TIMEOUT_MS = 1000 * 10
@@ -53,17 +52,14 @@ export default new Service({
     status: method({
       GET: [status],
     }),
-    updateAWBInfo: method({
-      PUT: [updateAWBInfoMiddleware],
+    updateTrackingStatus: method({
+      PUT: [updateTrackingStatusMiddleware],
     }),
-    sendInvoiceInfo: method({
-      POST: [sendInvoiceInfoMiddleware],
+    trackAndInvoice: method({
+      POST: [trackAndInvoiceMiddleware],
     }),
-    getVtexOrderData: method({
-      GET: [getVtexOrderData],
-    }),
-    printAWB: method({
-      GET: [printAWBMiddleware],
+    trackingLabel: method({
+      GET: [trackingLabelMiddleware],
     }),
   },
 })

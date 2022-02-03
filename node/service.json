@@ -10,20 +10,16 @@
       "path": "/_v/status/:code",
       "public": true
     },
-    "updateAWBInfo": {
-      "path": "/opa/:carrierName/updateAWBInfo",
+    "updateTrackingStatus": {
+      "path": "/opa/orders/:orderId/update-tracking-status",
       "public": true
     },
-    "sendInvoiceInfo": {
-      "path": "/opa/:carrierName/sendInvoiceInfo",
+    "trackAndInvoice": {
+      "path": "/opa/orders/:orderId/track-and-invoice",
       "public": true
     },
-    "printPDF": {
-      "path": "/opa/:carrierName/printPDF",
-      "public": true
-    },
-    "getVtexOrderData": {
-      "path": "/orderApi/getVtexOrderData/:orderId",
+    "trackingLabel": {
+      "path": "/opa/orders/tracking-label",
       "public": true
     }
   }

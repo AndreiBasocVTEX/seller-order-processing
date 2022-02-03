@@ -1,42 +1,22 @@
 import type { ICargusAwbPayload } from '../types/cargus'
-import type { IVtexOrder, Item, IVtexInvoiceData } from '../types/orderApi'
+import type { IVtexOrder, IVtexInvoiceData } from '../types/orderApi'
 import { cargusConstants } from '../utils/cargusConstants'
 import {
   defaultEnvelopeCount,
   shipmentPaymentMethod,
 } from '../utils/fancourierConstants'
-
-function getTotalWeight(order: IVtexOrder) {
-  return order.items.reduce((weight: number, item: Item) => {
-    return weight + item.additionalInfo.dimension.weight * item.quantity
-  }, 0)
-}
-
-function getTotalDiscount(order: IVtexOrder) {
-  if (!order.paymentData.giftCards.length) {
-    return 0
-  }
-
-  return order.paymentData.transactions[0].payments.reduce(
-    (result: number, item: Item) => {
-      if (item.redemptionCode) {
-        result -= item.value
-      }
-
-      return result
-    },
-    0
-  )
-}
+import { getTotalDiscount, getTotalWeight } from './helpers.dto'
 
 export function createCargusOrderPayload(
   order: IVtexOrder,
   senderLocationId: string,
   invoiceData: IVtexInvoiceData
 ): ICargusAwbPayload {
+  const { params: trackingParams } = invoiceData.tracking
+
   // The selected service does not allow parts weighing more than 31 kg
-  const totalWeight = invoiceData.weight
-    ? invoiceData.weight
+  const totalWeight = trackingParams.weight
+    ? trackingParams.weight
     : getTotalWeight(order)
 
   const totalOrderDiscount = getTotalDiscount(order)
@@ -46,8 +26,8 @@ export function createCargusOrderPayload(
   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   value += totalOrderDiscount
 
-  const numberOfParcels = invoiceData.numberOfParcels
-    ? invoiceData.numberOfParcels
+  const numberOfParcels = trackingParams.numberOfParcels
+    ? trackingParams.numberOfParcels
     : 1
 
   const parcels = []

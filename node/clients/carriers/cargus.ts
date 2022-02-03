@@ -13,7 +13,7 @@ import type {
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
-  PrintAWBParams,
+  TrackingLabelParams,
 } from '../../types/carrier-client'
 import { CarrierClient } from '../../types/carrier-client'
 import { createCargusOrderPayload } from '../../dto/cargus-order.dto'
@@ -67,10 +67,10 @@ export default class Cargus extends CarrierClient {
     })
   }
 
-  public async printAWB({
+  public async trackingLabel({
     settings,
     payload,
-  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
     const token = await this.getBearerToken(settings)
 
     return this.http.getStream(

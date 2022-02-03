@@ -18,6 +18,14 @@ export interface ISamedayAwbPayload {
   thirdPartyPickup: number
 }
 
+export interface ISamedayCountyData {
+  countryId: number
+  country: string
+  id: number
+  name: string
+  code: string
+}
+
 interface Parcel {
   sequenceNo: number
   weight: number

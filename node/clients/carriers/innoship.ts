@@ -1,17 +1,10 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
-  Item,
   IVtexInvoiceData,
   IVtexOrder,
   VtexEvent,
 } from '../../types/orderApi'
-import {
-  awbContent,
-  awbSourceChannel,
-  constants,
-  defaultCountryCode,
-} from '../../utils/fancourierConstants'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,
@@ -19,79 +12,10 @@ import type {
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
-  PrintAWBParams,
+  TrackingLabelParams,
 } from '../../types/carrier-client'
 import { CarrierClient } from '../../types/carrier-client'
-
-function getTotalWeight(order: IVtexOrder) {
-  return order.items.reduce((weight: number, item: Item) => {
-    return weight + item.additionalInfo.dimension.weight * item.quantity
-  }, 0)
-}
-
-function createOrderPayload(
-  order: IVtexOrder,
-  warehouseId: string,
-  invoiceData: IVtexInvoiceData
-) {
-  const totalWeight = invoiceData.weight
-    ? invoiceData.weight
-    : getTotalWeight(order)
-
-  const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const payment = firstDigits ? 0 : order.value / constants.price_multiplier
-  const { address } = order.shippingData
-
-  const numberOfParcels = invoiceData.numberOfParcels
-    ? invoiceData.numberOfParcels
-    : 1
-
-  const parcels = []
-
-  parcels.push({
-    sequenceNo: 1,
-    weight: totalWeight || 1,
-    type: 'Parcel',
-    reference1: 'Parcel 1',
-    size: { width: 1, height: 1, length: 1 },
-  })
-
-  // TODO interface for InnoshipPayload
-  return {
-    serviceId: 1,
-    shipmentDate: new Date().toISOString(),
-    addressFrom: null,
-    addressTo: {
-      name: address.receiverName,
-      contactPerson: address.receiverName,
-      country: defaultCountryCode,
-      countyName: address.state,
-      localityName: address.city,
-      addressText: `${address.street} ${address.number} ${
-        address.neighborhood || ''
-      } ${address.complement || ''} ${address.reference || ''}`,
-      postalCode: address.postalCode,
-      phone: order.clientProfileData.phone,
-      email: order.clientProfileData.email,
-    },
-    payment: 'Sender',
-    content: {
-      envelopeCount: 0,
-      parcelsCount: numberOfParcels,
-      palettesCount: 0,
-      totalWeight,
-      contents: awbContent,
-      parcels,
-    },
-    externalClientLocation: warehouseId,
-    // TODO Remove Date.now(). Needed for testing, Innoship doesn't take the same orderId twice
-    externalOrderId: `${order.orderId}_${Date.now()}`,
-    sourceChannel: awbSourceChannel,
-    extra: {
-      bankRepaymentAmount: payment,
-    },
-  }
-}
+import { createOrderPayload } from '../../dto/sameday-order.dto'
 
 export default class Innoship extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -106,10 +30,10 @@ export default class Innoship extends CarrierClient {
     })
   }
 
-  public async printAWB({
+  public async trackingLabel({
     settings,
     payload,
-  }: PrintAWBParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
     const [courierId, awbTrackingNumber] = payload.awbTrackingNumber.split(':')
 
     return this.http.get(

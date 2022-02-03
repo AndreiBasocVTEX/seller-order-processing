@@ -1,5 +1,5 @@
 import type { IFancourierAwbPayload } from '../types/fancourier'
-import type { IVtexOrder, Item, IVtexInvoiceData } from '../types/orderApi'
+import type { IVtexOrder, IVtexInvoiceData } from '../types/orderApi'
 import {
   defaultCountryCode,
   shipmentPaymentMethod,
@@ -9,29 +9,7 @@ import {
   pickupServiceId,
 } from '../utils/cargusConstants'
 import { constants } from '../utils/fancourierConstants'
-
-function getTotalWeight(order: IVtexOrder) {
-  return order.items.reduce((weight: number, item: Item) => {
-    return weight + item.additionalInfo.dimension.weight * item.quantity
-  }, 0)
-}
-
-function getTotalDiscount(order: IVtexOrder): number {
-  if (!order.paymentData.giftCards.length) {
-    return 0
-  }
-
-  return order.paymentData.transactions[0].payments.reduce(
-    (result: number, item: Item) => {
-      if (item.redemptionCode) {
-        result -= item.value
-      }
-
-      return result
-    },
-    0
-  )
-}
+import { getTotalDiscount, getTotalWeight } from './helpers.dto'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
@@ -41,8 +19,10 @@ export function createFancourierOrderPayload(
   warehouseId: string,
   invoiceData: IVtexInvoiceData
 ): IFancourierAwbPayload {
-  const totalWeight = invoiceData.weight
-    ? invoiceData.weight
+  const { params: trackingParams } = invoiceData.tracking
+
+  const totalWeight = trackingParams.weight
+    ? trackingParams.weight
     : getTotalWeight(order)
 
   const totalDiscount = getTotalDiscount(order)
@@ -54,8 +34,7 @@ export function createFancourierOrderPayload(
     order?.paymentData?.transactions?.[0]?.payments?.[0]?.group ===
     constants.promissory
 
-  // eslint-disable-next-line prefer-destructuring
-  let value: number = order.value
+  let value: number = order?.value
 
   // totalDiscount could be 0 or a negative number
   value += totalDiscount
@@ -63,8 +42,8 @@ export function createFancourierOrderPayload(
   const payment =
     firstDigits || paymentPromissory ? 0 : value / constants.price_multiplier
 
-  const numberOfParcels = invoiceData.numberOfParcels
-    ? invoiceData.numberOfParcels
+  const numberOfParcels = trackingParams.numberOfParcels
+    ? trackingParams.numberOfParcels
     : 1
 
   const parcels = []

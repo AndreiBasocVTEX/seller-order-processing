@@ -1,8 +1,8 @@
 export const CarriersEnum = {
-  FANCOURIER: '_cancourier', // aka. SelfAwb
-  CARGUS: '_cargus',
-  SAMEDAY: '_sameday',
-  INNOSHIP: '_innoship',
+  FANCOURIER: 'fancourier', // aka. SelfAwb
+  CARGUS: 'cargus',
+  SAMEDAY: 'sameday',
+  INNOSHIP: 'innoship',
 } as const
 
 export type CarrierIDS = keyof typeof CarriersEnum

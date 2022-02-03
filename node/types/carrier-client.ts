@@ -24,8 +24,10 @@ export interface RequestAWBForInvoiceResponse {
   orderId: string
   trackingNumber: string
   courier: string
-  items: Item[]
+  items?: Item[]
   trackingUrl?: string
+  invoiceUrl?: string
+  invoiceNumber?: string
 }
 
 export interface IBodyForRequestAwb {
@@ -34,7 +36,7 @@ export interface IBodyForRequestAwb {
   invoiceData: IVtexInvoiceData
 }
 
-export interface PrintAWBParams<PayloadType = { [key: string]: unknown }> {
+export interface TrackingLabelParams<PayloadType = { [key: string]: unknown }> {
   settings: IOContext['settings']
   payload: PayloadType
 }
@@ -61,5 +63,5 @@ export abstract class CarrierClient extends ExternalClient {
     invoiceData: IVtexInvoiceData
   }): Promise<RequestAWBForInvoiceResponse>
 
-  abstract printAWB({ settings, payload }: PrintAWBParams): unknown
+  abstract trackingLabel({ settings, payload }: TrackingLabelParams): unknown
 }

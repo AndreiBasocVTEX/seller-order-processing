@@ -6,13 +6,37 @@ export interface IVtexInvoiceResponse {
   orderId: string
   receipt: string
 }
+
+// export interface IVtexInvoiceData {
+//   issuanceDate: string
+//   invoiceNumber: string
+//   invoiceValue: string
+//   type: string
+//   weight?: number
+//   numberOfParcels?: number
+// }
+
 export interface IVtexInvoiceData {
-  issuanceDate: string
-  invoiceNumber: string
-  invoiceValue: string
-  type: string
-  weight?: number
-  numberOfParcels?: number
+  invoice: {
+    provider: 'smartbill' | 'manual'
+    params: {
+      issuanceDate: Date
+      invoiceNumber: string
+      invoiceValue: string
+      invoiceUrl?: string
+      type: string
+    }
+  }
+  tracking: {
+    provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
+    generate: true | false
+    params: {
+      weight: number
+      numberOfParcels: number
+      trackingNumber?: string
+      trackingUrl?: string
+    }
+  }
 }
 
 export interface VtexEvent {
