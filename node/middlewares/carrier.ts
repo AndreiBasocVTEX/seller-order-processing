@@ -1,3 +1,6 @@
+import type { CarrierValues } from '../enums/carriers.enum'
+// import type { IVtexOrder } from '../types/orderApi'
+// import type { VtexAuthData } from '../types/VtexAuthData'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
@@ -12,47 +15,36 @@ export async function updateAWBInfo(
         params: { carrierName },
       },
     },
-    clients: { cargus, sameday, innoship, fancourier, orderApi },
+    clients: { orderApi: vtexOrderClient, carrier: carrierClient },
     query: { orderId },
   } = ctx
 
   try {
     const settings = await getVtexAppSettings(ctx)
-    const data = {
+
+    const carrier = carrierClient.getCarrierClientByName(
+      ctx,
+      carrierName as CarrierValues
+    )
+
+    // const vtexAuthData: VtexAuthData = {
+    //   vtex_appKey: settings.vtex_appKey,
+    //   vtex_appToken: settings.vtex_appToken,
+    // }
+
+    // const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
+    //   vtexAuthData,
+    //   orderId
+    // )
+
+    const awbReponse = await carrier.getAWBInfo({
       settings,
-      orderApi,
       orderId,
-    }
-
-    let response
-
-    switch (carrierName) {
-      case '_cargus':
-        response = await cargus.getAWBInfo(data)
-
-        break
-
-      case '_sameday':
-        response = await sameday.getAWBInfo(data)
-
-        break
-
-      case '_innoship':
-        response = await innoship.getAWBInfo(data)
-
-        break
-
-      case '_fancourier':
-        response = await fancourier.getAWBInfo(data)
-
-        break
-
-      default:
-        throw new Error('Carrier is not implemented yet')
-    }
+      orderApi: vtexOrderClient,
+    })
 
     ctx.status = 200
-    ctx.body = response
+    ctx.body = awbReponse
   } catch (e) {
     logger.error(formatError(e))
 
