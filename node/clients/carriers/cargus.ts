@@ -6,10 +6,10 @@ import type {
   ICargusTrackAwbResponse,
 } from '../../types/cargus'
 import type {
-  IVtexInvoiceData,
+  TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/orderApi'
+} from '../../types/order-api'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
@@ -17,6 +17,7 @@ import type {
 } from '../../types/carrier-client'
 import { CarrierClient } from '../../types/carrier-client'
 import { createCargusOrderPayload } from '../../dto/cargus-order.dto'
+import { CarriersEnum } from '../../enums/carriers.enum'
 
 export default class Cargus extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -48,15 +49,15 @@ export default class Cargus extends CarrierClient {
 
   protected async requestAWB({
     settings,
-    invoiceData,
+    trackingRequest,
     order,
   }: IBodyForRequestAwb): Promise<ICargusAwbResponse[]> {
     const token = await this.getBearerToken(settings)
 
     const body = createCargusOrderPayload(
       order,
-      settings.senderLocationId,
-      invoiceData
+      settings.senderLocationId, //TODO: sholud be something like settings.cargus__locationId
+      trackingRequest
     )
 
     return this.http.post('/Awbs/WithGetAwb', body, {
@@ -86,27 +87,24 @@ export default class Cargus extends CarrierClient {
   public async requestAWBForInvoice({
     order,
     settings,
-    invoiceData,
+    trackingRequest,
   }: {
     order: IVtexOrder
     settings: IOContext['settings']
-    invoiceData: IVtexInvoiceData
+    trackingRequest: TrackingRequestDTO
   }) {
     const awbInfo: ICargusAwbResponse[] = await this.requestAWB({
       order,
       settings,
-      invoiceData,
+      trackingRequest,
     })
 
-    const { items } = order
     const trackingNumber = awbInfo?.[0]?.BarCode
 
     return {
-      orderId: order.orderId,
       trackingNumber,
-      items,
-      courier: 'Cargus',
-      // Can't find tracking number
+      courier: CarriersEnum.CARGUS,
+      //TODO: Can't find tracking number
       // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
     }
   }

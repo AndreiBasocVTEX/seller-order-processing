@@ -16,26 +16,30 @@ export interface IVtexInvoiceResponse {
 //   numberOfParcels?: number
 // }
 
-export interface IVtexInvoiceData {
-  invoice: {
-    provider: 'smartbill' | 'manual'
-    params: {
-      issuanceDate: Date
-      invoiceNumber: string
-      invoiceValue: string
-      invoiceUrl?: string
-      type: string
-    }
+export interface TrackAndInvoiceRequestDTO {
+  invoice: InvoiceRequestDTO
+  tracking: TrackingRequestDTO
+}
+
+export interface TrackingRequestDTO {
+  provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
+  generate: boolean
+  params: {
+    weight?: number
+    numberOfParcels?: number
+    trackingNumber?: string
+    trackingUrl?: string
   }
-  tracking: {
-    provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
-    generate: true | false
-    params: {
-      weight: number
-      numberOfParcels: number
-      trackingNumber?: string
-      trackingUrl?: string
-    }
+}
+
+export interface InvoiceRequestDTO {
+  provider: 'smartbill' | 'manual'
+  params: {
+    issuanceDate: Date
+    invoiceNumber: string
+    invoiceValue: number
+    invoiceUrl?: string
+    type: string
   }
 }
 

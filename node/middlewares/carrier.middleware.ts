@@ -1,8 +1,9 @@
 import { json } from 'co-body'
+import { NotifyInvoceDTO } from '../clients/vtex/notify-invoice.dto'
 
 import type { CarrierValues } from '../enums/carriers.enum'
-import type { RequestAWBForInvoiceResponse } from '../types/carrier-client'
-import type { IVtexInvoiceData, IVtexOrder } from '../types/orderApi'
+import type { TrackingInfoDTO } from '../types/carrier-client'
+import type { TrackAndInvoiceRequestDTO, IVtexOrder } from '../types/order-api'
 import type { VtexAuthData } from '../types/VtexAuthData'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
@@ -86,7 +87,7 @@ export async function trackAndInvoiceMiddleware(
 
   const orderId = params.orderId as string
 
-  const invoiceData: IVtexInvoiceData = await json(ctx.req)
+  const invoiceData: TrackAndInvoiceRequestDTO = await json(ctx.req)
 
   const { invoice, tracking } = invoiceData
 
@@ -103,7 +104,7 @@ export async function trackAndInvoiceMiddleware(
       vtex_appToken: settings.vtex_appToken,
     }
 
-    let trackingInfoPayload: RequestAWBForInvoiceResponse
+    let trackingInfoPayload: TrackingInfoDTO
 
     if (tracking.generate) {
       const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
@@ -114,11 +115,10 @@ export async function trackAndInvoiceMiddleware(
       trackingInfoPayload = await carrier.requestAWBForInvoice({
         settings,
         order,
-        invoiceData,
+        trackingRequest: tracking,
       })
     } else {
       trackingInfoPayload = {
-        orderId,
         courier: tracking.provider,
         trackingNumber: tracking.params.trackingNumber as string,
         trackingUrl: tracking.params.trackingUrl ?? '',
@@ -134,9 +134,21 @@ export async function trackAndInvoiceMiddleware(
       }
     }
 
+    //TODO: finish this
+    const notifyInvoiceRequest: NotifyInvoceDTO = {
+      ...trackingInfoPayload,
+      type: 'Output',
+      invoiceNumber: 'string',
+      items: [],
+      issuanceDate: '',
+      invoiceValue: 0
+
+    }
+
     const invoiceInfo = await vtexOrderClient.trackAndInvoice(
       vtexAuthData,
-      trackingInfoPayload
+      orderId,
+      notifyInvoiceRequest
     )
 
     ctx.status = 200
@@ -149,7 +161,6 @@ export async function trackAndInvoiceMiddleware(
         courier: trackingInfoPayload.courier,
         invoiceNumber: invoice.params.invoiceNumber,
         invoiceUrl: invoice.params.invoiceUrl,
-        items: trackingInfoPayload.items,
       },
     }
   } catch (e) {

@@ -1,5 +1,5 @@
 import type { ICargusAwbPayload } from '../types/cargus'
-import type { IVtexOrder, IVtexInvoiceData } from '../types/orderApi'
+import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
 import { cargusConstants } from '../utils/cargusConstants'
 import {
   defaultEnvelopeCount,
@@ -10,9 +10,9 @@ import { getTotalDiscount, getTotalWeight } from './helpers.dto'
 export function createCargusOrderPayload(
   order: IVtexOrder,
   senderLocationId: string,
-  invoiceData: IVtexInvoiceData
+  trackingRequest: TrackingRequestDTO
 ): ICargusAwbPayload {
-  const { params: trackingParams } = invoiceData.tracking
+  const { params: trackingParams } = trackingRequest
 
   // The selected service does not allow parts weighing more than 31 kg
   const totalWeight = trackingParams.weight

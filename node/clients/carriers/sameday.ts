@@ -7,10 +7,10 @@ import type {
   ISamedayTrackAWBResponse,
 } from '../../types/sameday'
 import type {
-  IVtexInvoiceData,
+  TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/orderApi'
+} from '../../types/order-api'
 import { CarrierClient } from '../../types/carrier-client'
 import type {
   GetAWBInfoParams,
@@ -70,7 +70,7 @@ export default class Sameday extends CarrierClient {
 
   protected async requestAWB({
     settings,
-    invoiceData,
+    trackingRequest,
     order,
   }: IBodyForRequestAwb): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
@@ -79,7 +79,7 @@ export default class Sameday extends CarrierClient {
       order.shippingData.address.state
     )
 
-    const body = createOrderPayload(order, countyId, invoiceData)
+    const body = createOrderPayload(order, countyId, trackingRequest)
 
     return this.http.post('/api/awb', body, {
       headers: {
@@ -107,16 +107,16 @@ export default class Sameday extends CarrierClient {
   public async requestAWBForInvoice({
     order,
     settings,
-    invoiceData,
+    trackingRequest,
   }: {
     order: IVtexOrder
     settings: IOContext['settings']
-    invoiceData: IVtexInvoiceData
+    trackingRequest: TrackingRequestDTO
   }) {
     const { awbNumber: trackingNumber } = await this.requestAWB({
       settings,
       order,
-      invoiceData,
+      trackingRequest,
     })
 
     const { items } = order

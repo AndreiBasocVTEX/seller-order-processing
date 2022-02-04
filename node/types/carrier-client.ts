@@ -1,7 +1,7 @@
 import type { IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-import type { Item, IVtexInvoiceData, IVtexOrder, VtexEvent } from './orderApi'
+import type { TrackingRequestDTO, IVtexOrder, VtexEvent } from './order-api'
 
 export interface ITrackAwbInfoPayload {
   pathParams: {
@@ -20,20 +20,15 @@ export type GetAWBInfoParams = {
   order: IVtexOrder
 }
 
-export interface RequestAWBForInvoiceResponse {
-  orderId: string
+export interface TrackingInfoDTO {
   trackingNumber: string
   courier: string
-  items?: Item[]
   trackingUrl?: string
-  invoiceUrl?: string
-  invoiceNumber?: string
 }
-
 export interface IBodyForRequestAwb {
   order: IVtexOrder
   settings: IOContext['settings']
-  invoiceData: IVtexInvoiceData
+  trackingRequest: TrackingRequestDTO
 }
 
 export interface TrackingLabelParams<PayloadType = { [key: string]: unknown }> {
@@ -44,7 +39,7 @@ export interface TrackingLabelParams<PayloadType = { [key: string]: unknown }> {
 export abstract class CarrierClient extends ExternalClient {
   protected abstract requestAWB({
     settings,
-    invoiceData,
+    trackingRequest,
     order,
   }: IBodyForRequestAwb): Promise<unknown>
 
@@ -56,12 +51,12 @@ export abstract class CarrierClient extends ExternalClient {
   abstract requestAWBForInvoice({
     order,
     settings,
-    invoiceData,
+    trackingRequest,
   }: {
     order: IVtexOrder
     settings: IOContext['settings']
-    invoiceData: IVtexInvoiceData
-  }): Promise<RequestAWBForInvoiceResponse>
+    trackingRequest: TrackingRequestDTO
+  }): Promise<TrackingInfoDTO>
 
   abstract trackingLabel({ settings, payload }: TrackingLabelParams): unknown
 }

@@ -1,4 +1,4 @@
-import type { IVtexOrder, IVtexInvoiceData } from '../types/orderApi'
+import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
 import {
   defaultCountryCode,
   awbContent,
@@ -10,9 +10,9 @@ import { getTotalWeight } from './helpers.dto'
 export function createOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
-  invoiceData: IVtexInvoiceData
+  trackingRequest: TrackingRequestDTO
 ) {
-  const { params: trackingParams } = invoiceData.tracking
+  const { params: trackingParams } = trackingRequest
 
   const totalWeight = trackingParams.weight
     ? trackingParams.weight
@@ -47,9 +47,8 @@ export function createOrderPayload(
       country: defaultCountryCode,
       countyName: address.state,
       localityName: address.city,
-      addressText: `${address.street} ${address.number} ${
-        address.neighborhood || ''
-      } ${address.complement || ''} ${address.reference || ''}`,
+      addressText: `${address.street} ${address.number} ${address.neighborhood || ''
+        } ${address.complement || ''} ${address.reference || ''}`,
       postalCode: address.postalCode,
       phone: order.clientProfileData.phone,
       email: order.clientProfileData.email,

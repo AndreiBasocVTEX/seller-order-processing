@@ -1,5 +1,5 @@
 import type { IFancourierAwbPayload } from '../types/fancourier'
-import type { IVtexOrder, IVtexInvoiceData } from '../types/orderApi'
+import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
 import {
   defaultCountryCode,
   shipmentPaymentMethod,
@@ -17,9 +17,9 @@ import { getTotalDiscount, getTotalWeight } from './helpers.dto'
 export function createFancourierOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
-  invoiceData: IVtexInvoiceData
+  trackingRequest: TrackingRequestDTO
 ): IFancourierAwbPayload {
-  const { params: trackingParams } = invoiceData.tracking
+  const { params: trackingParams } = trackingRequest
 
   const totalWeight = trackingParams.weight
     ? trackingParams.weight

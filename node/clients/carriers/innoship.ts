@@ -1,10 +1,10 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
-  IVtexInvoiceData,
+  TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/orderApi'
+} from '../../types/order-api'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,
@@ -49,12 +49,12 @@ export default class Innoship extends CarrierClient {
 
   protected async requestAWB({
     settings,
-    invoiceData,
+    trackingRequest,
     order,
   }: IBodyForRequestAwb): Promise<IInnoshipAwbResponse> {
     const warehouseId = settings.innoship__warehouseId
 
-    const body = createOrderPayload(order, warehouseId, invoiceData)
+    const body = createOrderPayload(order, warehouseId, trackingRequest)
 
     return this.http.post('/Order?api-version=1.0', body, {
       headers: {
@@ -67,16 +67,16 @@ export default class Innoship extends CarrierClient {
   public async requestAWBForInvoice({
     order,
     settings,
-    invoiceData,
+    trackingRequest,
   }: {
     order: IVtexOrder
     settings: IOContext['settings']
-    invoiceData: IVtexInvoiceData
+    trackingRequest: TrackingRequestDTO
   }) {
     const awbInfo: IInnoshipAwbResponse = await this.requestAWB({
       settings,
       order,
-      invoiceData,
+      trackingRequest,
     })
 
     const {

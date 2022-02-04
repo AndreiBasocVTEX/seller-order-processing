@@ -4,10 +4,10 @@ import ObjectsToCsv from 'objects-to-csv'
 
 import type { IAuthDataFancourier } from '../../types/fancourier'
 import type {
-  IVtexInvoiceData,
+  TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/orderApi'
+} from '../../types/order-api'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
@@ -30,7 +30,7 @@ export default class Fancourier extends CarrierClient {
 
   protected async requestAWB({
     settings,
-    invoiceData,
+    trackingRequest,
     order,
   }: IBodyForRequestAwb): Promise<{
     _: string
@@ -41,7 +41,7 @@ export default class Fancourier extends CarrierClient {
     const fancourierOrderPayload = createFancourierOrderPayload(
       order,
       settings.fancourier__warehouseId,
-      invoiceData
+      trackingRequest
     )
 
     // Order of the keys in fileData is important because of the generation column flow for the csv-object
@@ -146,16 +146,16 @@ export default class Fancourier extends CarrierClient {
   public async requestAWBForInvoice({
     order,
     settings,
-    invoiceData,
+    trackingRequest,
   }: {
     order: IVtexOrder
     settings: IOContext['settings']
-    invoiceData: IVtexInvoiceData
+    trackingRequest: TrackingRequestDTO
   }) {
     const { trackingNumber } = await this.requestAWB({
       settings,
       order,
-      invoiceData,
+      trackingRequest,
     })
 
     const { items } = order
