@@ -14,15 +14,14 @@ import {
   // Toggle,
   Totalizer,
   // InputSearch,
-  // FilterBar,
+  FilterBar,
+  Input,
+  Checkbox,
+  DatePicker,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
 import RequestAwbModal from '../requestAwbModal'
-// import fancourier from '../logos/fancourier.png'
-// import cargus from '../logos/cargus.png'
-// import innoship from '../logos/innoship.png'
-// import sameday from '../logos/sameday.png'
 import '../src/style.css'
 import type { IOrder } from '../typings/order'
 import AwbStatus from '../components/AwbStatus'
@@ -46,6 +45,8 @@ const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
 
   const [searchValue, setSearchValue] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [statements, setStatements] = useState([])
   const [isClosed, setIsClosed] = useState(false)
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
@@ -67,6 +68,8 @@ const OrdersList: FC = () => {
     },
   })
 
+  // for developement only, true = unlim awb generation, false = pdf download if there is a tracking number
+  const devMode = false
   // console.log(trackingNum)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -115,6 +118,12 @@ const OrdersList: FC = () => {
         url += `&q=${searchValue}`
       }
 
+      if (filterStatus !== '') {
+        url += `&f_status=${filterStatus}`
+      }
+
+      console.log('GETITEMS_URL', url, 'filterStatus:', filterStatus)
+
       try {
         const { data } = await axios.get(url, {
           headers: { Accept: 'application/json' },
@@ -136,7 +145,7 @@ const OrdersList: FC = () => {
         console.log(err)
       }
     },
-    [fetchTrackingNumbers, searchValue]
+    [fetchTrackingNumbers, searchValue, filterStatus]
   )
 
   type SchemeDataType = {
@@ -144,6 +153,7 @@ const OrdersList: FC = () => {
     cellData: IOrder
   }
   const displayStatus = (cellData: string) => {
+    console.log(cellData)
     if (cellData === 'ready-for-handling') {
       return (
         <>
@@ -249,6 +259,20 @@ const OrdersList: FC = () => {
     return <span>missing tag</span>
   }
 
+  const printInvoice = async (invoiceNumber: string) => {
+    const { data } = await axios.get('/opa/_smartbill/printInvoice', {
+      params: {
+        invoiceNumber,
+      },
+      responseType: 'arraybuffer',
+    })
+
+    const blob = new Blob([data], { type: 'application/pdf' })
+    const blobURL = URL.createObjectURL(blob)
+
+    window.open(blobURL)
+  }
+
   const printAwb = useCallback(
     async (orderId: string): Promise<any> => {
       const printOrder = orderAwb.find((order) => order?.orderId === orderId)
@@ -289,14 +313,13 @@ const OrdersList: FC = () => {
     [orderAwb]
   )
 
-  const getLabelOrder = useCallback(
+  const displayAwbInfoButton = useCallback(
     (rowData: IOrder) => {
       const order = orderAwb.find(
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
-      // console.log('INFOLABEL', order)
-
+      // renders courier+value. Those values are stored in state in getTrackingNumber
       return order
         ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
         : null
@@ -310,7 +333,7 @@ const OrdersList: FC = () => {
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
-      return order ? `${order.invoiceNumber ? order.invoiceNumber : ' '}` : null
+      return order ? `${order.invoiceNumber ? order.invoiceNumber : ' '}` : ''
     },
     [orderAwb]
   )
@@ -321,7 +344,20 @@ const OrdersList: FC = () => {
         (payOrder) => payOrder?.orderId === rowData?.orderId
       )
 
+      console.log(order)
+
       return order ? order.payMethod?.match(/\b(\w+)$/g)[0] : ''
+    },
+    [orderAwb]
+  )
+
+  const getElefantOrderId = useCallback(
+    (rowData: IOrder) => {
+      const order = orderAwb.find(
+        (payOrder) => payOrder?.orderId === rowData?.orderId
+      )
+
+      return order ? order.payMethod?.match(/\d/g).join('') : ''
     },
     [orderAwb]
   )
@@ -429,6 +465,9 @@ const OrdersList: FC = () => {
           title: 'Status',
           width: 100,
           cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
+            // console.log('STATUS,CELLDATA', cellData)
+
+            // return <span className="nowrap">{cellData}</span>
             return displayStatus(cellData)
           },
         },
@@ -436,7 +475,7 @@ const OrdersList: FC = () => {
           title: 'Elefant #',
           width: 90,
           cellRenderer: ({
-            cellData,
+            // cellData,
             rowData,
           }: {
             cellData: string
@@ -444,7 +483,7 @@ const OrdersList: FC = () => {
           }): JSX.Element => {
             return (
               <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {cellData}
+                {getElefantOrderId(rowData)}
               </Link>
             )
           },
@@ -538,11 +577,23 @@ const OrdersList: FC = () => {
                   block
                   disabled={rowData.status === 'canceled'}
                   onClick={() => {
+                    console.log('orderAwbOnclick', orderAwb)
                     setCurrentRowData(rowData)
-                    setIsClosed(!isClosed)
+                    // switch devMode to false to get intended functionality
+                    if (
+                      devMode
+                        ? false
+                        : getInvoiceNumber(rowData) !== 'No invoice'
+                    ) {
+                      printAwb(rowData.orderId)
+                    }
+
+                    if (getInvoiceNumber(rowData) === 'No invoice' || devMode) {
+                      setIsClosed(!isClosed)
+                    }
                   }}
                 >
-                  {getLabelOrder(rowData)}
+                  {displayAwbInfoButton(rowData)}
                 </Button>
               </>
             )
@@ -584,7 +635,10 @@ const OrdersList: FC = () => {
                   block
                   disabled={rowData.status === 'canceled'}
                   onClick={() => {
-                    printAwb(rowData.orderId)
+                    // printAwb(rowData.orderId)
+                    if (getInvoiceNumber(rowData) !== 'No invoice') {
+                      printInvoice(getInvoiceNumber(rowData))
+                    }
                   }}
                 >
                   <span style={{ paddingRight: '10px' }}>
@@ -601,7 +655,7 @@ const OrdersList: FC = () => {
     }),
     [
       getPayMethod,
-      getLabelOrder,
+      displayAwbInfoButton,
       trackingNum,
       isClosed,
       orderAwb,
@@ -610,37 +664,232 @@ const OrdersList: FC = () => {
     ]
   )
 
+  const renderSimpleFilterLabel = (statement: any) => {
+    if (!statement) {
+      // you should treat empty object cases only for alwaysVisibleFilters
+      return 'Any'
+    }
+
+    return `${
+      statement.verb === '='
+        ? 'is'
+        : statement.verb === '!='
+        ? 'is not'
+        : 'contains'
+    }`
+  }
+
+  const SimpleInputObject = ({ value, onChange }: any) => {
+    return (
+      <Input
+        value={value || ''}
+        onChange={(e: any) => onChange(e.target.value)}
+      />
+    )
+  }
+
+  const getSimpleVerbs = () => {
+    return [
+      {
+        label: 'is',
+        value: '=',
+        object: (props: any) => <SimpleInputObject {...props} />,
+      },
+      {
+        label: 'is not',
+        value: '!=',
+        object: (props: any) => <SimpleInputObject {...props} />,
+      },
+      {
+        label: 'contains',
+        value: 'contains',
+        object: (props: any) => <SimpleInputObject {...props} />,
+      },
+    ]
+  }
+
+  function DatePickerObject({ value, onChange }: any) {
+    return (
+      <div className="w-100">
+        <DatePicker
+          value={value || new Date()}
+          onChange={(date: any) => {
+            onChange(date)
+          }}
+          locale="pt-BR"
+        />
+      </div>
+    )
+  }
+
+  function DatePickerRangeObject({ value, onChange }: any) {
+    return (
+      <div className="flex flex-column w-100">
+        <br />
+        <DatePicker
+          label="from"
+          value={(value && value.from) || new Date()}
+          onChange={(date: any) => {
+            onChange({ ...(value || {}), from: date })
+          }}
+          locale="pt-BR"
+        />
+        <br />
+        <DatePicker
+          label="to"
+          value={(value && value.to) || new Date()}
+          onChange={(date: any) => {
+            onChange({ ...(value || {}), to: date })
+          }}
+          locale="pt-BR"
+        />
+      </div>
+    )
+  }
+
+  function StatusSelectorObject({ value, onChange }: any) {
+    const initialValue = {
+      'Window to cancelation': true,
+      Canceling: true,
+      Canceled: true,
+      'Payment pending': true,
+      'Payment approved': true,
+      'Ready for handling': true,
+      'Handling shipping': true,
+      'Ready for invoice': true,
+      Invoiced: true,
+      Complete: true,
+      ...(value || {}),
+    }
+
+    const toggleValueByKey = (key: any) => {
+      return {
+        ...(value || initialValue),
+        [key]: value ? !value[key] : false,
+      }
+    }
+
+    return (
+      <div>
+        {Object.keys(initialValue).map((opt, index) => {
+          return (
+            <div className="mb3" key={`class-statment-object-${opt}-${index}`}>
+              <Checkbox
+                checked={value ? value[opt] : initialValue[opt]}
+                id={`status-${opt}`}
+                label={opt}
+                name="status-checkbox-group"
+                onChange={() => {
+                  const newValue = toggleValueByKey(`${opt}`)
+
+                  onChange(newValue)
+                }}
+                value={opt}
+              />
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
     <div className="f6 lh-copy">
-      {/* <div className="mb5">
-        <div style={{ width: '50%' }}>
-          <InputSearch
-            placeholder="Cautati numarul comenzii, destinatarul, plata"
-            value={searchValue}
-            size="regular"
-            onChange={handleInputSearchChange}
-            onClear={handleInputSearchClear}
-            onSubmit={handleInputSearchSubmit}
-          />
-        </div>
-      </div> */}
-      {/* <FilterBar
-        alwaysVisibleFilters={['status']}
+      <FilterBar
+        alwaysVisibleFilters={['status', 'invoicedate']}
         statements={statements}
+        clearAllFiltersButtonLabel="Clear Filters"
         onChangeStatements={(st: any) => {
-          setStatements({ st })
+          console.log('onchangeStatements', st)
+          setStatements(st)
         }}
         options={{
-          orderStatus: {
-            label: 'asd',
+          id: {
+            label: 'ID',
+            renderFilterLabel: renderSimpleFilterLabel,
+            verbs: getSimpleVerbs(),
           },
-          verbs: [
-            {
-              label: '111',
+          invoicedate: {
+            label: 'Invoiced date',
+            renderFilterLabel: (st: any) => {
+              if (!st || !st.object) {
+                return 'All'
+              }
+
+              return `${
+                st.verb === 'between'
+                  ? `between ${st.object.from} and ${st.object.to}`
+                  : `is ${st.object}`
+              }`
             },
-          ],
+            verbs: [
+              {
+                label: 'is',
+                value: '=',
+                object: (props: any) => <DatePickerObject {...props} />,
+              },
+              {
+                label: 'is between',
+                value: 'between',
+                object: (props: any) => <DatePickerRangeObject {...props} />,
+              },
+            ],
+          },
+          status: {
+            label: 'Status',
+            renderFilterLabel: (st: any) => {
+              // console.log('f_STATE', st)
+              if (!st || !st.object) {
+                // you should treat empty object cases only for alwaysVisibleFilters
+                // console.log('filterERROR')
+
+                return 'All'
+              }
+
+              const keys = st.object ? Object.keys(st.object) : [] // {} !!!!
+              const isAllTrue = !keys.some((key: any) => !st.object[key])
+              const isAllFalse = !keys.some((key: any) => st.object[key])
+              const trueKeys = keys.filter((key: any) => st.object[key])
+              let trueKeysLabel = ''
+
+              trueKeys.forEach((key: any, index: any) => {
+                trueKeysLabel += `${key}${
+                  index === trueKeys.length - 1 ? '' : ', '
+                }`
+              })
+              console.log(
+                'filterData',
+                'keys',
+                keys,
+                'isAllTrue',
+                isAllTrue,
+                'isAllFalse',
+                isAllFalse,
+                'trueKeys:',
+                trueKeys,
+                'trueKeysLabel:',
+                trueKeysLabel
+              )
+              setFilterStatus('canceled')
+
+              return `${
+                isAllTrue ? 'All' : isAllFalse ? 'None' : `${trueKeysLabel}`
+              }`
+            },
+            verbs: [
+              {
+                label: 'includes',
+                value: 'includes',
+                object: (props: any) => {
+                  console.log('VERBSPROPS', props)
+
+                  return <StatusSelectorObject {...props} />
+                },
+              },
+            ],
+          },
         }}
-      /> */}
+      />
       <Totalizer
         horizontalLayout
         items={[
@@ -726,8 +975,7 @@ const OrdersList: FC = () => {
             showAllLabel: 'Show All',
             hideAllLabel: 'Hide All',
             onToggleColumn: (params: any) => {
-              console.log(params.toggledField)
-              console.log(params.activeFields)
+              console.log('VISIBILITY_PARAMS', params)
             },
             onHideAllColumns: (activeFields: any) => console.log(activeFields),
             onShowAllColumns: (activeFields: any) => console.log(activeFields),
