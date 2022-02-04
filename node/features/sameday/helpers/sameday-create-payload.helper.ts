@@ -1,8 +1,9 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../../core/dto/order-api'
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import {
   getTotalWeight,
   getTotalDiscount,
 } from '../../core/helpers/helpers.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'
 import {
   promissory,

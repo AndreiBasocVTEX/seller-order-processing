@@ -1,4 +1,4 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../../core/dto/order-api'
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import {
   shipmentPaymentMethod,
   defaultEnvelopeCount,
@@ -15,6 +15,7 @@ import {
   getTotalDiscount,
 } from '../../core/helpers/helpers.dto'
 import type { IFancourierAwbPayload } from '../dto/fancourier-awb.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )

@@ -1,4 +1,4 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../../core/dto/order-api'
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
 import {
   defaultEnvelopeCount,
@@ -10,6 +10,7 @@ import {
   getTotalDiscount,
   getTotalWeight,
 } from '../../core/helpers/helpers.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export function createCargusOrderPayload(
   order: IVtexOrder,
