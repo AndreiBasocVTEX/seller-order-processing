@@ -1,16 +1,14 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type {
-  TrackingRequestDTO,
-} from '../../core/dto/order-api'
-import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
+import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
-import { IVtexOrder } from '../../vtex/dto/order.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,

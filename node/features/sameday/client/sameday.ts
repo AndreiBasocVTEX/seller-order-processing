@@ -1,9 +1,7 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type {
-  TrackingRequestDTO,
-} from '../../core/dto/order-api'
-import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
+import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
   GetAWBInfoParams,
@@ -17,7 +15,7 @@ import type {
 } from '../dto/sameday-awb.dto'
 import type { IAuthDataSameday } from '../models/sameday-auth.model'
 import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
-import { IVtexOrder } from '../../vtex/dto/order.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export default class SamedayClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
