@@ -1,4 +1,4 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
+import type { IVtexOrder, TrackingRequestDTO } from '../../core/dto/order-api'
 import { getTotalWeight } from '../../core/helpers/helpers.dto'
 import {
   defaultCountryCode,
@@ -43,9 +43,8 @@ export function createOrderPayload(
       country: defaultCountryCode,
       countyName: address.state,
       localityName: address.city,
-      addressText: `${address.street} ${address.number} ${
-        address.neighborhood || ''
-      } ${address.complement || ''} ${address.reference || ''}`,
+      addressText: `${address.street} ${address.number} ${address.neighborhood || ''
+        } ${address.complement || ''} ${address.reference || ''}`,
       postalCode: address.postalCode,
       phone: order.clientProfileData.phone,
       email: order.clientProfileData.email,

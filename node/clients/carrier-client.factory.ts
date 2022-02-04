@@ -4,10 +4,10 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type {
   CarrierIDS,
   CarrierValues,
-} from '../features/core/enums/carriers.enum'
-import { CarriersEnum } from '../features/core/enums/carriers.enum'
+} from '../features/shared/enums/carriers.enum'
+import { CarriersEnum } from '../features/shared/enums/carriers.enum'
 
-export default class Carrier extends ExternalClient {
+export default class CarrierClientFactory extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super(`https://${ctx.account}.vtexcommercestable.com.br`, ctx, {
       ...options,

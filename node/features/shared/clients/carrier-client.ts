@@ -1,7 +1,7 @@
 import type { IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-import type { TrackingRequestDTO, IVtexOrder, VtexEvent } from './order-api'
+import type { TrackingRequestDTO, IVtexOrder, VtexEvent } from '../../core/dto/order-api'
 
 export interface ITrackAwbInfoPayload {
   pathParams: {

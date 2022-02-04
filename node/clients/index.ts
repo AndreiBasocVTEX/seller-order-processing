@@ -4,11 +4,11 @@ import { CargusClient } from '../features/cargus'
 import { FancourierClient } from '../features/fancourier'
 import { InnoshipClient } from '../features/innoship'
 import { SamedayClient } from '../features/sameday'
-import Carrier from './carrier'
-import OrderClient from './order'
+import CarrierClientFactory from './carrier-client.factory'
+import OrderClient from '../features/vtex/clients/order-client'
 
 export class Clients extends IOClients {
-  public get orderApi() {
+  public get vtexOrder() {
     return this.getOrSet('orderApi', OrderClient)
   }
 
@@ -29,6 +29,6 @@ export class Clients extends IOClients {
   }
 
   public get carrier() {
-    return this.getOrSet('carrier', Carrier)
+    return this.getOrSet('carrier', CarrierClientFactory)
   }
 }

@@ -1,13 +1,13 @@
 import { json } from 'co-body'
 
-import type { NotifyInvoiceDTO } from '../dto/order.dto'
-import type { CarrierValues } from '../enums/carriers.enum'
-import type { TrackingInfoDTO } from '../../../types/carrier-client'
+import type { NotifyInvoiceDTO } from '../../vtex/dto/order.dto'
+import type { CarrierValues } from '../../shared/enums/carriers.enum'
+import type { TrackingInfoDTO } from '../../shared/clients/carrier-client'
 import type {
   TrackAndInvoiceRequestDTO,
   IVtexOrder,
-} from '../../../types/order-api'
-import type { VtexAuthData } from '../../../types/VtexAuthData'
+} from '../dto/order-api'
+import type { VtexAuthData } from '../../shared/dto/VtexAuthData'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
@@ -22,7 +22,7 @@ export async function updateTrackingStatusMiddleware(
         params: { carrierName },
       },
     },
-    clients: { orderApi: vtexOrderClient, carrier: carrierClient },
+    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
     query: { orderId },
   } = ctx
 
@@ -85,7 +85,7 @@ export async function trackAndInvoiceMiddleware(
       logger,
       route: { params },
     },
-    clients: { orderApi: vtexOrderClient, carrier: carrierClient },
+    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
   } = ctx
 
   const orderId = params.orderId as string

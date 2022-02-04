@@ -1,10 +1,10 @@
 import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { VtexAuthData } from '../types/VtexAuthData'
-import type { ITrackAwbInfoResponse } from '../types/order-api'
-import type { ITrackAwbInfoPayload } from '../types/carrier-client'
-import type { NotifyInvoiceDTO } from '../features/core/dto/order.dto'
+import type { VtexAuthData } from '../../shared/dto/VtexAuthData'
+import type { ITrackAwbInfoResponse } from '../../core/dto/order-api'
+import type { ITrackAwbInfoPayload } from '../../shared/clients/carrier-client'
+import type { NotifyInvoiceDTO } from '../dto/order.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {

@@ -4,13 +4,13 @@ import type {
   TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../../types/order-api'
-import { CarrierClient } from '../../../types/carrier-client'
+} from '../../core/dto/order-api'
+import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
-} from '../../../types/carrier-client'
+} from '../../shared/clients/carrier-client'
 import type {
   ISamedayCountyData,
   ISamedayAwbResponse,

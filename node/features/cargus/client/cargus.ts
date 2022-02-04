@@ -4,14 +4,14 @@ import type {
   TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../../types/order-api'
+} from '../../core/dto/order-api'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
-} from '../../../types/carrier-client'
-import { CarrierClient } from '../../../types/carrier-client'
-import { CarriersEnum } from '../../core/enums/carriers.enum'
+} from '../../shared/clients/carrier-client'
+import { CarrierClient } from '../../shared/clients/carrier-client'
+import { CarriersEnum } from '../../shared/enums/carriers.enum'
 import type {
   ICargusAwbResponse,
   ICargusTrackAwbResponse,

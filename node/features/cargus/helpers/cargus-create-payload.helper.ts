@@ -1,4 +1,4 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
+import type { IVtexOrder, TrackingRequestDTO } from '../../core/dto/order-api'
 import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
 import {
   defaultEnvelopeCount,

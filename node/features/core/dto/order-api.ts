@@ -7,15 +7,6 @@ export interface IVtexInvoiceResponse {
   receipt: string
 }
 
-// export interface IVtexInvoiceData {
-//   issuanceDate: string
-//   invoiceNumber: string
-//   invoiceValue: string
-//   type: string
-//   weight?: number
-//   numberOfParcels?: number
-// }
-
 export interface TrackAndInvoiceRequestDTO {
   invoice: InvoiceRequestDTO
   tracking: TrackingRequestDTO
