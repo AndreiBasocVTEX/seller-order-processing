@@ -296,7 +296,7 @@ const OrdersList: FC = () => {
         return (
           <>
             <IconDownload />
-            <span className="ml2">
+            <span className="ml4">
               {order.courier} {order.orderValue}
             </span>
           </>
@@ -620,24 +620,27 @@ const OrdersList: FC = () => {
           title: 'Factura',
           width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
-            if (getInvoiceNumber(rowData) !== 'No invoice') {
+            const invoiceNumber = getInvoiceNumber(rowData)
+
+            if (invoiceNumber !== 'No invoice') {
               return (
-                <Button
-                  variation="secondary"
-                  block
-                  disabled={rowData.status === 'canceled'}
-                  onClick={() => {
-                    printInvoice(getInvoiceNumber(rowData))
-                  }}
-                >
-                  <span style={{ paddingRight: '10px' }}>
-                    {' '}
-                    <IconDownload />
-                  </span>
-                  <span className="mw-100 truncate">
-                    {getInvoiceNumber(rowData)}
-                  </span>
-                </Button>
+                <Tooltip label={invoiceNumber}>
+                  <Button
+                    variation="secondary"
+                    block
+                    disabled={rowData.status === 'canceled'}
+                    onClick={() => {
+                      printInvoice(invoiceNumber)
+                    }}
+                  >
+                    <span style={{ paddingRight: '10px' }}>
+                      {' '}
+                      <IconDownload />
+                    </span>
+
+                    <span className="mw-100 truncate">{invoiceNumber}</span>
+                  </Button>
+                </Tooltip>
               )
             }
 
