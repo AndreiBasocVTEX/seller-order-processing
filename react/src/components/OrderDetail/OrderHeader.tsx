@@ -3,18 +3,10 @@ import type { FC } from 'react'
 import { PageHeader, Tag } from 'vtex.styleguide'
 import { useRuntime } from 'vtex.render-runtime'
 
-interface HeaderProps {
-  orderId: string
-  orderStatus?: string
-}
-interface OrderStatus {
-  tagBgColor: string
-  tagColor: string
-  tagText: string
-}
+import type { IOrderHeaderProps, IOrderStatus } from '../../types/order'
 
-const OrderHeader: FC<HeaderProps> = ({ orderId, orderStatus }) => {
-  const [status, setStatus] = useState<OrderStatus>()
+const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
+  const [status, setStatus] = useState<IOrderStatus>()
   const { navigate } = useRuntime()
   const handleLinkClick = () => navigate({ to: '/admin/app/seller-dashboard' })
 

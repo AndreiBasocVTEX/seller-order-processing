@@ -3,11 +3,7 @@ import { Alert } from 'vtex.styleguide'
 import { useRuntime } from 'vtex.render-runtime'
 import type { FC } from 'react'
 
-interface Props {
-  errorMessage: string
-}
-
-const ErrorNotification: FC<Props> = ({ errorMessage }) => {
+const ErrorNotification: FC<{ errorMessage: string }> = ({ errorMessage }) => {
   const { navigate } = useRuntime()
   const handleLinkClick = () => navigate({ to: '/admin/app/seller-dashboard' })
 

@@ -11,6 +11,7 @@ import type {
   IOrderDetailProps,
   ITrackingObj,
 } from '../../types/common'
+import AwbStatus from '../../components/AwbStatus'
 
 const OrderDetail: FC<IOrderDetailProps> = ({ orderData, rawOrderData }) => {
   const [data, setData] = useState<OrderDetailsData>()

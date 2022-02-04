@@ -2,23 +2,11 @@ import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
 import { NumericStepper, Table } from 'vtex.styleguide'
 
+import type { IOrderTableItem } from '../../types/order'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
 
-interface TableProps {
-  orderData?: OrderDetailsData
-}
-
-interface TableItem {
-  productSku: string
-  productName: string
-  productQuantity: number
-  productPriceNoTva: string
-  tvaProcent: string
-  productPriceTva: string
-}
-
-const OrderTable: FC<TableProps> = ({ orderData }) => {
-  const [tableData, setTableData] = useState<TableItem[]>([])
+const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
+  const [tableData, setTableData] = useState<IOrderTableItem[]>([])
 
   const customSchema = {
     properties: {
@@ -58,7 +46,7 @@ const OrderTable: FC<TableProps> = ({ orderData }) => {
   const normalizeTableData = (data: OrderDetailsData) => {
     const { items } = data
     const orderTotals: { [key: string]: number } = {}
-    const result: TableItem[] = []
+    const result: IOrderTableItem[] = []
 
     items.forEach((element, index) => {
       result.push(

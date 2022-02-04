@@ -2,15 +2,10 @@ import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
 import { Button, Spinner, Tooltip, IconVisibilityOn } from 'vtex.styleguide'
 
-import { getOrderAwbStatus } from '../utils/api'
+import type { IAwbStatusProps } from '../../types/awbStatus'
+import { getOrderAwbStatus } from '../../utils/api'
 
-interface Props {
-  courier: string
-  orderId: string
-  size: 'small' | 'large'
-}
-
-const AwbStatus: FC<Props> = ({ courier, orderId, size }) => {
+const AwbStatus: FC<IAwbStatusProps> = ({ courier, orderId, size }) => {
   const [awbStatus, setAwbStatus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 

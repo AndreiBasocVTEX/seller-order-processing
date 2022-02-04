@@ -56,7 +56,6 @@ const OrdersList: FC = () => {
 
   // for developement only, true = unlim awb generation, false = pdf download if there is a tracking number
   const devMode = false
-  // console.log(trackingNum)
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchTrackingNumbers = useCallback((orders: any[]) => {
@@ -387,10 +386,12 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     getItems(paginationParams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackingNum])
 
   const handleInputSearchChange = useCallback(
@@ -406,6 +407,7 @@ const OrdersList: FC = () => {
         },
       })
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationParams, searchValue]
   )
 
@@ -636,6 +638,7 @@ const OrdersList: FC = () => {
         },
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getPayMethod,
       displayAwbInfoButton,
@@ -821,11 +824,8 @@ const OrdersList: FC = () => {
           status: {
             label: 'Status',
             renderFilterLabel: (st: any) => {
-              // console.log('f_STATE', st)
               if (!st || !st.object) {
                 // you should treat empty object cases only for alwaysVisibleFilters
-                // console.log('filterERROR')
-
                 return 'All'
               }
 
