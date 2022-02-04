@@ -1,9 +1,8 @@
-import { CarrierValues } from '../../shared/enums/carriers.enum';
-import { VtexAuthData } from '../../vtex/dto/auth.dto';
-import { formatError } from '../utils/formatError';
-import { getVtexAppSettings } from '../utils/getVtexAppSettings';
-import { IVtexOrder } from '../../vtex/dto/order.dto';
-
+import type { CarrierValues } from '../../shared/enums/carriers.enum'
+import type { VtexAuthData } from '../../vtex/dto/auth.dto'
+import { formatError } from '../utils/formatError'
+import { getVtexAppSettings } from '../utils/getVtexAppSettings'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export async function updateTrackingStatusMiddleware(
   ctx: Context,
@@ -12,21 +11,15 @@ export async function updateTrackingStatusMiddleware(
   const {
     vtex: {
       logger,
-      route: {
-        params: { carrierName },
-      },
+      route: { params },
     },
     clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
-    query: { orderId },
   } = ctx
+
+  const orderId = params.orderId as string
 
   try {
     const settings = await getVtexAppSettings(ctx)
-
-    const carrier = carrierClient.getCarrierClientByName(
-      ctx,
-      carrierName as CarrierValues
-    )
 
     const vtexAuthData: VtexAuthData = {
       vtex_appKey: settings.vtex_appKey,
@@ -36,6 +29,13 @@ export async function updateTrackingStatusMiddleware(
     const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
       vtexAuthData,
       orderId
+    )
+
+    const { courier: carrierName } = order?.packageAttachment?.packages.pop()
+
+    const carrier = carrierClient.getCarrierClientByName(
+      ctx,
+      carrierName.toLowerCase() as CarrierValues
     )
 
     const trackingInfoPayload = await carrier.getAWBInfo({

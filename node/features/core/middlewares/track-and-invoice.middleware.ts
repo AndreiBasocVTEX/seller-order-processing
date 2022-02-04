@@ -1,4 +1,5 @@
-import { json } from 'co-body';
+import { json } from 'co-body'
+
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { NotifyInvoiceDTO } from '../../vtex/dto/invoice.dto'
 import type { CarrierValues } from '../../shared/enums/carriers.enum'
@@ -6,7 +7,7 @@ import type { TrackingInfoDTO } from '../../shared/clients/carrier-client'
 import type { TrackAndInvoiceRequestDTO } from '../dto/order-api'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
-import { VtexAuthData } from '../../vtex/dto/auth.dto';
+import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 
 export async function trackAndInvoiceMiddleware(
   ctx: Context,

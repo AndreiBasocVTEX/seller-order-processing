@@ -46,7 +46,7 @@ export default new Service({
   clients,
   routes: {
     updateTrackingStatus: method({
-      PUT: [updateTrackingStatusMiddleware],
+      POST: [updateTrackingStatusMiddleware],
     }),
     trackAndInvoice: method({
       POST: [trackAndInvoiceMiddleware],
