@@ -7,8 +7,8 @@ export interface UpdateTrackingStatusRequestDTO extends OrderAwareVtexRequest<Up
 
 export interface UpdateTrackingStatusPayload {
   isDelivered: boolean
-  deliveredDate: string
-  events: VtexTrackingEvent[]
+  deliveredDate?: string
+  events?: VtexTrackingEvent[]
 }
 export interface VtexTrackingEvent {
   city?: string

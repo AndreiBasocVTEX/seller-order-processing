@@ -31,7 +31,7 @@ export async function updateTrackingStatusMiddleware(
       orderId
     )
 
-    const { courier: carrierName } = order?.packageAttachment?.packages.pop()
+    const { courier: carrierName, invoiceNumber } = order?.packageAttachment?.packages.pop()
 
     const carrier = carrierClient.getCarrierClientByName(
       ctx,
@@ -48,10 +48,11 @@ export async function updateTrackingStatusMiddleware(
       trackingInfoPayload.payload.events = undefined
     }
 
-    const trackAwbInfoVtexRes = await vtexOrderClient.trackAWBInfo({
-      vtexAuthData,
+    const trackAwbInfoVtexRes = await vtexOrderClient.updateTrackingStatus({
+      authData: vtexAuthData,
       payload: trackingInfoPayload.payload,
-      pathParams: trackingInfoPayload.pathParams,
+      orderId,
+      invoiceNumber
     })
 
     ctx.status = 200
