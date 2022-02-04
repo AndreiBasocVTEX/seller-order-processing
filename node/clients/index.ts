@@ -1,8 +1,8 @@
 import { IOClients } from '@vtex/api'
 
 import { CargusClient } from '../features/cargus'
+import { FancourierClient } from '../features/fancourier'
 import Carrier from './carrier'
-import Fancourier from './carriers/fancourier/fancourier'
 import Innoship from './carriers/innoship/innoship'
 import OrderClient from './order'
 import Sameday from './carriers/sameday/sameday'
@@ -13,7 +13,7 @@ export class Clients extends IOClients {
   }
 
   public get fancourier() {
-    return this.getOrSet('fancourier', Fancourier)
+    return this.getOrSet('fancourier', FancourierClient)
   }
 
   public get cargus() {
