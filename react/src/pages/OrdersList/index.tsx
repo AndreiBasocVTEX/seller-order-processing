@@ -558,7 +558,11 @@ const OrdersList: FC = () => {
             return (
               <>
                 <Button
-                  variation="secondary"
+                  variation={
+                    getInvoiceNumber(rowData) === 'No invoice'
+                      ? 'primary'
+                      : 'secondary'
+                  }
                   block
                   disabled={rowData.status === 'canceled'}
                   onClick={() => {
