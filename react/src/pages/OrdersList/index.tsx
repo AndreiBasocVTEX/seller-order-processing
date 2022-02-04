@@ -705,20 +705,6 @@ const OrdersList: FC = () => {
     ]
   }
 
-  function DatePickerObject({ value, onChange }: any) {
-    return (
-      <div className="w-100">
-        <DatePicker
-          value={value || new Date()}
-          onChange={(date: any) => {
-            onChange(date)
-          }}
-          locale="pt-BR"
-        />
-      </div>
-    )
-  }
-
   function DatePickerRangeObject({ value, onChange }: any) {
     return (
       <div className="flex flex-column w-100">
@@ -821,12 +807,6 @@ const OrdersList: FC = () => {
             },
             verbs: [
               {
-                label: 'is',
-                value: '=',
-                object: (props: any) => <DatePickerObject {...props} />,
-              },
-              {
-                label: 'is between',
                 value: 'between',
                 object: (props: any) => <DatePickerRangeObject {...props} />,
               },
