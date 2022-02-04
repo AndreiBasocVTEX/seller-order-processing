@@ -1,4 +1,6 @@
-import { json } from 'co-body'
+import { json } from 'co-body';
+import { IVtexOrder } from '../../vtex/dto/order.dto';
+import { NotifyInvoiceDTO } from "../../vtex/dto/invoice.dto";
 
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { NotifyInvoiceDTO } from '../../vtex/dto/invoice.dto'

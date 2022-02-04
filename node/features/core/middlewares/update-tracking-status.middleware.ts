@@ -1,8 +1,9 @@
-import type { CarrierValues } from '../../shared/enums/carriers.enum'
-import type { VtexAuthData } from '../../shared/dto/VtexAuthData'
-import { formatError } from '../utils/formatError'
-import { getVtexAppSettings } from '../utils/getVtexAppSettings'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import { CarrierValues } from '../../shared/enums/carriers.enum';
+import { VtexAuthData } from '../../vtex/dto/auth.dto';
+import { formatError } from '../utils/formatError';
+import { getVtexAppSettings } from '../utils/getVtexAppSettings';
+import { IVtexOrder } from '../../vtex/dto/order.dto';
+
 
 export async function updateTrackingStatusMiddleware(
   ctx: Context,
