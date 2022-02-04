@@ -8,8 +8,8 @@ import type {
   IVtexOrder,
 } from '../../../types/order-api'
 import type { VtexAuthData } from '../../../types/VtexAuthData'
-import { formatError } from '../../../utils/formatError'
-import { getVtexAppSettings } from '../../../utils/getVtexAppSettings'
+import { formatError } from '../utils/formatError'
+import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
 export async function updateTrackingStatusMiddleware(
   ctx: Context,

@@ -1,12 +1,6 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
-  IAuthDataSameday,
-  ISamedayAwbResponse,
-  ISamedayCountyData,
-  ISamedayTrackAWBResponse,
-} from '../../../types/sameday'
-import type {
   TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
@@ -17,9 +11,15 @@ import type {
   IBodyForRequestAwb,
   TrackingLabelParams,
 } from '../../../types/carrier-client'
-import { createOrderPayload } from '../../../dto/sameday-order.dto'
+import type {
+  ISamedayCountyData,
+  ISamedayAwbResponse,
+  ISamedayTrackAWBResponse,
+} from '../dto/sameday-awb.dto'
+import type { IAuthDataSameday } from '../models/sameday-auth.model'
+import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
 
-export default class Sameday extends CarrierClient {
+export default class SamedayClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     // URL for demo environment
     super('https://sameday-api.demo.zitec.com', ctx, {

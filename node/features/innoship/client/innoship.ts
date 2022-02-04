@@ -6,18 +6,18 @@ import type {
   VtexEvent,
 } from '../../../types/order-api'
 import type {
-  IInnoshipAwbResponse,
-  IInnoshipTrackAwbResponse,
-} from '../../../types/innoship'
-import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
 } from '../../../types/carrier-client'
 import { CarrierClient } from '../../../types/carrier-client'
-import { createOrderPayload } from '../../../dto/sameday-order.dto'
+import type {
+  IInnoshipAwbResponse,
+  IInnoshipTrackAwbResponse,
+} from '../dto/innoship-awb.dto'
+import { createOrderPayload } from '../helpers/innoship-create-payload.helper'
 
-export default class Innoship extends CarrierClient {
+export default class InnoshipClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://api.innoship.io/api', ctx, {
       ...options,
@@ -48,9 +48,9 @@ export default class Innoship extends CarrierClient {
   }
 
   protected async requestAWB({
+    order,
     settings,
     trackingRequest,
-    order,
   }: IBodyForRequestAwb): Promise<IInnoshipAwbResponse> {
     const warehouseId = settings.innoship__warehouseId
 
@@ -74,8 +74,8 @@ export default class Innoship extends CarrierClient {
     trackingRequest: TrackingRequestDTO
   }) {
     const awbInfo: IInnoshipAwbResponse = await this.requestAWB({
-      settings,
       order,
+      settings,
       trackingRequest,
     })
 

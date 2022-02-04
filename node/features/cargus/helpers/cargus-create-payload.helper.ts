@@ -1,8 +1,9 @@
 import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
 import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
 import {
-  cargusConstants,
   defaultEnvelopeCount,
+  priceMultiplier,
+  promissory,
   shipmentPaymentMethod,
 } from './cargus-constants.helper'
 import {
@@ -57,13 +58,9 @@ export function createCargusOrderPayload(
 
   const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
   const paymentPromissory =
-    order.paymentData.transactions[0].payments[0].group ===
-    cargusConstants.promissory
+    order.paymentData.transactions[0].payments[0].group === promissory
 
-  const payment =
-    firstDigits || paymentPromissory
-      ? 0
-      : value / cargusConstants.price_multiplier
+  const payment = firstDigits || paymentPromissory ? 0 : value / priceMultiplier
 
   let county = ''
   let locality = ''

@@ -1,11 +1,11 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
+import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
+import { getTotalWeight } from '../../core/helpers/helpers.dto'
 import {
   defaultCountryCode,
   awbContent,
   awbSourceChannel,
-} from '../utils/cargusConstants'
-import { constants } from '../utils/fancourierConstants'
-import { getTotalWeight } from '../features/core/helpers/helpers.dto'
+  priceMultiplier,
+} from './innoship-constants.helper'
 
 export function createOrderPayload(
   order: IVtexOrder,
@@ -14,17 +14,13 @@ export function createOrderPayload(
 ) {
   const { params: trackingParams } = trackingRequest
 
-  const totalWeight = trackingParams.weight
-    ? trackingParams.weight
-    : getTotalWeight(order)
+  const totalWeight = trackingParams.weight ?? getTotalWeight(order)
 
   const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const payment = firstDigits ? 0 : order.value / constants.price_multiplier
+  const payment = firstDigits ? 0 : order.value / priceMultiplier
   const { address } = order.shippingData
 
-  const numberOfParcels = trackingParams.numberOfParcels
-    ? trackingParams.numberOfParcels
-    : 1
+  const numberOfParcels = trackingParams.numberOfParcels ?? 1
 
   const parcels = []
 
@@ -37,7 +33,7 @@ export function createOrderPayload(
   })
 
   // TODO interface for InnoshipPayload
-  return {
+  const innoshipPayload = {
     serviceId: 1,
     shipmentDate: new Date().toISOString(),
     addressFrom: null,
@@ -71,4 +67,6 @@ export function createOrderPayload(
       bankRepaymentAmount: payment,
     },
   }
+
+  return innoshipPayload
 }

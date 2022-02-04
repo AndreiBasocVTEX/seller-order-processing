@@ -1,11 +1,16 @@
-import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
-import type { ISamedayAwbPayload } from '../types/sameday'
-import { pickupServiceId } from '../utils/cargusConstants'
-import { samedayConstants, selectedPickup } from '../utils/samedayConstants'
+import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
 import {
-  getTotalDiscount,
   getTotalWeight,
-} from '../features/core/helpers/helpers.dto'
+  getTotalDiscount,
+} from '../../core/helpers/helpers.dto'
+import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'
+import {
+  promissory,
+  priceMultiplier,
+  selectedPickup,
+  pickupServiceId,
+  pickup,
+} from './sameday-constants.helper'
 
 export function createOrderPayload(
   order: IVtexOrder,
@@ -48,13 +53,9 @@ export function createOrderPayload(
 
   const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
   const paymentPromissory =
-    order.paymentData.transactions[0].payments[0].group ===
-    samedayConstants.promissory
+    order.paymentData.transactions[0].payments[0].group === promissory
 
-  const payment =
-    firstDigits || paymentPromissory
-      ? 0
-      : value / samedayConstants.price_multiplier
+  const payment = firstDigits || paymentPromissory ? 0 : value / priceMultiplier
 
   const samedayPayload = {
     awbPayment: 1,
@@ -82,7 +83,7 @@ export function createOrderPayload(
     thirdPartyPickup: 0,
   }
 
-  if (order.shippingData.address.addressType === samedayConstants.pickup) {
+  if (order.shippingData.address.addressType === pickup) {
     // samedayPayload.service = pickupServiceId
     // samedayPayload.awbRecipient.countyString = order.shippingData.address.state
     samedayPayload.awbRecipient.cityString = order.shippingData.address.city

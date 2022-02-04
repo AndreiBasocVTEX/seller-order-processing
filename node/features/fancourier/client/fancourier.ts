@@ -2,7 +2,6 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import FormData from 'form-data'
 import ObjectsToCsv from 'objects-to-csv'
 
-import type { IAuthDataFancourier } from '../../../types/fancourier'
 import type {
   TrackingRequestDTO,
   IVtexOrder,
@@ -14,7 +13,8 @@ import type {
   TrackingLabelParams,
 } from '../../../types/carrier-client'
 import { CarrierClient } from '../../../types/carrier-client'
-import { createFancourierOrderPayload } from '../../../dto/fancourier-order.dto'
+import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
+import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
 
 type FormDataAcceptedTypes =
   | string

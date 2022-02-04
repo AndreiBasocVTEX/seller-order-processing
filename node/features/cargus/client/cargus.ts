@@ -16,7 +16,7 @@ import type {
   ICargusAwbResponse,
   ICargusTrackAwbResponse,
 } from '../dto/cargus-awb.dto'
-import { createCargusOrderPayload } from '../helpers/create-payload.helper'
+import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
 
 export default class CargusClient extends CarrierClient {

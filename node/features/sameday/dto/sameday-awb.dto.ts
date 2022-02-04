@@ -1,8 +1,3 @@
-export interface IAuthDataSameday {
-  token: string
-  expire_at: Date
-}
-
 export interface ISamedayAwbPayload {
   awbPayment: number
   awbRecipient: AwbRecipient
