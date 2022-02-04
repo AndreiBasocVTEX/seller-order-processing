@@ -9,7 +9,10 @@ import {
   pickupServiceId,
 } from '../utils/cargusConstants'
 import { constants } from '../utils/fancourierConstants'
-import { getTotalDiscount, getTotalWeight } from './helpers.dto'
+import {
+  getTotalDiscount,
+  getTotalWeight,
+} from '../features/core/helpers/helpers.dto'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
