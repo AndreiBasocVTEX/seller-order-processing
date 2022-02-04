@@ -1,9 +1,8 @@
-import { OrderAwareVtexRequest } from "./common.dto";
+import type { OrderAwareVtexRequest } from './common.dto'
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface UpdateTrackingStatusRequestDTO extends OrderAwareVtexRequest<UpdateTrackingStatusPayload> {
-
-}
+export interface UpdateTrackingStatusRequestDTO
+  extends OrderAwareVtexRequest<UpdateTrackingStatusPayload> {}
 
 export interface UpdateTrackingStatusPayload {
   isDelivered: boolean

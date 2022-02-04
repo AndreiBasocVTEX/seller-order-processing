@@ -3,8 +3,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type { VtexAuthData } from '../dto/auth.dto'
 import type { ITrackAwbInfoResponse } from '../../core/dto/order-api'
-import { NotifyInvoiceRequestDTO } from "../dto/invoice.dto"
-import { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
+import type { NotifyInvoiceRequestDTO } from '../dto/invoice.dto'
+import type { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -31,7 +31,9 @@ export default class OrderClient extends ExternalClient {
     })
   }
 
-  public async trackAndInvoice(request: NotifyInvoiceRequestDTO): Promise<unknown> {
+  public async trackAndInvoice(
+    request: NotifyInvoiceRequestDTO
+  ): Promise<unknown> {
     return this.http.post(
       `/api/oms/pvt/orders/${request.orderId}/invoice`,
       request.payload,
@@ -44,7 +46,9 @@ export default class OrderClient extends ExternalClient {
     )
   }
 
-  public async updateTrackingStatus(request: UpdateTrackingStatusRequestDTO): Promise<ITrackAwbInfoResponse> {
+  public async updateTrackingStatus(
+    request: UpdateTrackingStatusRequestDTO
+  ): Promise<ITrackAwbInfoResponse> {
     const { orderId, invoiceNumber } = request
 
     return this.http.put(

@@ -1,11 +1,11 @@
-import { VtexAuthData } from "./auth.dto";
+import type { VtexAuthData } from './auth.dto'
 
 export interface VtexRequest<T> {
-  authData: VtexAuthData;
+  authData: VtexAuthData
   payload: T
 }
 
 export interface OrderAwareVtexRequest<T> extends VtexRequest<T> {
-  orderId: string;
-  invoiceNumber?: string;
+  orderId: string
+  invoiceNumber?: string
 }
