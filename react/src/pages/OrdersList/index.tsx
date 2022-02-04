@@ -602,28 +602,21 @@ const OrdersList: FC = () => {
               )
             }
 
-            return (
-              <div className="br-pill bg-muted-2 w-100 tc white-90 truncate fw4 ph4 pv2">
-                AWB nu a fost generat
-              </div>
-            )
+            return null
           },
         },
         Invoice: {
           title: 'Factura',
           width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
-            return (
-              <>
+            if (getInvoiceNumber(rowData) !== 'No invoice') {
+              return (
                 <Button
                   variation="secondary"
                   block
                   disabled={rowData.status === 'canceled'}
                   onClick={() => {
-                    // printAwb(rowData.orderId)
-                    if (getInvoiceNumber(rowData) !== 'No invoice') {
-                      printInvoice(getInvoiceNumber(rowData))
-                    }
+                    printInvoice(getInvoiceNumber(rowData))
                   }}
                 >
                   <span style={{ paddingRight: '10px' }}>
@@ -632,8 +625,10 @@ const OrdersList: FC = () => {
                   </span>
                   {getInvoiceNumber(rowData)}
                 </Button>
-              </>
-            )
+              )
+            }
+
+            return null
           },
         },
       },
