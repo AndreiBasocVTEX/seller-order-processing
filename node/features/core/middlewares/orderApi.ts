@@ -1,6 +1,6 @@
-import type { VtexAuthData } from '../types/VtexAuthData'
-import { formatError } from '../utils/formatError'
-import { getVtexAppSettings } from '../utils/getVtexAppSettings'
+import type { VtexAuthData } from '../../../types/VtexAuthData'
+import { formatError } from '../../../utils/formatError'
+import { getVtexAppSettings } from '../../../utils/getVtexAppSettings'
 
 export async function getVtexOrderData(
   ctx: Context,

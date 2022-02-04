@@ -2,12 +2,11 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import { status } from './middlewares/status'
 import {
   trackingLabelMiddleware,
   trackAndInvoiceMiddleware,
   updateTrackingStatusMiddleware,
-} from './middlewares/carrier.middleware'
+} from './features/core/middlewares/carrier.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -48,10 +47,6 @@ declare global {
 export default new Service({
   clients,
   routes: {
-    // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
-    status: method({
-      GET: [status],
-    }),
     updateTrackingStatus: method({
       PUT: [updateTrackingStatusMiddleware],
     }),

@@ -6,14 +6,8 @@ import Fancourier from './carriers/fancourier/fancourier'
 import Innoship from './carriers/innoship/innoship'
 import OrderClient from './order'
 import Sameday from './carriers/sameday/sameday'
-import Status from './status'
 
-// Extend the default IOClients implementation with our own custom clients.
 export class Clients extends IOClients {
-  public get status() {
-    return this.getOrSet('status', Status)
-  }
-
   public get orderApi() {
     return this.getOrSet('orderApi', OrderClient)
   }

@@ -11,13 +11,13 @@ import type {
   TrackingLabelParams,
 } from '../../../types/carrier-client'
 import { CarrierClient } from '../../../types/carrier-client'
-import { CarriersEnum } from '../../../core/enums/carriers.enum'
+import { CarriersEnum } from '../../core/enums/carriers.enum'
 import type {
-  IAuthDataCargus,
   ICargusAwbResponse,
   ICargusTrackAwbResponse,
 } from '../dto/cargus-awb.dto'
 import { createCargusOrderPayload } from '../helpers/create-payload.helper'
+import type { IAuthDataCargus } from '../models/cargus-auth.model'
 
 export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {

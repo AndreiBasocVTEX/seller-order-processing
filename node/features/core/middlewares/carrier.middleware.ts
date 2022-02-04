@@ -1,12 +1,15 @@
 import { json } from 'co-body'
 
-import type { NotifyInvoceDTO } from '../clients/vtex/notify-invoice.dto'
-import type { CarrierValues } from '../core/enums/carriers.enum'
-import type { TrackingInfoDTO } from '../types/carrier-client'
-import type { TrackAndInvoiceRequestDTO, IVtexOrder } from '../types/order-api'
-import type { VtexAuthData } from '../types/VtexAuthData'
-import { formatError } from '../utils/formatError'
-import { getVtexAppSettings } from '../utils/getVtexAppSettings'
+import type { NotifyInvoiceDTO } from '../dto/order.dto'
+import type { CarrierValues } from '../enums/carriers.enum'
+import type { TrackingInfoDTO } from '../../../types/carrier-client'
+import type {
+  TrackAndInvoiceRequestDTO,
+  IVtexOrder,
+} from '../../../types/order-api'
+import type { VtexAuthData } from '../../../types/VtexAuthData'
+import { formatError } from '../../../utils/formatError'
+import { getVtexAppSettings } from '../../../utils/getVtexAppSettings'
 
 export async function updateTrackingStatusMiddleware(
   ctx: Context,
@@ -135,7 +138,7 @@ export async function trackAndInvoiceMiddleware(
     }
 
     // TODO: finish this
-    const notifyInvoiceRequest: NotifyInvoceDTO = {
+    const notifyInvoiceRequest: NotifyInvoiceDTO = {
       ...trackingInfoPayload,
       type: 'Output',
       invoiceNumber: 'string',

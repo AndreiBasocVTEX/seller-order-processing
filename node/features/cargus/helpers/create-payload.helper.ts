@@ -5,7 +5,10 @@ import {
   defaultEnvelopeCount,
   shipmentPaymentMethod,
 } from './cargus-constants.helper'
-import { getTotalDiscount, getTotalWeight } from './helpers.dto'
+import {
+  getTotalDiscount,
+  getTotalWeight,
+} from '../../core/helpers/helpers.dto'
 
 export function createCargusOrderPayload(
   order: IVtexOrder,

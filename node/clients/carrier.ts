@@ -1,8 +1,11 @@
 import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { CarrierIDS, CarrierValues } from '../core/enums/carriers.enum'
-import { CarriersEnum } from '../core/enums/carriers.enum'
+import type {
+  CarrierIDS,
+  CarrierValues,
+} from '../features/core/enums/carriers.enum'
+import { CarriersEnum } from '../features/core/enums/carriers.enum'
 
 export default class Carrier extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {

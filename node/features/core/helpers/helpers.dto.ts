@@ -1,4 +1,4 @@
-import type { Item, IVtexOrder } from '../types/order-api'
+import type { Item, IVtexOrder } from '../../../types/order-api'
 
 export function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {

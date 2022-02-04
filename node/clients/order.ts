@@ -4,7 +4,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexAuthData } from '../types/VtexAuthData'
 import type { ITrackAwbInfoResponse } from '../types/order-api'
 import type { ITrackAwbInfoPayload } from '../types/carrier-client'
-import type { NotifyInvoceDTO } from '../core/dto/order.dto'
+import type { NotifyInvoiceDTO } from '../features/core/dto/order.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -34,7 +34,7 @@ export default class OrderClient extends ExternalClient {
   public async trackAndInvoice(
     vtexAuthData: VtexAuthData,
     orderId: string,
-    notifyInvoiceRequest: NotifyInvoceDTO
+    notifyInvoiceRequest: NotifyInvoiceDTO
   ): Promise<unknown> {
     return this.http.post(
       `/api/oms/pvt/orders/${orderId}/invoice`,

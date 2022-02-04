@@ -1,4 +1,4 @@
-export interface NotifyInvoceDTO {
+export interface NotifyInvoiceDTO {
   type: 'Output'
   invoiceNumber: string
   courier: string

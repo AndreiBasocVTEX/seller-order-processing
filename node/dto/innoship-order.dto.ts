@@ -5,7 +5,7 @@ import {
   awbSourceChannel,
 } from '../utils/cargusConstants'
 import { constants } from '../utils/fancourierConstants'
-import { getTotalWeight } from './helpers.dto'
+import { getTotalWeight } from '../features/core/helpers/helpers.dto'
 
 export function createOrderPayload(
   order: IVtexOrder,
@@ -47,8 +47,9 @@ export function createOrderPayload(
       country: defaultCountryCode,
       countyName: address.state,
       localityName: address.city,
-      addressText: `${address.street} ${address.number} ${address.neighborhood || ''
-        } ${address.complement || ''} ${address.reference || ''}`,
+      addressText: `${address.street} ${address.number} ${
+        address.neighborhood || ''
+      } ${address.complement || ''} ${address.reference || ''}`,
       postalCode: address.postalCode,
       phone: order.clientProfileData.phone,
       email: order.clientProfileData.email,

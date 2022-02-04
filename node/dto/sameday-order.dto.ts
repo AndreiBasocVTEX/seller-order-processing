@@ -2,7 +2,10 @@ import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
 import type { ISamedayAwbPayload } from '../types/sameday'
 import { pickupServiceId } from '../utils/cargusConstants'
 import { samedayConstants, selectedPickup } from '../utils/samedayConstants'
-import { getTotalDiscount, getTotalWeight } from './helpers.dto'
+import {
+  getTotalDiscount,
+  getTotalWeight,
+} from '../features/core/helpers/helpers.dto'
 
 export function createOrderPayload(
   order: IVtexOrder,

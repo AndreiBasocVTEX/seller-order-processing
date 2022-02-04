@@ -53,12 +53,6 @@ export interface ICargusAwbPayload {
   Transit2DepositFinger?: string
 }
 
-export interface IAuthDataCargus {
-  UserName: string
-  Password: string
-  'Ocp-Apim-Subscription-Key'?: string
-}
-
 export interface ShippingCost {
   BaseCost: number
   ExtraKmCost: number
