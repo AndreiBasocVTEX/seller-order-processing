@@ -1,10 +1,9 @@
 import { json } from 'co-body';
-import { NotifyInvoiceDTO } from '../../vtex/dto/order.dto';
+import { IVtexOrder, NotifyInvoiceDTO } from '../../vtex/dto/order.dto';
 import { CarrierValues } from '../../shared/enums/carriers.enum';
 import { TrackingInfoDTO } from '../../shared/clients/carrier-client';
 import {
   TrackAndInvoiceRequestDTO,
-  IVtexOrder
 } from '../dto/order-api';
 import { VtexAuthData } from '../../shared/dto/VtexAuthData';
 import { formatError } from '../utils/formatError';

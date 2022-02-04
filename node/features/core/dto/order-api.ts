@@ -1,12 +1,3 @@
-export type IVtexOrder = any
-export type Item = any
-
-export interface IVtexInvoiceResponse {
-  date: string
-  orderId: string
-  receipt: string
-}
-
 export interface TrackAndInvoiceRequestDTO {
   invoice: InvoiceRequestDTO
   tracking: TrackingRequestDTO

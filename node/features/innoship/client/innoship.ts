@@ -2,7 +2,6 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
   TrackingRequestDTO,
-  IVtexOrder,
   VtexEvent,
 } from '../../core/dto/order-api'
 import type {
@@ -11,6 +10,7 @@ import type {
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
+import { IVtexOrder } from '../../vtex/dto/order.dto'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,

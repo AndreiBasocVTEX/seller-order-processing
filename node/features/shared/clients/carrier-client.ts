@@ -1,7 +1,9 @@
 import type { IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-import type { TrackingRequestDTO, IVtexOrder, VtexEvent } from '../../core/dto/order-api'
+import type { TrackingRequestDTO } from '../../core/dto/order-api'
+import { IVtexOrder } from '../../vtex/dto/order.dto'
+import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
 
 export interface ITrackAwbInfoPayload {
   pathParams: {
@@ -11,7 +13,7 @@ export interface ITrackAwbInfoPayload {
   payload: {
     isDelivered: boolean
     deliveredDate?: string
-    events?: VtexEvent[]
+    events?: VtexTrackingEvent[]
   }
 }
 

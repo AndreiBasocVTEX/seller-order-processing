@@ -1,3 +1,5 @@
+export type IVtexOrder = any
+export type Item = any
 export interface NotifyInvoiceDTO {
   type: 'Output'
   invoiceNumber: string
