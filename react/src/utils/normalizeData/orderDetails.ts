@@ -6,11 +6,12 @@ const getPaymentMethod = (paymentData: string): string => {
 
   return paymentData.match(/\b(\w+)$/g)?.toString() || 'Lipsa Date'
 }
+
 const getOrderTotals = (orderData: IOrder) => {
   const orderTotals = {}
 
   orderData.totals.map((element) => {
-    Object.assign(orderTotals, {
+    return Object.assign(orderTotals, {
       [element.id.toLocaleLowerCase()]: element.value,
     })
   })
@@ -85,7 +86,7 @@ export const formatDate = (
 ): string => {
   if (!date || Object.keys(config).length < 2) return 'Lipsa Date'
 
-  //@ts-expect-error Date constructor return
+  // @ts-expect-error Date constructor return
   // type doesn't include exception 'Invalid Date'
   if (new Date(date) === 'Invalid Date') return 'Lipsa date'
 
@@ -100,28 +101,34 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
     hour: 'numeric',
     minute: 'numeric',
     second: 'numeric',
-    timeZone: "Europe/Bucharest"
+    timeZone: 'Europe/Bucharest',
   })
+
   const estimatedShipDate = formatDate(
     orderData?.shippingData?.logisticsInfo[0]?.shippingEstimateDate,
     {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      timeZone: "Europe/Bucharest"
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      timeZone: 'Europe/Bucharest',
     }
-  );
-  const packageData = orderData?.packageAttachment.packages[orderData?.packageAttachment.packages.length - 1];
+  )
+
+  const packageData =
+    orderData?.packageAttachment.packages[
+      orderData?.packageAttachment.packages.length - 1
+    ]
+
   const invoiceIssuanceDate = formatDate(packageData?.issuanceDate, {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    timeZone: "Europe/Bucharest"
-  });
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    timeZone: 'Europe/Bucharest',
+  })
 
   return {
     clientData: {
-      firstName: orderData.clientProfileData.firstName || "Lipsa Date",
+      firstName: orderData.clientProfileData.firstName || 'Lipsa Date',
       lastName: orderData.clientProfileData.lastName || 'Lipsa Date',
       phone: orderData.clientProfileData.phone || 'Lipsa Date',
       email: orderData.clientProfileData.email || 'Lipsa Date',
@@ -132,25 +139,25 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
       invoicedEntityType: getInvoicedEntityType(
         orderData.clientProfileData.isCorporate
       ),
-      postalCode: orderData.invoiceData.address.postalCode || "Lipsa Date",
-      phone: orderData.invoiceData.address.number || "Lipsa Date",
+      postalCode: orderData.invoiceData.address.postalCode || 'Lipsa Date',
+      phone: orderData.invoiceData.address.number || 'Lipsa Date',
 
       state: formatOrderState(orderData),
-      street: orderData.invoiceData.address.street || "Lipsa Date"
+      street: orderData.invoiceData.address.street || 'Lipsa Date',
     },
     items: orderData.items,
     orderDate,
     orderId: orderData.orderId,
     orderTotals: getOrderTotals(orderData),
-    marketPlaceOrderId: orderData.marketplaceOrderId || "Lipsa Date",
+    marketPlaceOrderId: orderData.marketplaceOrderId || 'Lipsa Date',
     packageData: {
-      courier: packageData?.courier || "Lipsa Date",
-      invoiceNumber: packageData?.invoiceNumber || "Lipsa Date",
-      invoiceUrl: packageData?.invoiceUrl || "Lipsa Date",
+      courier: packageData?.courier || 'Lipsa Date',
+      invoiceNumber: packageData?.invoiceNumber || 'Lipsa Date',
+      invoiceUrl: packageData?.invoiceUrl || 'Lipsa Date',
       invoiceValue: packageData?.invoiceValue || 0,
-      issuanceDate: invoiceIssuanceDate || "Lipsa Date",
-      trackingNumber: packageData?.trackingNumber || "Lipsa Date",
-      trackingUrl: packageData?.trackingUrl || "Lipsa Date"
+      issuanceDate: invoiceIssuanceDate || 'Lipsa Date',
+      trackingNumber: packageData?.trackingNumber || 'Lipsa Date',
+      trackingUrl: packageData?.trackingUrl || 'Lipsa Date',
     },
     paymentMethod: getPaymentMethod(orderData?.openTextField?.value),
     shippingAddress: {

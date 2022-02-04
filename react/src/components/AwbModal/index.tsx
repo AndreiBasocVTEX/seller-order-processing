@@ -12,31 +12,16 @@ import {
 import axios from 'axios'
 import type { FC } from 'react'
 
-import type { IOrder } from './typings/order'
-import fancourier from './logos/fancourier.png'
-import cargus from './logos/cargus.png'
-import innoship from './logos/innoship.png'
-import sameday from './logos/sameday.png'
-import facturis from './logos/facturis.png'
-import smartbill from './logos/smartbill.png'
-import download from './logos/download.png'
+import fancourier from '../../public/logos/fancourier.png'
+import cargus from '../../public/logos/cargus.png'
+import innoship from '../../public/logos/innoship.png'
+import sameday from '../../public/logos/sameday.png'
+import facturis from '../../public/logos/facturis.png'
+import smartbill from '../../public/logos/smartbill.png'
+import download from '../../public/logos/download.png'
+import type { IOrderAwbProps } from '../../types/awbModal'
 
-interface IOrderAwb {
-  orderId: string
-  orderValue: string
-  courier: string
-  invoiceNumber?: string
-}
-
-type Props = {
-  rowData: IOrder | undefined
-  isClosed: boolean
-  setIsClosed: (v: boolean) => void
-  setTrackingNum: (v: { [k: string]: string }) => void
-  setOrderAwb: (v: (a: IOrderAwb[]) => IOrderAwb[]) => void
-}
-
-const RequestAwbModal: FC<Props> = ({
+const RequestAwbModal: FC<IOrderAwbProps> = ({
   rowData,
   isClosed,
   setIsClosed,
@@ -81,8 +66,6 @@ const RequestAwbModal: FC<Props> = ({
         }
       )
 
-      // console.log('GETORDERdata', data.updatedIt03c2116e632fc88631c50b9bc58d32a2182149e7ems.trackingNumber)
-      // console.log('GETORDERdata', data.updatedItems)
       setTrackingNum({
         [data.updatedItems.orderId]: data.updatedItems.trackingNumber,
       })
@@ -93,7 +76,6 @@ const RequestAwbModal: FC<Props> = ({
             el.orderValue = data.updatedItems.trackingNumber
             el.courier = data.updatedItems.courier
             el.invoiceNumber = invoiceNum
-            console.log('MATCH SET', data)
           }
 
           return el
@@ -110,11 +92,9 @@ const RequestAwbModal: FC<Props> = ({
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
     e.preventDefault()
-    console.log('clicked')
     setIsClosed(!isClosed)
     setInvoiceNum('')
     rowData ? getOrderData(rowData?.orderId) : null
-    console.log('submitted')
   }
 
   return (

@@ -8,38 +8,24 @@ import {
   Table,
   Tag,
   Link,
-  // ActionMenu,
   Tooltip,
   Pagination,
-  // Toggle,
   Totalizer,
-  // InputSearch,
-  FilterBar,
   Input,
-  Checkbox,
   DatePicker,
+  FilterBar,
+  Checkbox,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
-import RequestAwbModal from '../requestAwbModal'
-import '../src/style.css'
-import type { IOrder } from '../typings/order'
-import AwbStatus from '../components/AwbStatus'
+import RequestAwbModal from '../../components/AwbModal'
+import '../../public/style.css'
+import type { IOrder } from '../../typings/order'
+import type { IOrderAwb, ITrackingObj } from '../../types/common'
+import AwbStatus from '../../components/AwbStatus'
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Save = require('@vtex/styleguide/lib/icon/Save').default
-
-interface ITrackingObj {
-  [orderId: string]: string
-}
-
-interface IOrderAwb {
-  orderId: string
-  orderValue: string
-  courier: string
-  payMethod?: any
-  invoiceNumber?: string
-}
 
 const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
@@ -70,7 +56,6 @@ const OrdersList: FC = () => {
 
   // for developement only, true = unlim awb generation, false = pdf download if there is a tracking number
   const devMode = false
-  // console.log(trackingNum)
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchTrackingNumbers = useCallback((orders: any[]) => {
@@ -82,9 +67,6 @@ const OrdersList: FC = () => {
       )
 
       const lastOrder = data.packageAttachment.packages.length - 1
-
-      console.log('PPPPPPPPP', data.packageAttachment)
-      // console.log('AAAAAAAAA', data.openTextField.value)
 
       setOrderAwb((prevState) => {
         return [
@@ -104,15 +86,12 @@ const OrdersList: FC = () => {
           },
         ]
       })
-      // }
     })
   }, [])
 
   const getItems = useCallback(
     async (newParams) => {
       let url = `/api/oms/pvt/orders?_stats=1&f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
-
-      // console.log('url_searchval', url, searchValue)
 
       if (searchValue !== '') {
         url += `&q=${searchValue}`
@@ -139,8 +118,6 @@ const OrdersList: FC = () => {
           currentItemTo: data.paging.perPage * data.paging.currentPage,
         })
         fetchTrackingNumbers(data.list)
-        // console.log('getItems', data.list)
-        console.log('getItemsDATA', data)
       } catch (err) {
         console.log(err)
       }
@@ -279,8 +256,6 @@ const OrdersList: FC = () => {
       const typeOfResponse =
         printOrder?.courier === 'Innoship' ? undefined : 'blob'
 
-      console.log('printAwbOrder', orderAwb)
-      console.log('printAWBservice', printOrder?.courier)
       try {
         const { data } = await axios.get(
           `/_${printOrder?.courier.toLowerCase()}/printPDF`,
@@ -319,7 +294,6 @@ const OrdersList: FC = () => {
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
-      // renders courier+value. Those values are stored in state in getTrackingNumber
       return order
         ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
         : null
@@ -344,9 +318,13 @@ const OrdersList: FC = () => {
         (payOrder) => payOrder?.orderId === rowData?.orderId
       )
 
-      console.log(order)
+      if (order?.payMethod) {
+        const orderMatched = order.payMethod.match(/\b(\w+)$/g) as string[]
 
-      return order ? order.payMethod?.match(/\b(\w+)$/g)[0] : ''
+        return orderMatched[0] || ''
+      }
+
+      return ''
     },
     [orderAwb]
   )
@@ -357,7 +335,13 @@ const OrdersList: FC = () => {
         (payOrder) => payOrder?.orderId === rowData?.orderId
       )
 
-      return order ? order.payMethod?.match(/\d/g).join('') : ''
+      if (order?.payMethod) {
+        const orderMatched = order.payMethod.match(/\d/g) as string[]
+
+        return orderMatched.join('') || ''
+      }
+
+      return ''
     },
     [orderAwb]
   )
@@ -391,7 +375,6 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
-    console.log('PAG_PREV', newParams)
   }
 
   const handleRowsChange = useCallback((e: unknown, value: number) => {
@@ -403,10 +386,12 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     getItems(paginationParams)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trackingNum])
 
   const handleInputSearchChange = useCallback(
@@ -421,8 +406,8 @@ const OrdersList: FC = () => {
           pages: paginationParams.paging.pages,
         },
       })
-      console.log('SEARCH_V', searchValue)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [paginationParams, searchValue]
   )
 
@@ -562,7 +547,7 @@ const OrdersList: FC = () => {
         paymentNames: {
           title: 'Pay Method',
           width: 100,
-          cellRenderer: ({ rowData }: { rowData: IOrder }): JSX.Element => {
+          cellRenderer: ({ rowData }: { rowData: IOrder }): string => {
             return getPayMethod(rowData)
           },
         },
@@ -653,6 +638,7 @@ const OrdersList: FC = () => {
         },
       },
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getPayMethod,
       displayAwbInfoButton,
@@ -838,11 +824,8 @@ const OrdersList: FC = () => {
           status: {
             label: 'Status',
             renderFilterLabel: (st: any) => {
-              // console.log('f_STATE', st)
               if (!st || !st.object) {
                 // you should treat empty object cases only for alwaysVisibleFilters
-                // console.log('filterERROR')
-
                 return 'All'
               }
 
@@ -999,7 +982,6 @@ const OrdersList: FC = () => {
         rowData={currentRowData}
         isClosed={isClosed}
         setIsClosed={setIsClosed}
-        // service={service}
         setTrackingNum={setTrackingNum}
         setOrderAwb={setOrderAwb}
       />

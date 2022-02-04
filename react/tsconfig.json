@@ -10,5 +10,5 @@
     "target": "es2017",
     "jsx": "react"
   },
-  "include": ["./typings/*.d.ts", "./**/*.tsx", "./**/*.ts"]
+  "include": ["src/typings/*.d.ts", "./**/*.tsx", "./**/*.ts"]
 }
