@@ -1,5 +1,6 @@
 import { json } from 'co-body';
-import { IVtexOrder, NotifyInvoiceDTO } from '../../vtex/dto/order.dto';
+import { IVtexOrder } from '../../vtex/dto/order.dto';
+import { NotifyInvoiceDTO } from "../../vtex/dto/invoice.dto";
 import { CarrierValues } from '../../shared/enums/carriers.enum';
 import { TrackingInfoDTO } from '../../shared/clients/carrier-client';
 import {

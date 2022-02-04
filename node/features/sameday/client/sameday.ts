@@ -2,8 +2,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
   TrackingRequestDTO,
-  VtexEvent,
 } from '../../core/dto/order-api'
+import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
   GetAWBInfoParams,
@@ -147,7 +147,7 @@ export default class SamedayClient extends CarrierClient {
       }
     )
 
-    let trackingEvents: VtexEvent[] = []
+    let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
 
     if (

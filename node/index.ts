@@ -3,10 +3,10 @@ import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
 import {
-  trackingLabelMiddleware,
-  trackAndInvoiceMiddleware,
-  updateTrackingStatusMiddleware,
-} from './features/core/middlewares/carrier.middleware'
+  getTrackingLabelMiddleware,
+} from './features/core/middlewares/get-tracking-label.middleware'
+import { trackAndInvoiceMiddleware } from "./features/core/middlewares/track-and-invoice.middleware"
+import { updateTrackingStatusMiddleware } from "./features/core/middlewares/update-tracking-status.middleware"
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -54,7 +54,7 @@ export default new Service({
       POST: [trackAndInvoiceMiddleware],
     }),
     trackingLabel: method({
-      GET: [trackingLabelMiddleware],
+      GET: [getTrackingLabelMiddleware],
     }),
   },
 })

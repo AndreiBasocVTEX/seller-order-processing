@@ -2,8 +2,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
   TrackingRequestDTO,
-  VtexEvent,
 } from '../../core/dto/order-api'
+import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
@@ -121,7 +121,7 @@ export default class InnoshipClient extends CarrierClient {
       }
     )
 
-    let trackingEvents: VtexEvent[] = []
+    let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
 
     if (

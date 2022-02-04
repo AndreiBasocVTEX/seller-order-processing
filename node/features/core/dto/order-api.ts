@@ -25,13 +25,6 @@ export interface InvoiceRequestDTO {
   }
 }
 
-export interface VtexEvent {
-  city?: string
-  state?: string
-  description?: string
-  date?: string
-}
-
 export interface ITrackAwbInfoResponse {
   date: string
   orderId: string

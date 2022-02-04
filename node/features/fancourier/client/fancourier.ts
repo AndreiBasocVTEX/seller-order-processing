@@ -4,9 +4,8 @@ import ObjectsToCsv from 'objects-to-csv'
 
 import type {
   TrackingRequestDTO,
-  IVtexOrder,
-  VtexEvent,
 } from '../../core/dto/order-api'
+import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
@@ -15,6 +14,7 @@ import type {
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
 import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
+import { IVtexOrder } from '../../vtex/dto/order.dto'
 
 type FormDataAcceptedTypes =
   | string
@@ -194,7 +194,7 @@ export default class FancourierClient extends CarrierClient {
 
     const trackingHistory = updatedAwbInfo.split('\n')
 
-    let trackingEvents: VtexEvent[] = []
+    let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
 
     if (trackingHistory.length) {

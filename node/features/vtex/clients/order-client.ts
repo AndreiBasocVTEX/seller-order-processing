@@ -4,7 +4,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexAuthData } from '../../shared/dto/VtexAuthData'
 import type { ITrackAwbInfoResponse } from '../../core/dto/order-api'
 import type { ITrackAwbInfoPayload } from '../../shared/clients/carrier-client'
-import type { NotifyInvoiceDTO } from '../dto/order.dto'
+import { NotifyInvoiceDTO } from "../dto/invoice.dto"
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {

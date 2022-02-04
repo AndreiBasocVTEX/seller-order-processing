@@ -2,9 +2,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
   TrackingRequestDTO,
-  IVtexOrder,
-  VtexEvent,
 } from '../../core/dto/order-api'
+import { VtexTrackingEvent } from "../../vtex/dto/tracking.dto"
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
@@ -18,6 +17,7 @@ import type {
 } from '../dto/cargus-awb.dto'
 import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
+import { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -124,7 +124,7 @@ export default class CargusClient extends CarrierClient {
       }
     )
 
-    let trackingEvents: VtexEvent[] | undefined
+    let trackingEvents: VtexTrackingEvent[] | undefined
     let isDelivered = false
 
     if (
