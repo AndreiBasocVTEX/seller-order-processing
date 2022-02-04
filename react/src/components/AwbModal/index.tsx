@@ -7,10 +7,9 @@ import {
   NumericStepper,
   DatePicker,
   ActionMenu,
-  Spinner,
 } from 'vtex.styleguide'
 import axios from 'axios'
-import type { FC } from 'react'
+import type { FC, SetStateAction } from 'react'
 
 import fancourier from '../../public/logos/fancourier.png'
 import cargus from '../../public/logos/cargus.png'
@@ -29,6 +28,98 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   setOrderAwb,
 }) => {
   const [service, setService] = useState('')
+  const [courierSetManually, setCourierManually] = useState([
+    { value: 'FanCourier', label: 'FanCourier' },
+    { value: 'Cargus', label: 'Cargus' },
+    { value: 'SameDay', label: 'SameDay' },
+    { value: 'TNT', label: 'TNT' },
+    { value: 'DHL', label: 'DHL' },
+    { value: 'GLS', label: 'GLS' },
+    { value: 'DPD', label: 'DPD' },
+  ])
+
+  const dropDownOptions = [
+    {
+      label: (
+        <>
+          <img
+            alt="logo"
+            style={{ width: '20px', paddingRight: '6px' }}
+            src={cargus}
+          />{' '}
+          Cargus
+        </>
+      ),
+      onClick: () => {
+        setService('cargus')
+      },
+    },
+    {
+      label: (
+        <>
+          <img
+            alt="logo"
+            style={{ width: '20px', paddingRight: '6px' }}
+            src={sameday}
+          />{' '}
+          SameDay
+        </>
+      ),
+      disabled: false,
+      onClick: () => {
+        setService('sameday')
+      },
+    },
+    {
+      label: (
+        <>
+          <img
+            alt="logo"
+            style={{ width: '20px', paddingRight: '6px' }}
+            src={innoship}
+          />{' '}
+          Innoship
+        </>
+      ),
+      disabled: false,
+      onClick: () => {
+        setService('innoship')
+      },
+    },
+    {
+      label: (
+        <>
+          <img
+            alt="logo"
+            style={{ width: '20px', paddingRight: '6px' }}
+            src={fancourier}
+          />{' '}
+          Fan Courier
+        </>
+      ),
+      disabled: false,
+      onClick: () => {
+        setService('fancourier')
+      },
+    },
+    {
+      label: (
+        <>
+          <img
+            alt="logo"
+            style={{ width: '20px', paddingRight: '6px' }}
+            src={download}
+          />{' '}
+          Incarca AWB Manual
+        </>
+      ),
+      disabled: false,
+      onClick: () => {
+        setService('manual')
+      },
+    },
+  ]
+
   const [courier, setCourier] = useState('')
   const [packageAmount, setPackageAmount] = useState(1)
   const [invoiceUrl, setInvoiceUrl] = useState('')
@@ -113,139 +204,27 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         closeOnOverlayClick
         closeOnEsc
         centered
-        zIndex={2}
+        zIndex={9}
       >
         <div className="mb4">
           <h2>AWB Generation</h2>
 
           <form onSubmit={formHandler}>
-            <div className="flex items-center">
-              <ActionMenu
-                label={service || 'Alege Modalitatea'}
-                zIndex={999999}
-                options={[
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={cargus}
-                        />{' '}
-                        Cargus
-                      </>
-                    ),
-                    onClick: () => {
-                      setService('cargus')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={sameday}
-                        />{' '}
-                        SameDay
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setService('sameday')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={innoship}
-                        />{' '}
-                        Innoship
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setService('innoship')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={fancourier}
-                        />{' '}
-                        Fan Courier
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setService('fancourier')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={download}
-                        />{' '}
-                        Incarca AWB Manual
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setService('manual')
-                    },
-                  },
-                ]}
-              />
-            </div>
-            {((): JSX.Element | void => {
-              if (service) {
-                return (
-                  <div className="pt5">
-                    <img
-                      alt="logo"
-                      style={{
-                        width: '50px',
-                        height: '50px',
-                        paddingRight: '50px',
-                        paddingLeft: '25px',
-                      }}
-                      src={
-                        service === 'cargus'
-                          ? cargus
-                          : service === 'innoship'
-                          ? innoship
-                          : service === 'sameday'
-                          ? sameday
-                          : service === 'fancourier'
-                          ? fancourier
-                          : download
-                      }
-                    />
-                  </div>
-                )
-              }
-
-              return (
-                <div
-                  style={{ padding: '100px', textAlign: 'center' }}
-                  className="dib c-muted-1 pa7"
-                >
-                  <Spinner color="currentColor" size={50} />
+            <div className="flex">
+              <div className="flex flex-column">
+                <div className="mt2">
+                  <ActionMenu
+                    label={service || 'Alege Modalitatea'}
+                    zIndex={9999999}
+                    options={dropDownOptions}
+                  />
                 </div>
-              )
-            })()}
+              </div>
+            </div>
 
             {((): JSX.Element | void => {
-              if (service !== 'manual') {
+              console.log('SERVICE', service)
+              if (service && service !== 'manual') {
                 return (
                   <>
                     <p>Tip pachet:</p>
@@ -297,7 +276,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                         { value: 'GLS', label: 'GLS' },
                         { value: 'DPD', label: 'DPD' },
                       ]}
-                      value=""
+                      value={courierSetManually}
+                      onChange={(
+                        _: unknown,
+                        v: SetStateAction<
+                          Array<{ value: string; label: string }>
+                        >
+                      ) => setCourierManually(v)}
                       // onChange={(_: any, v: React.SetStateAction<string>) =>
                       //   setPackageType(v)
                       // }
@@ -316,6 +301,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   </>
                 )
               }
+
+              return (
+                <div
+                  style={{ padding: '100px', textAlign: 'center' }}
+                  className="dib c-muted-1 pa1"
+                />
+              )
             })()}
 
             <br />
@@ -379,18 +371,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             </div>
 
             {((): JSX.Element | void => {
-              if (courier === 'smartbill') {
-                return (
-                  <div className="pa7">
-                    <img
-                      alt="logo"
-                      style={{ width: '100px', marginTop: '40px' }}
-                      src={smartbill}
-                    />
-                  </div>
-                )
-              }
-
               if (courier === 'manual') {
                 return (
                   <>
@@ -433,10 +413,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
               return (
                 <div
                   style={{ padding: '100px', textAlign: 'center' }}
-                  className="dib c-muted-1 pa7"
-                >
-                  <Spinner color="currentColor" size={50} />
-                </div>
+                  className="dib c-muted-1 pa1"
+                />
               )
             })()}
 
