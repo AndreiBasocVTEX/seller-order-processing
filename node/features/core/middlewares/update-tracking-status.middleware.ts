@@ -34,6 +34,7 @@ export async function updateTrackingStatusMiddleware(
     const {
       courier: carrierName,
       invoiceNumber,
+      trackingNumber,
     } = order?.packageAttachment?.packages.pop()
 
     const carrier = carrierClient.getCarrierClientByName(
@@ -41,28 +42,27 @@ export async function updateTrackingStatusMiddleware(
       carrierName.toLowerCase() as CarrierValues
     )
 
-    const trackingInfoPayload = await carrier.getAWBInfo({
+    const trackingStatus = await carrier.getTrackingStatus({
       settings,
-      order,
+      invoiceNumber,
+      trackingNumber,
     })
 
     // Do not send events at all if there are no events to send
-    if (!trackingInfoPayload.payload.events?.length) {
-      trackingInfoPayload.payload.events = undefined
+    if (!trackingStatus.events?.length) {
+      trackingStatus.events = undefined
     }
 
     const trackAwbInfoVtexRes = await vtexOrderClient.updateTrackingStatus({
       authData: vtexAuthData,
-      payload: trackingInfoPayload.payload,
+      payload: trackingStatus,
       orderId,
       invoiceNumber,
     })
 
     ctx.status = 200
     ctx.body = {
-      vtexResponse: trackAwbInfoVtexRes,
-      isDelivered: trackingInfoPayload.payload.isDelivered,
-      trackingEvents: trackingInfoPayload.payload.events,
+      ...trackingStatus,
     }
   } catch (e) {
     logger.error(formatError(e))

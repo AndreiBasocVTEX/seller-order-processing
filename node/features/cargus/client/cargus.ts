@@ -1,10 +1,9 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
-  GetAWBInfoParams,
-  IBodyForRequestAwb,
+  CreateTrackingRequest,
+  GetTrackingStatusRequest,
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
@@ -15,7 +14,6 @@ import type {
 } from '../dto/cargus-awb.dto'
 import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -45,17 +43,13 @@ export default class CargusClient extends CarrierClient {
     })
   }
 
-  protected async requestAWB({
-    settings,
-    trackingRequest,
-    order,
-  }: IBodyForRequestAwb): Promise<ICargusAwbResponse[]> {
+  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<ICargusAwbResponse[]> {
     const token = await this.getBearerToken(settings)
 
     const body = createCargusOrderPayload(
       order,
       settings.senderLocationId, // TODO: sholud be something like settings.cargus__locationId
-      trackingRequest
+      params,
     )
 
     return this.http.post('/Awbs/WithGetAwb', body, {
@@ -82,20 +76,8 @@ export default class CargusClient extends CarrierClient {
     )
   }
 
-  public async requestAWBForInvoice({
-    order,
-    settings,
-    trackingRequest,
-  }: {
-    order: IVtexOrder
-    settings: IOContext['settings']
-    trackingRequest: TrackingRequestDTO
-  }) {
-    const awbInfo: ICargusAwbResponse[] = await this.requestAWB({
-      order,
-      settings,
-      trackingRequest,
-    })
+  public async createTracking(request: CreateTrackingRequest) {
+    const awbInfo: ICargusAwbResponse[] = await this.requestAWB(request)
 
     const trackingNumber = awbInfo?.[0]?.BarCode
 
@@ -107,12 +89,7 @@ export default class CargusClient extends CarrierClient {
     }
   }
 
-  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
-    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
-    const packageItem = order?.packageAttachment?.packages?.pop()
-    const trackingNumber = packageItem?.trackingNumber
-    const invoiceNumber = packageItem?.invoiceNumber
-
+  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
     const updatedAwbInfo: ICargusTrackAwbResponse[] = await this.http.get(
       `/NoAuth/GetAwbTrace?barCode=${trackingNumber}`,
       {
@@ -146,15 +123,8 @@ export default class CargusClient extends CarrierClient {
     }
 
     return {
-      pathParams: {
-        orderId: order.orderId,
-        invoiceNumber,
-      },
-      payload: {
-        isDelivered,
-        // We are unable to update events field therefore we are not sending empty array
-        events: trackingEvents,
-      },
+      isDelivered,
+      events: trackingEvents,
     }
   }
 }

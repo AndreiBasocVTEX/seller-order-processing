@@ -48,10 +48,10 @@ export async function trackAndInvoiceMiddleware(
         orderId
       )
 
-      trackingInfoPayload = await carrier.requestAWBForInvoice({
+      trackingInfoPayload = await carrier.createTracking({
         settings,
         order,
-        trackingRequest: tracking,
+        params: { ...tracking.params },
       })
     } else {
       trackingInfoPayload = {

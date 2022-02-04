@@ -1,11 +1,9 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
-import { CarrierClient } from '../../shared/clients/carrier-client'
+import { CarrierClient, CreateTrackingRequest } from '../../shared/clients/carrier-client'
 import type {
-  GetAWBInfoParams,
-  IBodyForRequestAwb,
+  GetTrackingStatusRequest,
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import type {
@@ -15,7 +13,7 @@ import type {
 } from '../dto/sameday-awb.dto'
 import type { IAuthDataSameday } from '../models/sameday-auth.model'
 import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import { CarriersEnum } from '../../shared/enums/carriers.enum'
 
 export default class SamedayClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -66,18 +64,14 @@ export default class SamedayClient extends CarrierClient {
     return county.id
   }
 
-  protected async requestAWB({
-    settings,
-    trackingRequest,
-    order,
-  }: IBodyForRequestAwb): Promise<ISamedayAwbResponse> {
+  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
     const countyId = await this.getCountyId(
       token,
       order.shippingData.address.state
     )
 
-    const body = createOrderPayload(order, countyId, trackingRequest)
+    const body = createOrderPayload(order, countyId, params)
 
     return this.http.post('/api/awb', body, {
       headers: {
@@ -102,39 +96,17 @@ export default class SamedayClient extends CarrierClient {
     )
   }
 
-  public async requestAWBForInvoice({
-    order,
-    settings,
-    trackingRequest,
-  }: {
-    order: IVtexOrder
-    settings: IOContext['settings']
-    trackingRequest: TrackingRequestDTO
-  }) {
-    const { awbNumber: trackingNumber } = await this.requestAWB({
-      settings,
-      order,
-      trackingRequest,
-    })
-
-    const { items } = order
+  public async createTracking(request: CreateTrackingRequest) {
+    const { awbNumber: trackingNumber } = await this.requestAWB(request)
 
     return {
-      orderId: order.orderId,
       trackingNumber,
-      items,
-      courier: 'Sameday',
+      courier: CarriersEnum.SAMEDAY,
     }
   }
 
-  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
+  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
     const { token } = await this.getAuthToken(settings)
-
-    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
-    const packageItem = order?.packageAttachment?.packages?.pop()
-    const trackingNumber = packageItem?.trackingNumber
-
-    const invoiceNumber = packageItem?.invoiceNumber
 
     const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http.get(
       `/api/client/awb/${trackingNumber}/status`,
@@ -171,14 +143,8 @@ export default class SamedayClient extends CarrierClient {
     }
 
     return {
-      pathParams: {
-        orderId: order.orderId,
-        invoiceNumber,
-      },
-      payload: {
-        isDelivered,
-        events: trackingEvents,
-      },
+      isDelivered,
+      events: trackingEvents,
     }
   }
 }

@@ -1,5 +1,6 @@
 import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import { getTotalWeight } from '../../core/helpers/helpers.dto'
+import { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import {
   defaultCountryCode,
@@ -11,10 +12,8 @@ import {
 export function createOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
-  trackingRequest: TrackingRequestDTO
+  trackingParams: CreateTrackingRequestParams
 ) {
-  const { params: trackingParams } = trackingRequest
-
   const totalWeight = trackingParams.weight ?? getTotalWeight(order)
 
   const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
@@ -44,9 +43,8 @@ export function createOrderPayload(
       country: defaultCountryCode,
       countyName: address.state,
       localityName: address.city,
-      addressText: `${address.street} ${address.number} ${
-        address.neighborhood || ''
-      } ${address.complement || ''} ${address.reference || ''}`,
+      addressText: `${address.street} ${address.number} ${address.neighborhood || ''
+        } ${address.complement || ''} ${address.reference || ''}`,
       postalCode: address.postalCode,
       phone: order.clientProfileData.phone,
       email: order.clientProfileData.email,

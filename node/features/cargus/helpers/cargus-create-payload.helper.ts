@@ -11,13 +11,13 @@ import {
   getTotalWeight,
 } from '../../core/helpers/helpers.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 
 export function createCargusOrderPayload(
   order: IVtexOrder,
   senderLocationId: string,
-  trackingRequest: TrackingRequestDTO
+  trackingParams: CreateTrackingRequestParams
 ): ICargusAwbPayload {
-  const { params: trackingParams } = trackingRequest
 
   // The selected service does not allow parts weighing more than 31 kg
   const totalWeight = trackingParams.weight

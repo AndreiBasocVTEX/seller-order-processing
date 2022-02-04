@@ -1,19 +1,18 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
-  GetAWBInfoParams,
-  IBodyForRequestAwb,
+  CreateTrackingRequest,
+  GetTrackingStatusRequest,
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type {
   IInnoshipAwbResponse,
   IInnoshipTrackAwbResponse,
 } from '../dto/innoship-awb.dto'
 import { createOrderPayload } from '../helpers/innoship-create-payload.helper'
+import { CarriersEnum } from '../../shared/enums/carriers.enum'
 
 export default class InnoshipClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -45,14 +44,10 @@ export default class InnoshipClient extends CarrierClient {
     )
   }
 
-  protected async requestAWB({
-    order,
-    settings,
-    trackingRequest,
-  }: IBodyForRequestAwb): Promise<IInnoshipAwbResponse> {
+  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<IInnoshipAwbResponse> {
     const warehouseId = settings.innoship__warehouseId
 
-    const body = createOrderPayload(order, warehouseId, trackingRequest)
+    const body = createOrderPayload(order, warehouseId, params)
 
     return this.http.post('/Order?api-version=1.0', body, {
       headers: {
@@ -62,20 +57,8 @@ export default class InnoshipClient extends CarrierClient {
     })
   }
 
-  public async requestAWBForInvoice({
-    order,
-    settings,
-    trackingRequest,
-  }: {
-    order: IVtexOrder
-    settings: IOContext['settings']
-    trackingRequest: TrackingRequestDTO
-  }) {
-    const awbInfo: IInnoshipAwbResponse = await this.requestAWB({
-      order,
-      settings,
-      trackingRequest,
-    })
+  public async createTracking(request: CreateTrackingRequest) {
+    const awbInfo: IInnoshipAwbResponse = await this.requestAWB(request)
 
     const {
       courierShipmentId: trackingNumber,
@@ -83,25 +66,18 @@ export default class InnoshipClient extends CarrierClient {
       courier: courierId,
     } = awbInfo
 
-    const { items } = order
 
     return {
-      orderId: order.orderId,
       trackingNumber: `${courierId}:${trackingNumber}`,
       trackingUrl,
-      items,
-      courier: 'Innoship',
+      courier: CarriersEnum.INNOSHIP,
     }
   }
 
-  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
+  public async getTrackingStatus({ settings, trackingNumber: trackingInfo, invoiceNumber }: GetTrackingStatusRequest) {
     // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
-    const packageItem = order?.packageAttachment?.packages?.pop()
-    const trackingInfo = packageItem?.trackingNumber
 
     const [courierId, trackingNumber] = trackingInfo.split(':')
-
-    const invoiceNumber = packageItem?.invoiceNumber
 
     const body = {
       courier: +courierId,
@@ -140,14 +116,8 @@ export default class InnoshipClient extends CarrierClient {
     }
 
     return {
-      pathParams: {
-        orderId: order.orderId,
-        invoiceNumber,
-      },
-      payload: {
-        isDelivered,
-        events: trackingEvents,
-      },
+      isDelivered,
+      events: trackingEvents,
     }
   }
 }

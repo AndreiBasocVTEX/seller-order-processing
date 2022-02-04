@@ -1,4 +1,3 @@
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import {
   shipmentPaymentMethod,
   defaultEnvelopeCount,
@@ -16,6 +15,7 @@ import {
 } from '../../core/helpers/helpers.dto'
 import type { IFancourierAwbPayload } from '../dto/fancourier-awb.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
@@ -23,9 +23,8 @@ import type { IVtexOrder } from '../../vtex/dto/order.dto'
 export function createFancourierOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
-  trackingRequest: TrackingRequestDTO
+  trackingParams: CreateTrackingRequestParams
 ): IFancourierAwbPayload {
-  const { params: trackingParams } = trackingRequest
 
   const totalWeight = trackingParams.weight
     ? trackingParams.weight

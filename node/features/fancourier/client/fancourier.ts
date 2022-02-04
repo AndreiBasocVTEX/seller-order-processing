@@ -2,17 +2,16 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import FormData from 'form-data'
 import ObjectsToCsv from 'objects-to-csv'
 
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
-  GetAWBInfoParams,
-  IBodyForRequestAwb,
+  CreateTrackingRequest,
+  GetTrackingStatusRequest,
   TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
 import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import { CarriersEnum } from '../../shared/enums/carriers.enum'
 
 type FormDataAcceptedTypes =
   | string
@@ -26,11 +25,7 @@ export default class FancourierClient extends CarrierClient {
     super('', ctx, options)
   }
 
-  protected async requestAWB({
-    settings,
-    trackingRequest,
-    order,
-  }: IBodyForRequestAwb): Promise<{
+  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<{
     _: string
     lineNumber: string
     rate: string
@@ -39,7 +34,7 @@ export default class FancourierClient extends CarrierClient {
     const fancourierOrderPayload = createFancourierOrderPayload(
       order,
       settings.fancourier__warehouseId,
-      trackingRequest
+      params
     )
 
     // Order of the keys in fileData is important because of the generation column flow for the csv-object
@@ -141,44 +136,22 @@ export default class FancourierClient extends CarrierClient {
     )
   }
 
-  public async requestAWBForInvoice({
-    order,
-    settings,
-    trackingRequest,
-  }: {
-    order: IVtexOrder
-    settings: IOContext['settings']
-    trackingRequest: TrackingRequestDTO
-  }) {
-    const { trackingNumber } = await this.requestAWB({
-      settings,
-      order,
-      trackingRequest,
-    })
-
-    const { items } = order
+  public async createTracking(request: CreateTrackingRequest) {
+    const { trackingNumber } = await this.requestAWB(request)
 
     return {
-      orderId: order.orderId,
       trackingNumber,
-      items,
-      courier: 'Fancourier',
+      courier: CarriersEnum.FANCOURIER,
       trackingUrl: `https://www.fancourier.ro/awb-tracking/?metoda=tracking&awb=${trackingNumber}`,
     }
   }
 
-  public async getAWBInfo({ settings, order }: GetAWBInfoParams) {
+  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
     const formData: IAuthDataFancourier = {
       client_id: settings.fancourier__clientId,
       user_pass: settings.fancourier__password,
       username: settings.fancourier__username,
     }
-
-    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
-    const packageItem = order?.packageAttachment?.packages?.pop()
-    const trackingNumber = packageItem?.trackingNumber
-
-    const invoiceNumber = packageItem?.invoiceNumber
 
     const updatedAwbInfo = (await this.requestToFanCourier(
       'awb_tracking_integrat.php',
@@ -209,14 +182,8 @@ export default class FancourierClient extends CarrierClient {
     }
 
     return {
-      pathParams: {
-        orderId: order.orderId,
-        invoiceNumber,
-      },
-      payload: {
-        isDelivered,
-        events: trackingEvents,
-      },
+      isDelivered,
+      events: trackingEvents,
     }
   }
 
