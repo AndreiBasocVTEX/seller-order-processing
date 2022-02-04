@@ -12,6 +12,7 @@ import {
   Pagination,
   Totalizer,
   Input,
+  IconDownload,
   DatePicker,
   FilterBar,
   Checkbox,
@@ -23,9 +24,6 @@ import '../../public/style.css'
 import type { IOrder } from '../../typings/order'
 import type { IOrderAwb, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const Save = require('@vtex/styleguide/lib/icon/Save').default
 
 const OrdersList: FC = () => {
   const [currentRowData, setCurrentRowData] = useState<IOrder>()
@@ -294,9 +292,18 @@ const OrdersList: FC = () => {
         (labelOrder) => labelOrder?.orderId === rowData?.orderId
       )
 
-      return order
-        ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
-        : null
+      if (order?.courier && order?.orderValue) {
+        return (
+          <>
+            <IconDownload />
+            <span className="ml2">
+              {order.courier} {order.orderValue}
+            </span>
+          </>
+        )
+      }
+
+      return <>{order?.orderValue}</>
     },
     [orderAwb]
   )
@@ -625,9 +632,11 @@ const OrdersList: FC = () => {
                 >
                   <span style={{ paddingRight: '10px' }}>
                     {' '}
-                    <Save />
+                    <IconDownload />
                   </span>
-                  {getInvoiceNumber(rowData)}
+                  <span className="mw-100 truncate">
+                    {getInvoiceNumber(rowData)}
+                  </span>
                 </Button>
               )
             }
