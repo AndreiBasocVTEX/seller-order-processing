@@ -1,4 +1,9 @@
-export interface NotifyInvoiceDTO {
+import { OrderAwareVtexRequest } from "./common.dto";
+
+export interface NotifyInvoiceRequestDTO extends OrderAwareVtexRequest<NotifyInvoicePayload> {
+
+}
+export interface NotifyInvoicePayload {
   type: 'Output'
   invoiceNumber: string
   courier: string

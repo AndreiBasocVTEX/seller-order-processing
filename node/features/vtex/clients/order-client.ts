@@ -3,8 +3,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type { VtexAuthData } from '../dto/auth.dto'
 import type { ITrackAwbInfoResponse } from '../../core/dto/order-api'
-import type { ITrackAwbInfoPayload } from '../../shared/clients/carrier-client'
-import { NotifyInvoiceDTO } from "../dto/invoice.dto"
+import { NotifyInvoiceRequestDTO } from "../dto/invoice.dto"
+import { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -31,39 +31,29 @@ export default class OrderClient extends ExternalClient {
     })
   }
 
-  public async trackAndInvoice(
-    vtexAuthData: VtexAuthData,
-    orderId: string,
-    notifyInvoiceRequest: NotifyInvoiceDTO
-  ): Promise<unknown> {
+  public async trackAndInvoice(request: NotifyInvoiceRequestDTO): Promise<unknown> {
     return this.http.post(
-      `/api/oms/pvt/orders/${orderId}/invoice`,
-      notifyInvoiceRequest,
+      `/api/oms/pvt/orders/${request.orderId}/invoice`,
+      request.payload,
       {
         headers: {
-          'X-VTEX-API-AppKey': vtexAuthData.vtex_appKey,
-          'X-VTEX-API-AppToken': vtexAuthData.vtex_appToken,
+          'X-VTEX-API-AppKey': request.authData.vtex_appKey,
+          'X-VTEX-API-AppToken': request.authData.vtex_appToken,
         },
       }
     )
   }
 
-  public async trackAWBInfo({
-    payload,
-    vtexAuthData,
-    pathParams,
-  }: ITrackAwbInfoPayload & {
-    vtexAuthData: VtexAuthData
-  }): Promise<ITrackAwbInfoResponse> {
-    const { orderId, invoiceNumber } = pathParams
+  public async updateTrackingStatus(request: UpdateTrackingStatusRequestDTO): Promise<ITrackAwbInfoResponse> {
+    const { orderId, invoiceNumber } = request
 
     return this.http.put(
       `/api/oms/pvt/orders/${orderId}/invoice/${invoiceNumber}/tracking`,
-      payload,
+      request.payload,
       {
         headers: {
-          'X-VTEX-API-AppKey': vtexAuthData.vtex_appKey,
-          'X-VTEX-API-AppToken': vtexAuthData.vtex_appToken,
+          'X-VTEX-API-AppKey': request.authData.vtex_appKey,
+          'X-VTEX-API-AppToken': request.authData.vtex_appToken,
         },
       }
     )

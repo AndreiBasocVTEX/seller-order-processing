@@ -1,7 +1,7 @@
 import { json } from 'co-body'
 
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
-import type { NotifyInvoiceDTO } from '../../vtex/dto/invoice.dto'
+import type { NotifyInvoicePayload } from '../../vtex/dto/invoice.dto'
 import type { CarrierValues } from '../../shared/enums/carriers.enum'
 import type { TrackingInfoDTO } from '../../shared/clients/carrier-client'
 import type { TrackAndInvoiceRequestDTO } from '../dto/order-api'
@@ -61,7 +61,7 @@ export async function trackAndInvoiceMiddleware(
       }
     }
 
-    let notifyInvoiceRequest: NotifyInvoiceDTO
+    let notifyInvoiceRequest: NotifyInvoicePayload
 
     if (invoice.provider === 'smartbill') {
       // add Smartbill integration
