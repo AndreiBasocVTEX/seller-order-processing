@@ -5,19 +5,19 @@ import type {
   ISamedayAwbResponse,
   ISamedayCountyData,
   ISamedayTrackAWBResponse,
-} from '../../types/sameday'
+} from '../../../types/sameday'
 import type {
   TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/order-api'
-import { CarrierClient } from '../../types/carrier-client'
+} from '../../../types/order-api'
+import { CarrierClient } from '../../../types/carrier-client'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
-} from '../../types/carrier-client'
-import { createOrderPayload } from '../../dto/sameday-order.dto'
+} from '../../../types/carrier-client'
+import { createOrderPayload } from '../../../dto/sameday-order.dto'
 
 export default class Sameday extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {

@@ -1,7 +1,7 @@
 import { json } from 'co-body'
-import { NotifyInvoceDTO } from '../clients/vtex/notify-invoice.dto'
 
-import type { CarrierValues } from '../enums/carriers.enum'
+import type { NotifyInvoceDTO } from '../clients/vtex/notify-invoice.dto'
+import type { CarrierValues } from '../core/enums/carriers.enum'
 import type { TrackingInfoDTO } from '../types/carrier-client'
 import type { TrackAndInvoiceRequestDTO, IVtexOrder } from '../types/order-api'
 import type { VtexAuthData } from '../types/VtexAuthData'
@@ -134,15 +134,14 @@ export async function trackAndInvoiceMiddleware(
       }
     }
 
-    //TODO: finish this
+    // TODO: finish this
     const notifyInvoiceRequest: NotifyInvoceDTO = {
       ...trackingInfoPayload,
       type: 'Output',
       invoiceNumber: 'string',
       items: [],
       issuanceDate: '',
-      invoiceValue: 0
-
+      invoiceValue: 0,
     }
 
     const invoiceInfo = await vtexOrderClient.trackAndInvoice(

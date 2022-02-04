@@ -1,9 +1,3 @@
-export interface IAuthDataCargus {
-  UserName: string
-  Password: string
-  'Ocp-Apim-Subscription-Key'?: string
-}
-
 export interface ICargusAwbPayload {
   DeliveryPudoPoint?: number | null
   ReturnCodeExpiration?: string
@@ -59,7 +53,13 @@ export interface ICargusAwbPayload {
   Transit2DepositFinger?: string
 }
 
-interface ShippingCost {
+export interface IAuthDataCargus {
+  UserName: string
+  Password: string
+  'Ocp-Apim-Subscription-Key'?: string
+}
+
+export interface ShippingCost {
   BaseCost: number
   ExtraKmCost: number
   WeightCost: number
@@ -71,7 +71,7 @@ interface ShippingCost {
   GrandTotal: number
 }
 
-interface ParcelCode {
+export interface ParcelCode {
   Code: string
   Type: number
   Weight: number
@@ -81,7 +81,7 @@ interface ParcelCode {
   // ParcelContent?: string
 }
 
-interface Sender {
+export interface Sender {
   LocationId: number | string | null
   Name?: string
   CountyId?: number
@@ -100,7 +100,7 @@ interface Sender {
   CountryId?: number
 }
 
-interface Recipient {
+export interface Recipient {
   LocationId?: number
   Name: string
   CountyId?: number
@@ -186,7 +186,7 @@ export interface ICargusTrackAwbResponse {
   Event: ICargusTrackAwbEvent[]
 }
 
-interface ICargusTrackAwbEvent {
+export interface ICargusTrackAwbEvent {
   Date: string
   EventId: number
   Description: string

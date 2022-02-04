@@ -1,25 +1,25 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type {
-  IAuthDataCargus,
-  ICargusAwbResponse,
-  ICargusTrackAwbResponse,
-} from '../../types/cargus'
-import type {
   TrackingRequestDTO,
   IVtexOrder,
   VtexEvent,
-} from '../../types/order-api'
+} from '../../../types/order-api'
 import type {
   GetAWBInfoParams,
   IBodyForRequestAwb,
   TrackingLabelParams,
-} from '../../types/carrier-client'
-import { CarrierClient } from '../../types/carrier-client'
-import { createCargusOrderPayload } from '../../dto/cargus-order.dto'
-import { CarriersEnum } from '../../enums/carriers.enum'
+} from '../../../types/carrier-client'
+import { CarrierClient } from '../../../types/carrier-client'
+import { CarriersEnum } from '../../../core/enums/carriers.enum'
+import type {
+  IAuthDataCargus,
+  ICargusAwbResponse,
+  ICargusTrackAwbResponse,
+} from '../dto/cargus-awb.dto'
+import { createCargusOrderPayload } from '../helpers/create-payload.helper'
 
-export default class Cargus extends CarrierClient {
+export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://urgentcargus.azure-api.net/api', ctx, {
       ...options,
@@ -56,7 +56,7 @@ export default class Cargus extends CarrierClient {
 
     const body = createCargusOrderPayload(
       order,
-      settings.senderLocationId, //TODO: sholud be something like settings.cargus__locationId
+      settings.senderLocationId, // TODO: sholud be something like settings.cargus__locationId
       trackingRequest
     )
 
@@ -104,7 +104,7 @@ export default class Cargus extends CarrierClient {
     return {
       trackingNumber,
       courier: CarriersEnum.CARGUS,
-      //TODO: Can't find tracking number
+      // TODO: Can't find tracking number
       // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
     }
   }

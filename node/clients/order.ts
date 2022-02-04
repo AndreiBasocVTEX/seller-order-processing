@@ -1,15 +1,12 @@
 import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
-import type { VtexAuthData } from '../../types/VtexAuthData'
-import type { ITrackAwbInfoResponse } from '../../types/order-api'
-import type {
-  ITrackAwbInfoPayload,
-  TrackingInfoDTO,
-} from '../../types/carrier-client'
-import { NotifyInvoceDTO } from './notify-invoice.dto'
+import type { VtexAuthData } from '../types/VtexAuthData'
+import type { ITrackAwbInfoResponse } from '../types/order-api'
+import type { ITrackAwbInfoPayload } from '../types/carrier-client'
+import type { NotifyInvoceDTO } from '../core/dto/order.dto'
 
-export default class OrderApi extends ExternalClient {
+export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super(`https://${ctx.account}.vtexcommercestable.com.br`, ctx, {
       ...options,
@@ -39,12 +36,16 @@ export default class OrderApi extends ExternalClient {
     orderId: string,
     notifyInvoiceRequest: NotifyInvoceDTO
   ): Promise<unknown> {
-    return this.http.post(`/api/oms/pvt/orders/${orderId}/invoice`, notifyInvoiceRequest, {
-      headers: {
-        'X-VTEX-API-AppKey': vtexAuthData.vtex_appKey,
-        'X-VTEX-API-AppToken': vtexAuthData.vtex_appToken,
-      },
-    })
+    return this.http.post(
+      `/api/oms/pvt/orders/${orderId}/invoice`,
+      notifyInvoiceRequest,
+      {
+        headers: {
+          'X-VTEX-API-AppKey': vtexAuthData.vtex_appKey,
+          'X-VTEX-API-AppToken': vtexAuthData.vtex_appToken,
+        },
+      }
+    )
   }
 
   public async trackAWBInfo({

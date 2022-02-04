@@ -1,10 +1,10 @@
-import type { ICargusAwbPayload } from '../types/cargus'
-import type { IVtexOrder, TrackingRequestDTO } from '../types/order-api'
-import { cargusConstants } from '../utils/cargusConstants'
+import type { IVtexOrder, TrackingRequestDTO } from '../../../types/order-api'
+import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
 import {
+  cargusConstants,
   defaultEnvelopeCount,
   shipmentPaymentMethod,
-} from '../utils/fancourierConstants'
+} from './cargus-constants.helper'
 import { getTotalDiscount, getTotalWeight } from './helpers.dto'
 
 export function createCargusOrderPayload(
