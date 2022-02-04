@@ -62,12 +62,16 @@ const AwbStatus: FC<IAwbStatusProps> = ({ courier, orderId, size }) => {
           >
             {isLoading ? (
               <Spinner size={20} />
-            ) : (
+            ) : awbStatus ? (
               <Tooltip label={awbStatus}>
                 <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2">
-                  {awbStatus ?? 'Lipsa date'}
+                  {awbStatus}
                 </div>
               </Tooltip>
+            ) : (
+              <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2">
+                Lipsa date
+              </div>
             )}
           </div>
         </div>
@@ -84,12 +88,16 @@ const AwbStatus: FC<IAwbStatusProps> = ({ courier, orderId, size }) => {
             >
               {isLoading ? (
                 <Spinner size={20} />
-              ) : (
+              ) : awbStatus ? (
                 <Tooltip label={awbStatus}>
                   <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate">
-                    {awbStatus ?? 'Lipsa date'}
+                    {awbStatus}
                   </div>
                 </Tooltip>
+              ) : (
+                <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate">
+                  Lipsa date
+                </div>
               )}
             </div>
           </div>
