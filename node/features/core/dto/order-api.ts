@@ -17,7 +17,7 @@ export interface TrackingRequestDTO {
 export interface InvoiceRequestDTO {
   provider: 'smartbill' | 'manual'
   params: {
-    issuanceDate: Date
+    issuanceDate: string
     invoiceNumber: string
     invoiceValue: number
     invoiceUrl?: string

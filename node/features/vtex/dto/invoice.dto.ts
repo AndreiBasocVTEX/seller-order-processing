@@ -1,12 +1,13 @@
 export interface NotifyInvoiceDTO {
-  type: 'Output';
-  invoiceNumber: string;
-  courier: string;
-  trackingNumber: string;
-  trackingUrl?: string;
-  items: InvoiceItem[];
-  issuanceDate: string;
-  invoiceValue: number;
+  type: 'Output'
+  invoiceNumber: string
+  courier: string
+  trackingNumber: string
+  trackingUrl?: string
+  items?: InvoiceItem[]
+  issuanceDate: string
+  invoiceValue: number
+  invoiceUrl?: string
 }
 
 export interface InvoiceItem {
@@ -14,4 +15,3 @@ export interface InvoiceItem {
   quantity: number
   price: number
 }
-

@@ -2,11 +2,9 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import {
-  getTrackingLabelMiddleware,
-} from './features/core/middlewares/get-tracking-label.middleware'
-import { trackAndInvoiceMiddleware } from "./features/core/middlewares/track-and-invoice.middleware"
-import { updateTrackingStatusMiddleware } from "./features/core/middlewares/update-tracking-status.middleware"
+import { getTrackingLabelMiddleware } from './features/core/middlewares/get-tracking-label.middleware'
+import { trackAndInvoiceMiddleware } from './features/core/middlewares/track-and-invoice.middleware'
+import { updateTrackingStatusMiddleware } from './features/core/middlewares/update-tracking-status.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
