@@ -103,6 +103,7 @@ export default class SamedayClient extends CarrierClient {
 
     return {
       trackingNumber,
+      trackingUrl: `https://sameday.ro/#awb=${trackingNumber}`,
       courier: CarriersEnum.SAMEDAY,
     }
   }
