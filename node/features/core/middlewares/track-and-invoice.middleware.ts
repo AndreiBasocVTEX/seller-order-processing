@@ -90,15 +90,7 @@ export async function trackAndInvoiceMiddleware(
 
     ctx.status = 200
     ctx.body = {
-      invoiceInfo,
-      trackAndInvoiceDetails: {
-        orderId,
-        trackingNumber: trackingInfoPayload.trackingNumber,
-        trackingUrl: trackingInfoPayload.trackingUrl,
-        courier: trackingInfoPayload.courier,
-        invoiceNumber: notifyInvoiceRequest.invoiceNumber,
-        invoiceUrl: notifyInvoiceRequest.invoiceUrl,
-      },
+      ...notifyInvoiceRequest
     }
   } catch (e) {
     logger.error(formatError(e))

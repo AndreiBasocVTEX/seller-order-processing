@@ -3,8 +3,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  GetTrackingLabelRequest,
   GetTrackingStatusRequest,
-  TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
@@ -14,6 +14,7 @@ import type {
 } from '../dto/cargus-awb.dto'
 import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
+import { PaperSize } from '../../shared/enums/paper-size.enum'
 
 export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -62,12 +63,14 @@ export default class CargusClient extends CarrierClient {
 
   public async trackingLabel({
     settings,
-    payload,
-  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+    trackingNumber,
+    paperSize,
+  }: GetTrackingLabelRequest): Promise<unknown> {
     const token = await this.getBearerToken(settings)
 
+    const format = paperSize === PaperSize.A6 ? 1 : 0;
     return this.http.getStream(
-      `/PDF/AwbDocuments?Token=${token}&barCodes=${payload.awbTrackingNumber}&format=0`,
+      `/PDF/AwbDocuments?Token=${token}&barCodes=${trackingNumber}&format=${format}`,
       {
         headers: {
           'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,

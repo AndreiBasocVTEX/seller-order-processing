@@ -1,11 +1,12 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
-import { CarrierClient, CreateTrackingRequest } from '../../shared/clients/carrier-client'
 import type {
-  GetTrackingStatusRequest,
-  TrackingLabelParams,
+  CreateTrackingRequest,
+  GetTrackingLabelRequest,
+  GetTrackingStatusRequest
 } from '../../shared/clients/carrier-client'
+import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
   ISamedayCountyData,
   ISamedayAwbResponse,
@@ -82,12 +83,13 @@ export default class SamedayClient extends CarrierClient {
 
   public async trackingLabel({
     settings,
-    payload,
-  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
+    trackingNumber,
+    paperSize
+  }: GetTrackingLabelRequest): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
 
     return this.http.getStream(
-      `/api/awb/download/${payload.awbTrackingNumber}/A4`,
+      `/api/awb/download/${trackingNumber}/${paperSize}`,
       {
         headers: {
           'X-AUTH-TOKEN': token,

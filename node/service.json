@@ -15,7 +15,7 @@
       "public": true
     },
     "trackingLabel": {
-      "path": "/opa/orders/tracking-label",
+      "path": "/opa/orders/:orderId/tracking-label",
       "public": true
     }
   }

@@ -3,8 +3,8 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  GetTrackingLabelRequest,
   GetTrackingStatusRequest,
-  TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
@@ -29,12 +29,13 @@ export default class InnoshipClient extends CarrierClient {
 
   public async trackingLabel({
     settings,
-    payload,
-  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
-    const [courierId, awbTrackingNumber] = payload.awbTrackingNumber.split(':')
+    trackingNumber,
+    paperSize
+  }: GetTrackingLabelRequest): Promise<unknown> {
+    const [courierId, awbTrackingNumber] = trackingNumber.split(':')
 
     return this.http.get(
-      `/Label/by-courier/${courierId}/awb/${awbTrackingNumber}?type=PDF&format=A4&useFile=false&api-version=1.0`,
+      `/Label/by-courier/${courierId}/awb/${awbTrackingNumber}?type=PDF&format=${paperSize}&useFile=false&api-version=1.0`,
       {
         headers: {
           accept: 'application/pdf',

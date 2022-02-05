@@ -5,8 +5,8 @@ import ObjectsToCsv from 'objects-to-csv'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  GetTrackingLabelRequest,
   GetTrackingStatusRequest,
-  TrackingLabelParams,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
@@ -119,9 +119,9 @@ export default class FancourierClient extends CarrierClient {
 
   public async trackingLabel({
     settings,
-    payload,
-  }: TrackingLabelParams<{ awbTrackingNumber: string }>): Promise<unknown> {
-    const { awbTrackingNumber } = payload
+    trackingNumber,
+    paperSize
+  }: GetTrackingLabelRequest): Promise<unknown> {
 
     return this.requestToFanCourier(
       'view_awb_integrat_pdf.php',
@@ -129,8 +129,8 @@ export default class FancourierClient extends CarrierClient {
         client_id: settings.fancourier__clientId,
         user_pass: settings.fancourier__password,
         username: settings.fancourier__username,
-        nr: awbTrackingNumber,
-        page: 'A4',
+        nr: trackingNumber,
+        page: paperSize,
       },
       { responseType: 'blob' }
     )
