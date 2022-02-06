@@ -32,7 +32,7 @@ export function createOrderPayload(
   })
 
   // TODO interface for InnoshipPayload
-  const innoshipPayload = {
+  return {
     serviceId: 1,
     shipmentDate: new Date().toISOString(),
     addressFrom: null,
@@ -66,6 +66,4 @@ export function createOrderPayload(
       bankRepaymentAmount: payment,
     },
   }
-
-  return innoshipPayload
 }

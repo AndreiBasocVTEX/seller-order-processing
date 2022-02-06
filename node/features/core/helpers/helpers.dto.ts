@@ -1,4 +1,4 @@
-import { Item, IVtexOrder } from "../../vtex/dto/order.dto"
+import type { Item, IVtexOrder } from '../../vtex/dto/order.dto'
 
 export function getTotalWeight(order: IVtexOrder) {
   return order.items.reduce((weight: number, item: Item) => {

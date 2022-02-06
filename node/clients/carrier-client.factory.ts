@@ -1,5 +1,4 @@
-import { ExternalClient } from '@vtex/api'
-import type { InstanceOptions, IOContext } from '@vtex/api'
+import { IOClient } from '@vtex/api'
 
 import type {
   CarrierIDS,
@@ -7,18 +6,7 @@ import type {
 } from '../features/shared/enums/carriers.enum'
 import { CarriersEnum } from '../features/shared/enums/carriers.enum'
 
-export default class CarrierClientFactory extends ExternalClient {
-  constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(`https://${ctx.account}.vtexcommercestable.com.br`, ctx, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    })
-  }
-
+export default class CarrierClientFactory extends IOClient {
   public getAvailableCarriers(): string[] {
     return Object.values(CarriersEnum)
   }
