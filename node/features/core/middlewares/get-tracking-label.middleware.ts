@@ -1,6 +1,6 @@
 import type { CarrierValues } from '../../shared/enums/carriers.enum'
-import { VtexAuthData } from '../../vtex/dto/auth.dto'
-import { IVtexOrder } from '../../vtex/dto/order.dto'
+import type { VtexAuthData } from '../../vtex/dto/auth.dto'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
@@ -11,7 +11,7 @@ export async function getTrackingLabelMiddleware(
   const {
     vtex: {
       logger,
-      route: { params }
+      route: { params },
     },
     query: { paperSize },
     clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
@@ -43,7 +43,7 @@ export async function getTrackingLabelMiddleware(
     const pdfData = await carrier.trackingLabel({
       settings,
       trackingNumber,
-      paperSize
+      paperSize,
     })
 
     ctx.status = 200

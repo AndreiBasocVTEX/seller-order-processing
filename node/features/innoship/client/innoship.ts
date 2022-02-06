@@ -30,7 +30,7 @@ export default class InnoshipClient extends CarrierClient {
   public async trackingLabel({
     settings,
     trackingNumber,
-    paperSize
+    paperSize,
   }: GetTrackingLabelRequest): Promise<unknown> {
     const [courierId, awbTrackingNumber] = trackingNumber.split(':')
 
@@ -45,7 +45,11 @@ export default class InnoshipClient extends CarrierClient {
     )
   }
 
-  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<IInnoshipAwbResponse> {
+  protected async requestAWB({
+    settings,
+    order,
+    params,
+  }: CreateTrackingRequest): Promise<IInnoshipAwbResponse> {
     const warehouseId = settings.innoship__warehouseId
 
     const body = createOrderPayload(order, warehouseId, params)
@@ -67,7 +71,6 @@ export default class InnoshipClient extends CarrierClient {
       courier: courierId,
     } = awbInfo
 
-
     return {
       trackingNumber: `${courierId}:${trackingNumber}`,
       trackingUrl,
@@ -75,7 +78,11 @@ export default class InnoshipClient extends CarrierClient {
     }
   }
 
-  public async getTrackingStatus({ settings, trackingNumber: trackingInfo, invoiceNumber }: GetTrackingStatusRequest) {
+  public async getTrackingStatus({
+    settings,
+    trackingNumber: trackingInfo,
+    invoiceNumber,
+  }: GetTrackingStatusRequest) {
     // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
 
     const [courierId, trackingNumber] = trackingInfo.split(':')

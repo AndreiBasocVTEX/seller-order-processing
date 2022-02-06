@@ -1,9 +1,8 @@
-import type { TrackingRequestDTO } from '../../core/dto/order-api'
 import {
   getTotalWeight,
   getTotalDiscount,
 } from '../../core/helpers/helpers.dto'
-import { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'
 import {

@@ -3,7 +3,7 @@ import { ExternalClient } from '@vtex/api'
 
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
-import { PaperSize } from '../enums/paper-size.enum'
+import type { PaperSize } from '../enums/paper-size.enum'
 
 interface CarrierClientRequest {
   settings: IOContext['settings']
@@ -42,12 +42,17 @@ export interface TrackingInfoDTO {
 }
 
 export abstract class CarrierClient extends ExternalClient {
+  protected abstract requestAWB(
+    request: CreateTrackingRequest
+  ): Promise<unknown>
 
-  protected abstract requestAWB(request: CreateTrackingRequest): Promise<unknown>
+  abstract getTrackingStatus(
+    request: GetTrackingStatusRequest
+  ): Promise<TrackingStatusDTO>
 
-  abstract getTrackingStatus(request: GetTrackingStatusRequest): Promise<TrackingStatusDTO>
-
-  abstract createTracking(request: CreateTrackingRequest): Promise<TrackingInfoDTO>
+  abstract createTracking(
+    request: CreateTrackingRequest
+  ): Promise<TrackingInfoDTO>
 
   abstract trackingLabel(request: GetTrackingLabelRequest): unknown
 }

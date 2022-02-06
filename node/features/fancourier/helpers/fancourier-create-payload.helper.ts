@@ -15,7 +15,7 @@ import {
 } from '../../core/helpers/helpers.dto'
 import type { IFancourierAwbPayload } from '../dto/fancourier-awb.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
-import { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
@@ -25,7 +25,6 @@ export function createFancourierOrderPayload(
   warehouseId: string,
   trackingParams: CreateTrackingRequestParams
 ): IFancourierAwbPayload {
-
   const totalWeight = trackingParams.weight
     ? trackingParams.weight
     : getTotalWeight(order)

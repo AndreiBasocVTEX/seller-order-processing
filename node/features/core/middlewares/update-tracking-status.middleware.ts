@@ -53,7 +53,7 @@ export async function updateTrackingStatusMiddleware(
       trackingStatus.events = undefined
     }
 
-    const trackAwbInfoVtexRes = await vtexOrderClient.updateTrackingStatus({
+    await vtexOrderClient.updateTrackingStatus({
       authData: vtexAuthData,
       payload: trackingStatus,
       orderId,

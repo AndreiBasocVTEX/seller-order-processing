@@ -4,7 +4,7 @@ import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
   GetTrackingLabelRequest,
-  GetTrackingStatusRequest
+  GetTrackingStatusRequest,
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
@@ -65,7 +65,11 @@ export default class SamedayClient extends CarrierClient {
     return county.id
   }
 
-  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
+  protected async requestAWB({
+    settings,
+    order,
+    params,
+  }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
     const countyId = await this.getCountyId(
       token,
@@ -84,7 +88,7 @@ export default class SamedayClient extends CarrierClient {
   public async trackingLabel({
     settings,
     trackingNumber,
-    paperSize
+    paperSize,
   }: GetTrackingLabelRequest): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
 
@@ -108,7 +112,11 @@ export default class SamedayClient extends CarrierClient {
     }
   }
 
-  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
+  public async getTrackingStatus({
+    settings,
+    trackingNumber,
+    invoiceNumber,
+  }: GetTrackingStatusRequest) {
     const { token } = await this.getAuthToken(settings)
 
     const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http.get(

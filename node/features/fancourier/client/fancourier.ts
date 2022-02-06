@@ -25,7 +25,11 @@ export default class FancourierClient extends CarrierClient {
     super('', ctx, options)
   }
 
-  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<{
+  protected async requestAWB({
+    settings,
+    order,
+    params,
+  }: CreateTrackingRequest): Promise<{
     _: string
     lineNumber: string
     rate: string
@@ -120,9 +124,8 @@ export default class FancourierClient extends CarrierClient {
   public async trackingLabel({
     settings,
     trackingNumber,
-    paperSize
+    paperSize,
   }: GetTrackingLabelRequest): Promise<unknown> {
-
     return this.requestToFanCourier(
       'view_awb_integrat_pdf.php',
       {
@@ -146,7 +149,11 @@ export default class FancourierClient extends CarrierClient {
     }
   }
 
-  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
+  public async getTrackingStatus({
+    settings,
+    trackingNumber,
+    invoiceNumber,
+  }: GetTrackingStatusRequest) {
     const formData: IAuthDataFancourier = {
       client_id: settings.fancourier__clientId,
       user_pass: settings.fancourier__password,
@@ -168,7 +175,7 @@ export default class FancourierClient extends CarrierClient {
     let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
 
-    if (trackingHistory.length) {
+    if (trackingHistory.length && invoiceNumber) {
       trackingEvents = trackingHistory.map((event) => {
         // event[0] is a status number (2 — is delivered)
         const [, description] = event.split(',')

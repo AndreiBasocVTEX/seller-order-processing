@@ -44,13 +44,17 @@ export default class CargusClient extends CarrierClient {
     })
   }
 
-  protected async requestAWB({ settings, order, params }: CreateTrackingRequest): Promise<ICargusAwbResponse[]> {
+  protected async requestAWB({
+    settings,
+    order,
+    params,
+  }: CreateTrackingRequest): Promise<ICargusAwbResponse[]> {
     const token = await this.getBearerToken(settings)
 
     const body = createCargusOrderPayload(
       order,
       settings.senderLocationId, // TODO: sholud be something like settings.cargus__locationId
-      params,
+      params
     )
 
     return this.http.post('/Awbs/WithGetAwb', body, {
@@ -68,7 +72,8 @@ export default class CargusClient extends CarrierClient {
   }: GetTrackingLabelRequest): Promise<unknown> {
     const token = await this.getBearerToken(settings)
 
-    const format = paperSize === PaperSize.A6 ? 1 : 0;
+    const format = paperSize === PaperSize.A6 ? 1 : 0
+
     return this.http.getStream(
       `/PDF/AwbDocuments?Token=${token}&barCodes=${trackingNumber}&format=${format}`,
       {
@@ -92,7 +97,11 @@ export default class CargusClient extends CarrierClient {
     }
   }
 
-  public async getTrackingStatus({ settings, trackingNumber, invoiceNumber }: GetTrackingStatusRequest) {
+  public async getTrackingStatus({
+    settings,
+    trackingNumber,
+    invoiceNumber,
+  }: GetTrackingStatusRequest) {
     const updatedAwbInfo: ICargusTrackAwbResponse[] = await this.http.get(
       `/NoAuth/GetAwbTrace?barCode=${trackingNumber}`,
       {

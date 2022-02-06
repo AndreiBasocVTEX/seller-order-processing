@@ -82,7 +82,7 @@ export async function trackAndInvoiceMiddleware(
       }
     }
 
-    const invoiceInfo = await vtexOrderClient.trackAndInvoice({
+    await vtexOrderClient.trackAndInvoice({
       authData: vtexAuthData,
       orderId,
       payload: notifyInvoiceRequest,
@@ -90,7 +90,7 @@ export async function trackAndInvoiceMiddleware(
 
     ctx.status = 200
     ctx.body = {
-      ...notifyInvoiceRequest
+      ...notifyInvoiceRequest,
     }
   } catch (e) {
     logger.error(formatError(e))
