@@ -18,7 +18,7 @@ export async function trackAndInvoiceMiddleware(
       logger,
       route: { params },
     },
-    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
+    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient, smartbill },
   } = ctx
 
   const orderId = params.orderId as string
@@ -63,16 +63,23 @@ export async function trackAndInvoiceMiddleware(
 
     let notifyInvoiceRequest: NotifyInvoicePayload
 
-    if (invoice.provider === 'smartbill') {
-      // add Smartbill integration
+    if (invoice.provider.toLowerCase() === 'smartbill') {
+      const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
+        vtexAuthData,
+        orderId
+      )
+
+      const smartbillInvoice = await smartbill.generateInvoice({
+        settings,
+        order,
+      })
+
       notifyInvoiceRequest = {
-        // TODO Finish with SmartBill
         ...trackingInfoPayload,
         type: 'Output',
-        invoiceNumber: '',
-        items: [],
-        issuanceDate: '',
-        invoiceValue: 0,
+        invoiceNumber: smartbillInvoice.number,
+        issuanceDate: new Date().toISOString().slice(0, 10), // '2022-02-01'
+        invoiceValue: order.value,
       }
     } else {
       notifyInvoiceRequest = {
