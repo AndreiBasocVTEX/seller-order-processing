@@ -6,6 +6,7 @@ import { InnoshipClient } from '../features/innoship'
 import { SamedayClient } from '../features/sameday'
 import CarrierClientFactory from './carrier-client.factory'
 import OrderClient from '../features/vtex/clients/order-client'
+import { SmartbillClient } from '../features/smartbill'
 
 export class Clients extends IOClients {
   public get vtexOrder() {
@@ -26,6 +27,10 @@ export class Clients extends IOClients {
 
   public get innoship() {
     return this.getOrSet('innoship', InnoshipClient)
+  }
+
+  public get smartbill() {
+    return this.getOrSet('smartbill', SmartbillClient)
   }
 
   public get carrier() {

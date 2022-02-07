@@ -59,6 +59,13 @@
         "host": "www.selfawb.ro",
         "path": "/*"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "ws.smartbill.ro",
+        "path": "/SBORO/*"
+      }
     }
   ],
   "settingsSchema": {
@@ -134,6 +141,54 @@
         "title": "Sandbox mode",
         "description": "",
         "type": "boolean"
+      },
+      "smartbill__username": {
+        "title": "SmartBill Username",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__apiToken": {
+        "title": "SmartBill Api Token",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__vatCode": {
+        "title": "SmartBill Vat Code",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__seriesName": {
+        "title": "SmartBill Series Name ",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__invoiceShippingCost": {
+        "title": "Invoice shipping cost",
+        "description": "Do you want to invoice the shipping cost?",
+        "type": "boolean"
+      },
+      "smartbill__invoiceShippingProductName": {
+        "title": "Shipping cost product name",
+        "description": "Name of the shipping cost product that will appear on the invoice",
+        "type": "string",
+        "default": "Shipping TAX"
+      },
+      "smartbill__invoiceShippingProductCode": {
+        "title": "Shipping cost product code",
+        "description": "Code of the shipping cost product that will appear on the invoice",
+        "type": "string",
+        "default": "shipping-tax"
+      },
+      "smartbill__useVtexProductTaxValue": {
+        "title": "Use VTEX priceTags",
+        "description": "Use VTEX priceTags VAT percentage if available",
+        "type": "boolean"
+      },
+      "smartbill__smartbillDefaultVATPercentage": {
+        "title": "Smartbill default VAT percentage",
+        "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
+        "type": "string",
+        "default": "0"
       }
     }
   },

@@ -5,6 +5,7 @@ import type { VtexAuthData } from '../dto/auth.dto'
 import type { ITrackAwbInfoResponse } from '../../core/dto/order-api.dto'
 import type { NotifyInvoiceRequestDTO } from '../dto/invoice.dto'
 import type { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
+import type { IVtexOrder } from '../dto/order.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -22,7 +23,7 @@ export default class OrderClient extends ExternalClient {
   public async getVtexOrderData(
     vtexAuthData: VtexAuthData,
     orderId: string
-  ): Promise<unknown> {
+  ): Promise<IVtexOrder> {
     return this.http.get(`/api/oms/pvt/orders/${orderId}`, {
       headers: {
         'X-VTEX-API-AppKey': vtexAuthData.vtex_appKey,
@@ -33,7 +34,7 @@ export default class OrderClient extends ExternalClient {
 
   public async trackAndInvoice(
     request: NotifyInvoiceRequestDTO
-  ): Promise<unknown> {
+  ): Promise<ITrackAwbInfoResponse> {
     return this.http.post(
       `/api/oms/pvt/orders/${request.orderId}/invoice`,
       request.payload,

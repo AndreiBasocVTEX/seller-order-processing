@@ -1,10 +1,9 @@
-import type { CarrierValues } from '../../shared/enums/carriers.enum'
 import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import { formatError } from '../utils/formatError'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
-export async function getTrackingLabelMiddleware(
+export async function getInvoiceMiddleware(
   ctx: Context,
   next: () => Promise<unknown>
 ) {
@@ -13,8 +12,7 @@ export async function getTrackingLabelMiddleware(
       logger,
       route: { params },
     },
-    query: { paperSize },
-    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
+    clients: { vtexOrder: vtexOrderClient, smartbill },
   } = ctx
 
   try {
@@ -30,21 +28,9 @@ export async function getTrackingLabelMiddleware(
       orderId
     )
 
-    const {
-      courier: carrierName,
-      trackingNumber,
-    } = order?.packageAttachment?.packages.pop()
+    const { invoiceNumber } = order?.packageAttachment?.packages.pop()
 
-    const carrier = carrierClient.getCarrierClientByName(
-      ctx,
-      carrierName.toLowerCase() as CarrierValues
-    )
-
-    const pdfData = await carrier.trackingLabel({
-      settings,
-      trackingNumber,
-      paperSize,
-    })
+    const pdfData = await smartbill.getInvoice({ settings, invoiceNumber })
 
     ctx.status = 200
     ctx.res.setHeader('Content-type', 'application/pdf')
@@ -56,5 +42,5 @@ export async function getTrackingLabelMiddleware(
     ctx.body = e
   }
 
-  await next()
+  next()
 }

@@ -17,6 +17,10 @@
     "trackingLabel": {
       "path": "/opa/orders/:orderId/tracking-label",
       "public": true
+    },
+    "getInvoice": {
+      "path": "/opa/orders/:orderId/get-invoice",
+      "public": true
     }
   }
 }
