@@ -82,12 +82,14 @@ const AwbStatus: FC<IAwbStatusProps> = ({ courier, orderId, size }) => {
         <div className="flex flex-column">
           <div className="flex items-center">
             <p className="fw5 mr2">Status AWB: </p>
-            <div
-              style={{ minWidth: '12rem' }}
-              className="flex justify-center items-center"
-            >
+            <div className="flex justify-center items-center">
               {isLoading ? (
-                <Spinner size={20} />
+                <div
+                  className="flex justify-center"
+                  style={{ minWidth: '12rem' }}
+                >
+                  <Spinner size={20} />
+                </div>
               ) : awbStatus ? (
                 <Tooltip label={awbStatus}>
                   <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate">

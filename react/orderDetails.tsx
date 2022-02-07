@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import type { FC } from 'react'
 import { Layout, Spinner } from 'vtex.styleguide'
 
-import { getOrderDataById } from './src/utils/api/index'
+import { getOrderDataById } from './src/utils/api'
 import { normalizeOrderData } from './src/utils/normalizeData/orderDetails'
 import OrderDetail from './src/pages/OrderDetail/index'
 import { OrderHeader } from './src/components/OrderDetail'
@@ -14,7 +14,8 @@ const OrderDetails: FC = () => {
   const [order, setOrder] = useState<OrderDetailsData>()
   const [rawData, setRawData] = useState<IOrder>()
   const [isLoading, setIsLoading] = useState(true)
-  const getOrdeData = async () => {
+
+  const getOrderData = async (): Promise<void> => {
     const orderId = window.location.pathname
       .match(/GCB-[0-9]+-[0-9]+/g)
       ?.toString()
@@ -32,7 +33,7 @@ const OrderDetails: FC = () => {
   }
 
   useEffect(() => {
-    getOrdeData()
+    getOrderData()
   }, [])
 
   return isLoading ? (
@@ -46,14 +47,14 @@ const OrderDetails: FC = () => {
         pageHeader={
           <OrderHeader
             orderId={order?.marketPlaceOrderId ?? 'Lipsa ID'}
-            orderStatus={order?.status}
+            orderStatus={order?.formattedOrderStatus}
           />
         }
       >
         {order ? (
           <OrderDetail orderData={order} rawOrderData={rawData} />
         ) : (
-          <ErrorNotification errorMessage="Eroare, incercati mai tarziu" />
+          <ErrorNotification errorMessage="eroare, vă rugăm să încercați din nou mai târziu" />
         )}
       </Layout>
     </>

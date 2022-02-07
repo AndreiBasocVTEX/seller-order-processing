@@ -1,12 +1,8 @@
+import type { FormattedOrderStatus } from '../typings/normalizedOrder'
+
 export interface IOrderHeaderProps {
   orderId: string
-  orderStatus?: string
-}
-
-export interface IOrderStatus {
-  tagBgColor: string
-  tagColor: string
-  tagText: string
+  orderStatus?: FormattedOrderStatus
 }
 
 export interface IOrderTableItem {
