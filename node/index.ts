@@ -2,23 +2,9 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import { status } from './middlewares/status'
-import { getVtexOrderData } from './middlewares/orderApi'
-import {
-  getServicesFromFancourier,
-  printAwbFromFancourier,
-  sendInvoiceInfoFancourier,
-} from './middlewares/fancourier'
-import { printAwbFromCargus, sendInvoiceInfoCargus } from './middlewares/cargus'
-import {
-  printAwbFromSameday,
-  sendInvoiceInfoSameday,
-} from './middlewares/sameday'
-import { updateAWBInfo } from './middlewares/carrier'
-import {
-  printAwbFromInnoship,
-  sendInvoiceInfoInnoship,
-} from './middlewares/innoship'
+import { getTrackingLabelMiddleware } from './features/core/middlewares/get-tracking-label.middleware'
+import { trackAndInvoiceMiddleware } from './features/core/middlewares/track-and-invoice.middleware'
+import { updateTrackingStatusMiddleware } from './features/core/middlewares/update-tracking-status.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -59,42 +45,14 @@ declare global {
 export default new Service({
   clients,
   routes: {
-    // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
-    status: method({
-      GET: [status],
+    updateTrackingStatus: method({
+      POST: [updateTrackingStatusMiddleware],
     }),
-    updateAWBInfo: method({
-      PUT: [updateAWBInfo],
+    trackAndInvoice: method({
+      POST: [trackAndInvoiceMiddleware],
     }),
-    getVtexOrderData: method({
-      GET: [getVtexOrderData],
-    }),
-    getServicesFromFancourier: method({
-      GET: [getServicesFromFancourier],
-    }),
-    printAwbFromFancourier: method({
-      GET: [printAwbFromFancourier],
-    }),
-    printAwbFromCargus: method({
-      GET: [printAwbFromCargus],
-    }),
-    sendInvoiceInfoCargus: method({
-      POST: [sendInvoiceInfoCargus],
-    }),
-    sendInvoiceInfoSameday: method({
-      POST: [sendInvoiceInfoSameday],
-    }),
-    sendInvoiceInfoFancourier: method({
-      POST: [sendInvoiceInfoFancourier],
-    }),
-    printAwbFromSameday: method({
-      GET: [printAwbFromSameday],
-    }),
-    sendInvoiceInfoInnoship: method({
-      POST: [sendInvoiceInfoInnoship],
-    }),
-    printAwbFromInnoship: method({
-      GET: [printAwbFromInnoship],
+    trackingLabel: method({
+      GET: [getTrackingLabelMiddleware],
     }),
   },
 })

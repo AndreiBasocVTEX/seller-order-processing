@@ -1,40 +1,34 @@
 import { IOClients } from '@vtex/api'
 
-import Cargus from './cargus'
-import Carrier from './carrier'
-import Fancourier from './fancourier'
-import Innoship from './innoship'
-import OrderApi from './orderApi'
-import Sameday from './sameday'
-import Status from './status'
+import { CargusClient } from '../features/cargus'
+import { FancourierClient } from '../features/fancourier'
+import { InnoshipClient } from '../features/innoship'
+import { SamedayClient } from '../features/sameday'
+import CarrierClientFactory from './carrier-client.factory'
+import OrderClient from '../features/vtex/clients/order-client'
 
-// Extend the default IOClients implementation with our own custom clients.
 export class Clients extends IOClients {
-  public get status() {
-    return this.getOrSet('status', Status)
-  }
-
-  public get orderApi() {
-    return this.getOrSet('orderApi', OrderApi)
+  public get vtexOrder() {
+    return this.getOrSet('orderApi', OrderClient)
   }
 
   public get fancourier() {
-    return this.getOrSet('fancourier', Fancourier)
+    return this.getOrSet('fancourier', FancourierClient)
   }
 
   public get cargus() {
-    return this.getOrSet('cargus', Cargus)
+    return this.getOrSet('cargus', CargusClient)
   }
 
   public get sameday() {
-    return this.getOrSet('sameday', Sameday)
+    return this.getOrSet('sameday', SamedayClient)
   }
 
   public get innoship() {
-    return this.getOrSet('innoship', Innoship)
+    return this.getOrSet('innoship', InnoshipClient)
   }
 
   public get carrier() {
-    return this.getOrSet('carrier', Carrier)
+    return this.getOrSet('carrier', CarrierClientFactory)
   }
 }
