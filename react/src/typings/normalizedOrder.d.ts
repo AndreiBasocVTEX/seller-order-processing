@@ -1,19 +1,61 @@
-export interface AddressData {
+export interface ShippingAddressData {
   city: string
   postalCode: string
   phone: string
   receiverName: string
-  state: string
+  state: string | null
   street: string
 }
-export interface PackageData {
+export interface AttachmentPackages {
   courier: string
+  courierStatus?: {
+    data: {
+      city: string | null
+      createDate: string
+      description: string
+      lastChange: string
+    }
+    deliveredDate: string
+    finished: boolean
+    status: string
+  }
   invoiceNumber: string
   invoiceUrl: string | null
   invoiceValue: number
   issuanceDate: string
   trackingNumber: string
   trackingUrl: string | null
+}
+
+export interface ClientProfileData {
+  id?: string
+  email: string
+  firstName: string
+  lastName: string
+  documentType?: string
+  document?: string
+  phone: string
+  corporateName?: string | null
+  tradeName?: string | null
+  corporateDocument?: unknown | null
+  stateInscription?: string | null
+  corporatePhone?: string | null
+  isCorporate: boolean
+  userProfileId?: string | null
+  customerClass?: string | null
+}
+export interface InvoiceDataAddress {
+  city: string
+  complement?: string | null
+  country: string
+  geoCoordinates?: [string] | null
+  invoicedEntityType: string
+  neighborhood?: string | null
+  number: string
+  postalCode: string
+  reference?: string | null
+  state: string | null
+  street: string
 }
 export interface OrderItem {
   freightCommission: number
@@ -27,10 +69,11 @@ export interface OrderItem {
   tax: number
   taxCode: string
 }
-export interface OrderStatus {
-  tagBgColor: string
-  tagColor: string
-  tagText: string
+export interface FormattedOrderStatus {
+  color: string
+  bgColor: string
+  longText: string
+  shortText: string
 }
 export interface LogisticsInfo {
   price: number
@@ -38,38 +81,31 @@ export interface LogisticsInfo {
 }
 
 export interface ShippingData {
-  address: AddressData
+  address: ShippingAddressData
   logisticsInfo: [LogisticsInfo]
 }
 
 export interface OrderDetailsData {
-  clientData: {
-    firstName: string
-    lastName: string
-    phone: string
-    email: string
-    isCorporate: boolean
-  }
+  clientProfileData: ClientProfileData
+  creationDate: string
+  formattedOrderStatus?: FormattedOrderStatus
   invoiceData: {
-    city: string
-    postalCode: string
-    invoicedEntityType: string
-    phone: string
-    state: string
-    street: string
+    address: InvoiceDataAddress
   }
   items: [OrderItem]
-  orderDate: string
   orderId: string
   orderTotals: {
     [key: string]: number
   }
+  openTextField: {
+    value: string | null
+  }
   marketPlaceOrderId: string
-  packageData?: PackageData
-  paymentMethod: string
-  shippingAddress: AddressData
+  packageAttachment: {
+    packages: AttachmentPackages | null
+  }
   shippingData: ShippingData
-  shippingEstimatedDate?: string
+  shippingEstimatedDate: string | null
   status: string
   totals: [
     {
@@ -78,4 +114,5 @@ export interface OrderDetailsData {
       value: number
     }
   ]
+  value: number
 }

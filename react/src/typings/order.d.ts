@@ -7,6 +7,7 @@ export interface AddressData {
   street: string
 }
 export interface ClientData {
+  corporateName: string | null
   firstName: string
   isCorporate: boolean
   lastName: string
@@ -21,6 +22,7 @@ export interface OrderTotals {
 export interface InvoiceData {
   address: {
     city: string
+    country: string
     postalCode: string
     number: string
     state: string
@@ -45,6 +47,19 @@ export interface LogisticsInfo {
 }
 export interface PackageData {
   courier: string
+  courierStatus?: {
+    data: [
+      {
+        city: string | null
+        createDate: string
+        description: string
+        lastChange: string
+      }
+    ]
+    deliveredDate: string
+    finished: boolean
+    status: string
+  }
   invoiceNumber: string
   invoiceUrl: string | null
   invoiceValue: number
@@ -115,4 +130,5 @@ export interface IOrder {
   awbShipping: string // nonexistent data
   awbStatus: string // nonexistent data
   invoice: string // nonexistent data
+  value: number
 }
