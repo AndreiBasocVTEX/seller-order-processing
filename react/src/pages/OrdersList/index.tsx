@@ -945,6 +945,7 @@ const OrdersList: FC = () => {
         }}
         toolbar={{
           fields: {
+            alignMenu: 'right',
             label: 'Toggle visible fields',
             showAllLabel: 'Show All',
             hideAllLabel: 'Hide All',
@@ -955,6 +956,7 @@ const OrdersList: FC = () => {
             onShowAllColumns: (activeFields: any) => console.log(activeFields),
           },
           density: {
+            alignMenu: 'right',
             buttonLabel: 'Line density',
             lowOptionLabel: 'Low',
             mediumOptionLabel: 'Medium',
