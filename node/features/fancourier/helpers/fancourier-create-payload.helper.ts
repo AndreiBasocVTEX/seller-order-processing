@@ -50,13 +50,25 @@ export function createFancourierOrderPayload(
 
   const parcels = []
 
-  parcels.push({
-    sequenceNo: 1,
-    weight: totalWeight,
-    type: 2,
-    reference1: `Parcel 1`,
-    size: { width: 1, height: 1, length: 1 },
-  })
+  if (numberOfParcels > 1) {
+    for (let i = 1; i <= numberOfParcels; i++) {
+      parcels.push({
+        sequenceNo: i,
+        weight: 1,
+        type: 2,
+        reference1: `Parcel ${i}`,
+        size: { width: 1, height: 1, length: 1 },
+      })
+    }
+  } else {
+    parcels.push({
+      sequenceNo: 1,
+      weight: totalWeight,
+      type: 2,
+      reference1: `Parcel 1`,
+      size: { width: 1, height: 1, length: 1 },
+    })
+  }
 
   const orderPayload: IFancourierAwbPayload = {
     service: 'Standard',
