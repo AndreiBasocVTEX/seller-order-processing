@@ -1,4 +1,5 @@
 import type { CarrierValues } from '../../shared/enums/carriers.enum'
+import { PaperSize } from '../../shared/enums/paper-size.enum'
 import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import { formatError } from '../utils/formatError'
@@ -43,7 +44,7 @@ export async function getTrackingLabelMiddleware(
     const pdfData = await carrier.trackingLabel({
       settings,
       trackingNumber,
-      paperSize,
+      paperSize: paperSize || PaperSize.A4,
     })
 
     ctx.status = 200

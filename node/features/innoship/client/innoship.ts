@@ -34,15 +34,19 @@ export default class InnoshipClient extends CarrierClient {
   }: GetTrackingLabelRequest): Promise<unknown> {
     const [courierId, awbTrackingNumber] = trackingNumber.split(':')
 
-    return this.http.get(
-      `/Label/by-courier/${courierId}/awb/${awbTrackingNumber}?type=PDF&format=${paperSize}&useFile=false&api-version=1.0`,
-      {
-        headers: {
-          accept: 'application/pdf',
-          'X-Api-Key': settings.innoship__apiToken,
-        },
-      }
-    )
+    return this.http
+      .get(
+        `/Label/by-courier/${courierId}/awb/${awbTrackingNumber}?type=PDF&format=${paperSize}&useFile=false&api-version=1.0`,
+        {
+          headers: {
+            accept: 'application/pdf',
+            'X-Api-Key': settings.innoship__apiToken,
+          },
+        }
+      )
+      .then((data) => {
+        return Buffer.from(data.contents, 'base64')
+      })
   }
 
   protected async requestAWB({
