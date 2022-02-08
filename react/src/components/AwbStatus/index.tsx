@@ -5,14 +5,14 @@ import { Button, Spinner, Tooltip, IconVisibilityOn } from 'vtex.styleguide'
 import type { IAwbStatusProps } from '../../types/awbStatus'
 import { getOrderAwbStatus } from '../../utils/api'
 
-const AwbStatus: FC<IAwbStatusProps> = ({ courier, orderId, size }) => {
+const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
   const [awbStatus, setAwbStatus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   const getAwbStatus = async () => {
-    const data = await getOrderAwbStatus(courier, orderId)
+    const data = await getOrderAwbStatus(orderId)
 
-    const lastEvent = data?.trackingEvents[0]
+    const lastEvent = data?.events?.length && data?.events[0]
 
     if (lastEvent) {
       setAwbStatus(lastEvent.description)

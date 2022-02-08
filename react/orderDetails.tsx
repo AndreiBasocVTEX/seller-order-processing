@@ -8,11 +8,9 @@ import OrderDetail from './src/pages/OrderDetail/index'
 import { OrderHeader } from './src/components/OrderDetail'
 import type { OrderDetailsData } from './src/typings/normalizedOrder'
 import ErrorNotification from './src/components/ErrorNotification'
-import type { IOrder } from './src/typings/order'
 
 const OrderDetails: FC = () => {
   const [order, setOrder] = useState<OrderDetailsData>()
-  const [rawData, setRawData] = useState<IOrder>()
   const [isLoading, setIsLoading] = useState(true)
 
   const getOrderData = async (): Promise<void> => {
@@ -23,7 +21,6 @@ const OrderDetails: FC = () => {
     const data = orderId && (await getOrderDataById(orderId))
 
     if (data) {
-      setRawData(data)
       const normalizedData = normalizeOrderData(data)
 
       setOrder(normalizedData)
@@ -52,7 +49,7 @@ const OrderDetails: FC = () => {
         }
       >
         {order ? (
-          <OrderDetail orderData={order} rawOrderData={rawData} />
+          <OrderDetail orderData={order} />
         ) : (
           <ErrorNotification errorMessage="eroare, vă rugăm să încercați din nou mai târziu" />
         )}

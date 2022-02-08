@@ -1,21 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { FC } from 'react'
+/* eslint-disable no-console */
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import {
   Button,
-  Table,
-  Tag,
-  Link,
-  Tooltip,
-  Pagination,
-  Totalizer,
-  Input,
-  IconDownload,
+  Checkbox,
   DatePicker,
   FilterBar,
-  Checkbox,
+  IconDownload,
+  Input,
+  Link,
+  Pagination,
+  Table,
+  Tag,
+  Tooltip,
+  Totalizer,
 } from 'vtex.styleguide'
 import { FormattedCurrency } from 'vtex.format-currency'
 
@@ -26,12 +26,10 @@ import type { IOrderAwb, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 
 const OrdersList: FC = () => {
-  const [currentRowData, setCurrentRowData] = useState<IOrder>()
-
+  const [awbUpdate, setAwbUpdate] = useState(false)
   const [searchValue, setSearchValue] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
   const [statements, setStatements] = useState([])
-  const [isClosed, setIsClosed] = useState(false)
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
   const [paginationParams, setPaginationParams] = useState({
@@ -52,8 +50,6 @@ const OrdersList: FC = () => {
     },
   })
 
-  // for developement only, true = unlim awb generation, false = pdf download if there is a tracking number
-  const devMode = false
   const [isLoading, setIsLoading] = useState(true)
 
   const fetchTrackingNumbers = useCallback((orders: any[]) => {
@@ -81,6 +77,7 @@ const OrdersList: FC = () => {
             invoiceNumber:
               data.packageAttachment?.packages[lastOrder]?.invoiceNumber ||
               'No invoice',
+            packageAttachment: data.packageAttachment,
           },
         ]
       })
@@ -235,12 +232,15 @@ const OrdersList: FC = () => {
   }
 
   const printInvoice = async (invoiceNumber: string) => {
-    const { data } = await axios.get('/opa/_smartbill/printInvoice', {
-      params: {
-        invoiceNumber,
-      },
-      responseType: 'arraybuffer',
-    })
+    const { data } = await axios.get(
+      `/opa/orders/${invoiceNumber}/get-invoice`,
+      {
+        params: {
+          paperSize: 'A4',
+        },
+        responseType: 'blob',
+      }
+    )
 
     const blob = new Blob([data], { type: 'application/pdf' })
     const blobURL = URL.createObjectURL(blob)
@@ -564,33 +564,12 @@ const OrdersList: FC = () => {
           cellRenderer: ({ rowData }: SchemeDataType) => {
             return (
               <>
-                <Button
-                  variation={
-                    getInvoiceNumber(rowData) === 'No invoice'
-                      ? 'primary'
-                      : 'secondary'
-                  }
-                  block
-                  disabled={rowData.status === 'canceled'}
-                  onClick={() => {
-                    console.log('orderAwbOnclick', orderAwb)
-                    setCurrentRowData(rowData)
-                    // switch devMode to false to get intended functionality
-                    if (
-                      devMode
-                        ? false
-                        : getInvoiceNumber(rowData) !== 'No invoice'
-                    ) {
-                      printAwb(rowData.orderId)
-                    }
-
-                    if (getInvoiceNumber(rowData) === 'No invoice' || devMode) {
-                      setIsClosed(!isClosed)
-                    }
-                  }}
-                >
-                  {displayAwbInfoButton(rowData)}
-                </Button>
+                <RequestAwbModal
+                  setTrackingNum={setTrackingNum}
+                  setOrderAwb={setOrderAwb}
+                  neededOrderId={rowData.orderId}
+                  onAwbUpdate={setAwbUpdate}
+                />
               </>
             )
           },
@@ -603,14 +582,8 @@ const OrdersList: FC = () => {
               (order) => order?.orderId === rowData.orderId
             )
 
-            if (rowAwbInfo?.courier) {
-              return (
-                <AwbStatus
-                  courier={rowAwbInfo.courier}
-                  orderId={rowAwbInfo.orderId}
-                  size="small"
-                />
-              )
+            if (rowAwbInfo?.courier || (rowAwbInfo?.courier && awbUpdate)) {
+              return <AwbStatus orderId={rowAwbInfo.orderId} size="small" />
             }
 
             return null
@@ -630,7 +603,7 @@ const OrdersList: FC = () => {
                     block
                     disabled={rowData.status === 'canceled'}
                     onClick={() => {
-                      printInvoice(invoiceNumber)
+                      printInvoice(rowData.orderId)
                     }}
                   >
                     <span style={{ paddingRight: '10px' }}>
@@ -654,7 +627,6 @@ const OrdersList: FC = () => {
       getPayMethod,
       displayAwbInfoButton,
       trackingNum,
-      isClosed,
       orderAwb,
       printAwb,
       getInvoiceNumber,
@@ -968,13 +940,6 @@ const OrdersList: FC = () => {
             onSubmit: handleInputSearchSubmit,
           },
         }}
-      />
-      <RequestAwbModal
-        rowData={currentRowData}
-        isClosed={isClosed}
-        setIsClosed={setIsClosed}
-        setTrackingNum={setTrackingNum}
-        setOrderAwb={setOrderAwb}
       />
     </div>
   )
