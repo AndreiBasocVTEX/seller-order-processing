@@ -5,5 +5,5 @@ export interface OrderTrackingEvents {
 
 export interface OrderAwbStatus {
   isDelivered: boolean
-  trackingEvents: [OrderTrackingEvents]
+  events: [OrderTrackingEvents]
 }

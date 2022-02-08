@@ -11,13 +11,10 @@ export const getOrderDataById = (orderId: string): Promise<IOrder> =>
       return null
     })
 export const getOrderAwbStatus = async (
-  deliveryCompany: string,
   orderNumber: string
 ): Promise<OrderAwbStatus> =>
   axios
-    .put(
-      `/opa/_${deliveryCompany.toLowerCase()}/updateAWBInfo?orderId=${orderNumber}`
-    )
+    .post(`/opa/orders/${orderNumber}/update-tracking-status`)
     .then((response) => response.data)
     .catch(() => {
       return null

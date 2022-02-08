@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Modal,
   Button,
@@ -21,13 +21,16 @@ import download from '../../public/logos/download.png'
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
 import { getErrorMessage } from '../../utils/api/errorResponse'
+import { getOrderDataById } from '../../utils/api'
+import { normalizeOrderData } from '../../utils/normalizeData/orderDetails'
+import type { OrderDetailsData } from '../../typings/normalizedOrder'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
-  rowData,
-  isClosed,
-  setIsClosed,
   setTrackingNum,
   setOrderAwb,
+  updateAwbData,
+  neededOrderId,
+  onAwbUpdate,
 }) => {
   const [service, setService] = useState('')
   const [axiosError, setAxiosEroor] = useState({
@@ -36,6 +39,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     errorStatus: 0,
   })
 
+  const [isLoading, setIsLoading] = useState(true)
+  const [orderData, setOrderData] = useState<OrderDetailsData>()
   const [courierSetManually, setCourierManually] = useState([
     { value: 'FanCourier', label: 'FanCourier' },
     { value: 'Cargus', label: 'Cargus' },
@@ -53,6 +58,9 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     })
   }
 
+  const [newAwbGenerated, setNewAwbGenerated] = useState(false)
+
+  const [modalOpen, setModalOpen] = useState(false)
   const dropDownOptions = [
     {
       label: (
@@ -152,41 +160,56 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [invoiceNum, setInvoiceNum] = useState('') // Math.floor((Math.random() * 1000000000))
 
   const handlePopUpToggle = () => {
-    setIsClosed(!isClosed)
+    setModalOpen(!modalOpen)
   }
 
   const getOrderData = async (orderId: string): Promise<unknown> => {
     try {
       const { data } = await axios.post(
-        `/_${service.toLowerCase()}/sendInvoiceInfo`,
+        `/opa/orders/${orderId}/track-and-invoice`,
+
         {
-          invoiceValue: rowData?.totalValue,
-          type: 'Output',
-          issuanceDate: invoiceDate.toString(), // '2019-01-20', // date
-          invoiceNumber: invoiceNum.toString(),
-          weight,
-          numberOfParcels: packageAmount,
-        },
-        {
-          params: { orderId },
+          tracking: {
+            generate: true,
+            provider: service.toLowerCase(),
+            params: {
+              weight,
+              numberOfParcels: packageAmount,
+            },
+          },
+          invoice: {
+            provider: courier,
+            ...(courier === 'manual' && {
+              params: {
+                invoiceValue: orderData?.value,
+                type: 'Output',
+                issuanceDate: invoiceDate.toString(),
+                invoiceNumber: invoiceNum.toString(),
+              },
+            }),
+          },
         }
       )
 
       setTrackingNum({
-        [data.updatedItems.orderId]: data.updatedItems.trackingNumber,
+        [orderId]: data.trackingNumber,
       })
+      updateAwbData && updateAwbData(data)
+      setNewAwbGenerated(true)
+      onAwbUpdate(true)
       // changing specific order to an updated one onClick generate in modal.
-      setOrderAwb((prevState) =>
-        prevState.map((el) => {
-          if (el.orderId === data.updatedItems.orderId) {
-            el.orderValue = data.updatedItems.trackingNumber
-            el.courier = data.updatedItems.courier
-            el.invoiceNumber = invoiceNum
-          }
+      setOrderAwb &&
+        setOrderAwb((prevState) =>
+          prevState.map((el) => {
+            if (el.orderId === orderId) {
+              el.orderValue = data.invoiceValue
+              el.courier = data.courier
+              el.invoiceNumber = data.invoiceNumber
+            }
 
-          return el
-        })
-      )
+            return el
+          })
+        )
 
       return data
     } catch (error) {
@@ -209,23 +232,77 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
     e.preventDefault()
-    setIsClosed(!isClosed)
+    setModalOpen(!modalOpen)
     setInvoiceNum('')
-    rowData ? getOrderData(rowData?.orderId) : null
+    orderData?.orderId && getOrderData(orderData?.orderId)
   }
+
+  const printAwb = async (_orderData: OrderDetailsData): Promise<any> => {
+    setIsLoading(true)
+
+    try {
+      const { data } = await axios.get(
+        `/opa/orders/${_orderData?.orderId}/tracking-label`,
+        {
+          params: {
+            awbTrackingNumber: _orderData?.value.toString(),
+            paperSize: 'A4',
+          },
+          responseType: 'blob',
+        }
+      )
+
+      const blob = new Blob([data], { type: 'application/pdf' })
+
+      const blobURL = URL.createObjectURL(blob)
+
+      window.open(blobURL)
+    } catch (e) {
+      console.log(e)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const getOrderDetails = async () => {
+    const rawData = await getOrderDataById(neededOrderId)
+    const normalizedData = normalizeOrderData(rawData)
+
+    setOrderData(normalizedData)
+    setIsLoading(false)
+  }
+
+  useEffect(() => {
+    getOrderDetails()
+  }, [newAwbGenerated])
 
   return (
     <>
+      <Button
+        block
+        variation={
+          orderData?.packageAttachment.packages ? 'secondary' : 'primary'
+        }
+        disabled={isLoading || orderData?.status === 'canceled'}
+        isLoading={isLoading}
+        onClick={() => {
+          orderData?.packageAttachment.packages
+            ? printAwb(orderData)
+            : setModalOpen(!modalOpen)
+        }}
+      >
+        {orderData?.packageAttachment.packages
+          ? `${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`
+          : 'Generează AWB & Factura'}
+      </Button>
       <Modal
-        isOpen={isClosed}
-        // title={`Request AWB and Invoice for ${service}`}
+        isOpen={modalOpen}
         responsiveFullScreen
         showCloseIcon
         onClose={() => {
           handlePopUpToggle()
           setCourier('')
           setService('')
-          // setButIsEnabled(false)
         }}
         closeOnOverlayClick
         closeOnEsc

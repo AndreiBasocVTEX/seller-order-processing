@@ -1,59 +1,29 @@
 import type { FC } from 'react'
-import React, { useCallback, useEffect, useState } from 'react'
-import { Box, Button, Divider } from 'vtex.styleguide'
+import React, { useEffect, useState } from 'react'
+import { Box, Divider } from 'vtex.styleguide'
 import '../../public/style.css'
 
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
-import type { IOrder } from '../../typings/order'
 import RequestAwbModal from '../../components/AwbModal'
 import { OrderTable } from '../../components/OrderDetail'
-import type {
-  IOrderAwb,
-  IOrderDetailProps,
-  ITrackingObj,
-} from '../../types/common'
+import type { IOrderDetailProps, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 
-const OrderDetail: FC<IOrderDetailProps> = ({ orderData, rawOrderData }) => {
+const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
   const [data, setData] = useState<OrderDetailsData>()
-  const [isClosed, setIsClosed] = useState(false)
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
-  const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
-
-  const getLabelOrder = useCallback(
-    (rowData: IOrder) => {
-      const order = orderAwb.find(
-        (labelOrder) => labelOrder?.orderId === rowData?.orderId
-      )
-
-      return order
-        ? `${order.courier ? order.courier : ' '} ${order.orderValue}`
-        : null
-    },
-    [orderAwb]
-  )
+  const [awbUpdated, setAwbUpdated] = useState(false)
+  const [awbData, updateAwbData] = useState<{
+    courier: string
+    invoiceNumber: string
+    invoiceValue: number
+    issuanceDate: string
+    trackingNumber: string
+  }>()
 
   useEffect(() => {
     setData(orderData)
-    const lastOrder =
-      (rawOrderData && rawOrderData.packageAttachment.packages.length - 1) ?? 1
-
-    rawOrderData &&
-      setOrderAwb(() => {
-        return [
-          {
-            orderId: rawOrderData.orderId.toString(),
-            orderValue:
-              rawOrderData.packageAttachment?.packages[lastOrder]
-                ?.trackingNumber ?? 'Generează AWB & Factura',
-            courier:
-              rawOrderData.packageAttachment?.packages[lastOrder]?.courier ??
-              null,
-            payMethod: rawOrderData.openTextField?.value,
-          },
-        ]
-      })
-  }, [trackingNum, orderData, rawOrderData])
+  }, [trackingNum, orderData])
 
   return (
     <>
@@ -138,45 +108,49 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData, rawOrderData }) => {
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="t-heading-3">AWB Livrare</h3>
-                {data?.packageAttachment.packages?.courier &&
+                {data?.packageAttachment.packages &&
                   data?.marketPlaceOrderId && (
-                    <AwbStatus
-                      courier={data?.packageAttachment.packages?.courier}
-                      orderId={data?.orderId}
-                      size="large"
-                    />
+                    <AwbStatus orderId={data?.orderId} size="large" />
+                  )}
+                {awbUpdated &&
+                  data?.orderId &&
+                  !data?.packageAttachment.packages && (
+                    <AwbStatus orderId={data?.orderId} size="large" />
                   )}
               </div>
-              <div className="mt2">
-                Curier:{' '}
-                {data?.packageAttachment.packages?.courier ?? 'Lipsa date'}
-              </div>
-              <div className="mt2">
-                AWB: {data?.packageAttachment.packages?.trackingNumber}
-              </div>
-              <div className="mt2">
-                {' '}
-                Tracking URL: {data?.packageAttachment.packages?.trackingUrl}
-              </div>
+              {data?.packageAttachment?.packages && (
+                <>
+                  <div className="mt2">
+                    Curier:{' '}
+                    {data?.packageAttachment.packages?.courier ?? 'Lipsa date'}
+                  </div>
+                  <div className="mt2">
+                    AWB: {data?.packageAttachment.packages?.trackingNumber}
+                  </div>
+                  <div className="mt2">
+                    {' '}
+                    Tracking URL:{' '}
+                    {data?.packageAttachment.packages?.trackingUrl}
+                  </div>
+                </>
+              )}
+              {awbUpdated && (
+                <>
+                  <div className="mt2">
+                    Curier: {awbData?.courier ?? 'Lipsa date'}
+                  </div>
+                  <div className="mt2">AWB: {awbData?.trackingNumber}</div>
+                </>
+              )}
               <div className="flex w-50 mt5">
-                {rawOrderData && (
-                  <Button
-                    variation="secondary"
-                    disabled={rawOrderData.status === 'canceled'}
-                    onClick={() => {
-                      setIsClosed(!isClosed)
-                    }}
-                  >
-                    {getLabelOrder(rawOrderData)}
-                  </Button>
+                {data?.orderId && (
+                  <RequestAwbModal
+                    updateAwbData={updateAwbData}
+                    setTrackingNum={setTrackingNum}
+                    neededOrderId={data?.orderId}
+                    onAwbUpdate={setAwbUpdated}
+                  />
                 )}
-                <RequestAwbModal
-                  rowData={rawOrderData}
-                  isClosed={isClosed}
-                  setIsClosed={setIsClosed}
-                  setTrackingNum={setTrackingNum}
-                  setOrderAwb={setOrderAwb}
-                />
               </div>
             </div>
           </Box>
@@ -205,21 +179,38 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData, rawOrderData }) => {
                 <Divider />
               </div>
               <h3 className="t-heading-3">Factura</h3>
-              <div className="mt2">
-                ID factura: {data?.packageAttachment.packages?.invoiceNumber}
-              </div>
-              <div className="mt2">
-                Valoare:{' '}
-                {(data?.packageAttachment.packages?.invoiceValue ?? 0) / 100 ||
-                  'Lipsa date'}{' '}
-                Lei
-              </div>
-              <div className="mt2">
-                Data factura: {data?.packageAttachment.packages?.issuanceDate}
-              </div>
-              <div className="mt2">
-                URL factura: {data?.packageAttachment.packages?.invoiceUrl}
-              </div>
+              {data?.packageAttachment?.packages && (
+                <>
+                  <div className="mt2">
+                    ID factura:{' '}
+                    {data?.packageAttachment.packages?.invoiceNumber}
+                  </div>
+                  <div className="mt2">
+                    Valoare:{' '}
+                    {(data?.packageAttachment.packages?.invoiceValue ?? 0) /
+                      100 || 'Lipsa date'}{' '}
+                    Lei
+                  </div>
+                  <div className="mt2">
+                    Data factura:{' '}
+                    {data?.packageAttachment.packages?.issuanceDate}
+                  </div>
+                  <div className="mt2">
+                    URL factura: {data?.packageAttachment.packages?.invoiceUrl}
+                  </div>
+                </>
+              )}
+              {awbUpdated && (
+                <>
+                  <div className="mt2">
+                    Valoare:{' '}
+                    {(awbData?.invoiceValue ?? 0) / 100 || 'Lipsa date'} Lei
+                  </div>
+                  <div className="mt2">
+                    Data factura: {awbData?.issuanceDate}
+                  </div>
+                </>
+              )}
             </div>
           </Box>
         </div>
