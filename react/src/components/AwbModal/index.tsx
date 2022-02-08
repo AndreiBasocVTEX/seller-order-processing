@@ -19,6 +19,8 @@ import facturis from '../../public/logos/facturis.png'
 import smartbill from '../../public/logos/smartbill.png'
 import download from '../../public/logos/download.png'
 import type { IOrderAwbProps } from '../../types/awbModal'
+import ErrorPopUpMessage from '../ErrorPopUpMessage'
+import { getErrorMessage } from '../../utils/api/errorResponse'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
   rowData,
@@ -28,6 +30,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   setOrderAwb,
 }) => {
   const [service, setService] = useState('')
+  const [axiosError, setAxiosEroor] = useState({
+    isError: false,
+    errorMessage: '',
+    errorStatus: 0,
+  })
+
   const [courierSetManually, setCourierManually] = useState([
     { value: 'FanCourier', label: 'FanCourier' },
     { value: 'Cargus', label: 'Cargus' },
@@ -37,6 +45,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     { value: 'GLS', label: 'GLS' },
     { value: 'DPD', label: 'DPD' },
   ])
+
+  const removeAxiosError = () => {
+    setAxiosEroor({
+      ...axiosError,
+      isError: false,
+    })
+  }
 
   const dropDownOptions = [
     {
@@ -175,7 +190,18 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
       return data
     } catch (error) {
-      console.log(error)
+      // <! this is temporary until we will get the correct error type from backend>
+      const errorStatusRgx = /\d+/g
+      const status = String(error).match(errorStatusRgx)
+
+      const errorMessage = getErrorMessage(status?.[0] ?? '')
+
+      setAxiosEroor({
+        ...axiosError,
+        isError: true,
+        errorMessage: errorMessage.message,
+        errorStatus: errorMessage.status,
+      })
 
       return error
     }
@@ -223,7 +249,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             </div>
 
             {((): JSX.Element | void => {
-              console.log('SERVICE', service)
               if (service && service !== 'manual') {
                 return (
                   <>
@@ -424,6 +449,14 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           </form>
         </div>
       </Modal>
+      {axiosError.isError && (
+        <ErrorPopUpMessage
+          errorMessage={axiosError.errorMessage}
+          errorStatus={axiosError.errorStatus}
+          timeSeconds={4}
+          resetError={removeAxiosError}
+        />
+      )}
     </>
   )
 }
