@@ -8,7 +8,7 @@ import {
 import {
   getTotalDiscount,
   getTotalWeight,
-} from '../../core/helpers/helpers.dto'
+} from '../../core/helpers/order-dto.helper'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 

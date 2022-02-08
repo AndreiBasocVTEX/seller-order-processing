@@ -1,11 +1,11 @@
 import { IOClients } from '@vtex/api'
 
+import CarrierClientFactory from './carrier-client.factory'
 import { CargusClient } from '../features/cargus'
 import { FancourierClient } from '../features/fancourier'
 import { InnoshipClient } from '../features/innoship'
 import { SamedayClient } from '../features/sameday'
-import CarrierClientFactory from './carrier-client.factory'
-import OrderClient from '../features/vtex/clients/order-client'
+import { OrderClient } from '../features/vtex'
 import { SmartbillClient } from '../features/smartbill'
 
 export class Clients extends IOClients {

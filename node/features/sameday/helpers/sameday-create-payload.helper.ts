@@ -1,7 +1,7 @@
 import {
   getTotalWeight,
   getTotalDiscount,
-} from '../../core/helpers/helpers.dto'
+} from '../../core/helpers/order-dto.helper'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'

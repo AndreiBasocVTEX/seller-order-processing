@@ -1,5 +1,4 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
-import FormData from 'form-data'
 import ObjectsToCsv from 'objects-to-csv'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
@@ -12,13 +11,12 @@ import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
 import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
-
-type FormDataAcceptedTypes =
-  | string
-  | number
-  | { isFile: boolean; filename: string; value: unknown; contentType: string }
-
-type FanCourierRequestPayloadType = { [key: string]: FormDataAcceptedTypes }
+import {
+  payloadToFormData,
+  transformResponseToBuffer,
+  transformResponseToText,
+} from '../../core/helpers/body-parser.helper'
+import type { FormDataPayload } from '../../core/models/form-data.model'
 
 export default class FancourierClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -196,53 +194,26 @@ export default class FancourierClient extends CarrierClient {
 
   private requestToFanCourier(
     url: string,
-    payload: FanCourierRequestPayloadType,
+    payload: FormDataPayload,
     options: { responseType: 'text' | 'blob' }
   ) {
     if (!url) {
       throw new Error('URL is required')
     }
 
-    const form = new FormData()
-
-    for (const propName in payload) {
-      const value: FormDataAcceptedTypes = payload[propName]
-
-      if (typeof value === 'object' && value?.isFile) {
-        form.append(propName, value.value, {
-          filename: value.filename,
-          contentType: value.contentType,
-        })
-      } else {
-        form.append(propName, value)
-      }
-    }
+    const form = payloadToFormData(payload)
 
     return new Promise((resolve, reject) => {
-      form.submit(`https://www.selfawb.ro/${url}`, (err, _res) => {
-        if (err) {
-          return reject(err)
+      form.submit(`https://www.selfawb.ro/${url}`, (error, response) => {
+        if (options.responseType === 'blob') {
+          return transformResponseToBuffer(error, response)
+            .then(resolve)
+            .catch(reject)
         }
 
-        const body: string[] | Uint8Array[] = []
-
-        _res.on('data', (chunk) => {
-          body.push(chunk)
-        })
-
-        _res.on('end', () => {
-          if (options.responseType === 'text') {
-            return resolve(body.join(''))
-          }
-
-          if (options.responseType === 'blob') {
-            return resolve(Buffer.concat(body as Uint8Array[]))
-          }
-
-          resolve(body)
-        })
-
-        _res.on('error', () => reject(body))
+        return transformResponseToText(error, response)
+          .then(resolve)
+          .catch(reject)
       })
     })
   }
