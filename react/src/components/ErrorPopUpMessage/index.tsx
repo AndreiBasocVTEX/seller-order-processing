@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Modal, Button } from 'vtex.styleguide'
 import type { FC } from 'react'
 
@@ -7,17 +7,9 @@ import type { IErrorPopUpMessage } from '../../types/errorModalMessage'
 const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
   errorStatus,
   errorMessage,
-  timeSeconds,
   resetError,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(true)
-
-  useEffect(() => {
-    setTimeout(() => {
-      setIsModalOpen(false)
-      resetError?.()
-    }, (timeSeconds && timeSeconds * 1000) || 3000)
-  }, [])
 
   const onCLoseModal = () => {
     setIsModalOpen(false)

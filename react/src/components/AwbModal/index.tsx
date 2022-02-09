@@ -532,7 +532,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         <ErrorPopUpMessage
           errorMessage={axiosError.errorMessage}
           errorStatus={axiosError.errorStatus}
-          timeSeconds={4}
           resetError={removeAxiosError}
         />
       )}
