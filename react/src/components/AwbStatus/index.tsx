@@ -64,12 +64,12 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
               <Spinner size={20} />
             ) : awbStatus ? (
               <Tooltip label={awbStatus}>
-                <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2">
+                <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2 f7">
                   {awbStatus}
                 </div>
               </Tooltip>
             ) : (
-              <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2">
+              <div className="br-pill bg-muted-2 white-90 fw4 pv2 ph8 f7">
                 Lipsa date
               </div>
             )}
@@ -92,12 +92,12 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
                 </div>
               ) : awbStatus ? (
                 <Tooltip label={awbStatus}>
-                  <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate">
+                  <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate f7">
                     {awbStatus}
                   </div>
                 </Tooltip>
               ) : (
-                <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate">
+                <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate f7">
                   Lipsa date
                 </div>
               )}

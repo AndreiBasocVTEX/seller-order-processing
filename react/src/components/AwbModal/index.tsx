@@ -291,9 +291,11 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             : setModalOpen(!modalOpen)
         }}
       >
-        {orderData?.packageAttachment.packages
-          ? `${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`
-          : 'Generează AWB & Factura'}
+        <span className="f6">
+          {orderData?.packageAttachment.packages
+            ? `${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`
+            : 'Generează AWB & Factura'}
+        </span>
       </Button>
       <Modal
         isOpen={modalOpen}

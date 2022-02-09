@@ -24,6 +24,7 @@ import '../../public/style.css'
 import type { IOrder } from '../../typings/order'
 import type { IOrderAwb, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
+import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
@@ -96,8 +97,6 @@ const OrdersList: FC = () => {
         url += `&f_status=${filterStatus}`
       }
 
-      console.log('GETITEMS_URL', url, 'filterStatus:', filterStatus)
-
       try {
         const { data } = await axios.get(url, {
           headers: { Accept: 'application/json' },
@@ -125,106 +124,27 @@ const OrdersList: FC = () => {
     cellData: IOrder
   }
   const displayStatus = (cellData: string) => {
-    console.log(cellData)
-    if (cellData === 'ready-for-handling') {
+    const orderStatus = getOrderStatus(cellData)
+
+    if (orderStatus?.shortText) {
       return (
         <>
-          <Tooltip label="Ready for handling" position="bottom">
-            <div
-              style={{
-                backgroundColor: '#44c767',
-                borderRadius: '14px',
-                display: 'inline-block',
-                color: '#fff',
-                fontSize: '14px',
-                padding: '4px 26px',
-                fontWeight: '500',
-              }}
-            >
-              RFH
-            </div>
+          <Tooltip label={orderStatus.longText} position="bottom">
+            <span>
+              <Tag bgColor={orderStatus.bgColor} color={orderStatus.color}>
+                <span className="fw3 f7 ph4">{orderStatus.shortText} </span>
+              </Tag>
+            </span>
           </Tooltip>
         </>
       )
     }
 
-    if (cellData === 'waiting-for-sellers-confirmation') {
+    if (orderStatus && !orderStatus.shortText) {
       return (
-        <>
-          <Tooltip label="Waiting for sellers confirmation" position="bottom">
-            <div
-              style={{
-                backgroundColor: '#44c767',
-                borderRadius: '14px',
-                display: 'inline-block',
-                color: '#fff',
-                fontSize: '14px',
-                padding: '4px 26px',
-                fontWeight: '500',
-              }}
-            >
-              WFSC
-            </div>
-          </Tooltip>
-        </>
-      )
-    }
-
-    if (cellData === 'payment-approved') {
-      return <Tag type="success">Paid</Tag>
-    }
-
-    if (cellData === 'canceled') {
-      return (
-        <Tag bgColor="#FF4136" color="#fff">
-          Canceled
+        <Tag bgColor={orderStatus.bgColor} color={orderStatus.color}>
+          <span className="fw3 f7 helvetica"> {orderStatus.longText} </span>
         </Tag>
-      )
-    }
-
-    if (cellData === 'invoiced') {
-      return (
-        <Tag bgColor="#00449E" color="#fff">
-          Invoiced
-        </Tag>
-      )
-    }
-
-    if (cellData === 'handling') {
-      return (
-        <Tag bgColor="#357EDD" color="#fff">
-          Handling
-        </Tag>
-      )
-    }
-
-    if (cellData === 'payment-pending') {
-      return (
-        <Tag bgColor="#98b13d" color="#fff">
-          $ Pending
-        </Tag>
-      )
-    }
-
-    if (cellData === 'cancellation-requested') {
-      return (
-        <>
-          <Tooltip label="Cancellation requested" position="bottom">
-            <div
-              style={{
-                backgroundColor: '#FF725C',
-                borderRadius: '14px',
-                display: 'inline-block',
-                color: '#fff',
-                fontSize: '14px',
-                padding: '4px 30px',
-                fontWeight: '500',
-              }}
-            >
-              CR
-            </div>
-          </Tooltip>
-        </>
       )
     }
 
@@ -438,7 +358,7 @@ const OrdersList: FC = () => {
     console.log('clicked+searchVal', searchValue)
     setPaginationParams({
       ...paginationParams,
-      currentItemFrom: 1 * paginationParams.paging.perPage,
+      currentItemFrom: paginationParams.paging.perPage,
       currentItemTo: 2 * paginationParams.paging.perPage,
       paging: {
         total: paginationParams.paging.total,
@@ -457,9 +377,6 @@ const OrdersList: FC = () => {
           title: 'Status',
           width: 100,
           cellRenderer: ({ cellData }: { cellData: string }): JSX.Element => {
-            // console.log('STATUS,CELLDATA', cellData)
-
-            // return <span className="nowrap">{cellData}</span>
             return displayStatus(cellData)
           },
         },
@@ -480,23 +397,25 @@ const OrdersList: FC = () => {
             )
           },
         },
-        orderId: {
-          title: 'VTEX #',
-          width: 170,
-          cellRenderer: ({
-            cellData,
-            rowData,
-          }: {
-            cellData: string
-            rowData: IOrder
-          }): JSX.Element => {
-            return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {cellData}
-              </Link>
-            )
-          },
-        },
+        // <!! DO NOT REMOVE IT , will be implemented letter with '#vitex' toggle off>
+
+        // orderId: {
+        //   title: 'VTEX #',
+        //   width: 170,
+        //   cellRenderer: ({
+        //     cellData,
+        //     rowData,
+        //   }: {
+        //     cellData: string
+        //     rowData: IOrder
+        //   }): JSX.Element => {
+        //     return (
+        //       <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+        //         {cellData}
+        //       </Link>
+        //     )
+        //   },
+        // },
         creationDate: {
           title: 'Creation Date',
           width: 140,
@@ -611,7 +530,7 @@ const OrdersList: FC = () => {
                       <IconDownload />
                     </span>
 
-                    <span className="mw-100 truncate">{invoiceNumber}</span>
+                    <span className="mw-100 truncate f6">{invoiceNumber}</span>
                   </Button>
                 </Tooltip>
               )

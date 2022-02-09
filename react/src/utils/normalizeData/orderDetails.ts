@@ -4,6 +4,7 @@ import type {
   AttachmentPackages,
   FormattedOrderStatus,
 } from '../../typings/normalizedOrder'
+import { deliveryStatus } from '../constants'
 
 const getPaymentMethod = (paymentData: string): string | null => {
   if (!paymentData) return null
@@ -26,11 +27,11 @@ const getOrderTotals = (orderData: IOrder) => {
 const getInvoicedEntityType = (isCorporate: boolean) =>
   isCorporate ? 'Persoana juridica' : 'Persoana fizica'
 
-const getOrderStatus = (
+export const getOrderStatus = (
   status: string | undefined
 ): FormattedOrderStatus | undefined => {
   switch (status) {
-    case 'ready-for-handling':
+    case deliveryStatus.READY_FOR_HANDLING:
       return {
         color: '#FFF',
         bgColor: '#44c767',
@@ -38,7 +39,7 @@ const getOrderStatus = (
         shortText: 'RFH',
       }
 
-    case 'waiting-for-sellers-confirmation':
+    case deliveryStatus.WAITING_FOR_SELLERS_CONFIRMATION:
       return {
         color: '#FFF',
         bgColor: '#44c767',
@@ -46,47 +47,42 @@ const getOrderStatus = (
         shortText: 'WFSC',
       }
 
-    case 'payment-approved':
+    case deliveryStatus.PAYMENT_APPROVED:
       return {
         color: '#FFF',
         bgColor: '#8bc34a',
         longText: 'Paid',
-        shortText: 'Paid',
       }
 
-    case 'canceled':
+    case deliveryStatus.CANCELED:
       return {
         color: '#FFF',
         bgColor: '#FF4136',
         longText: 'Canceled',
-        shortText: 'Canceled',
       }
 
-    case 'invoiced':
+    case deliveryStatus.INVOICED:
       return {
         color: '#FFF',
         bgColor: '#00449E',
         longText: 'Invoiced',
-        shortText: 'Invoiced',
       }
 
-    case 'handling':
+    case deliveryStatus.HANDLING:
       return {
         color: '#FFF',
         bgColor: '#357EDD',
         longText: 'Handling',
-        shortText: 'Handling',
       }
 
-    case 'payment-pending':
+    case deliveryStatus.PAYMENT_PENDING:
       return {
         color: '#FFF',
         bgColor: '#98b13d',
         longText: 'Pending',
-        shortText: 'Pending',
       }
 
-    case 'cancellation-requested':
+    case deliveryStatus.CANCELLATION_REQUESTED:
       return {
         color: '#FFF',
         bgColor: '#FF725C',
