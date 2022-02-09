@@ -64,12 +64,12 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
               <Spinner size={20} />
             ) : awbStatus ? (
               <Tooltip label={awbStatus}>
-                <div className="br-pill bg-muted-2 tc mw-100 white-90 truncate fw4 ph4 pv2 f7">
+                <div className="br-pill bg-muted-2 tc w5 white-90 truncate fw4 ph4 pv2 f7">
                   {awbStatus}
                 </div>
               </Tooltip>
             ) : (
-              <div className="br-pill bg-muted-2 white-90 fw4 pv2 ph8 f7">
+              <div className="br-pill bg-muted-2 w5 white-90 fw4 pv2 tc f7">
                 Lipsa date
               </div>
             )}
