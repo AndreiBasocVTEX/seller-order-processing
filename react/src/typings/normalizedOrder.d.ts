@@ -6,6 +6,7 @@ export interface ShippingAddressData {
   state: string | null
   street: string
 }
+
 export interface AttachmentPackages {
   courier: string
   courierStatus?: {
@@ -44,6 +45,7 @@ export interface ClientProfileData {
   userProfileId?: string | null
   customerClass?: string | null
 }
+
 export interface InvoiceDataAddress {
   city: string
   complement?: string | null
@@ -57,6 +59,7 @@ export interface InvoiceDataAddress {
   state: string | null
   street: string
 }
+
 export interface OrderItem {
   freightCommission: number
   name: string
@@ -69,12 +72,14 @@ export interface OrderItem {
   tax: number
   taxCode: string
 }
+
 export interface FormattedOrderStatus {
   color: string
   bgColor: string
   longText: string
-  shortText: string
+  shortText?: string
 }
+
 export interface LogisticsInfo {
   price: number
   shippingEstimateDate: string
