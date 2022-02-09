@@ -397,25 +397,24 @@ const OrdersList: FC = () => {
             )
           },
         },
-        // <!! DO NOT REMOVE IT , will be implemented letter with '#vitex' toggle off>
-
-        // orderId: {
-        //   title: 'VTEX #',
-        //   width: 170,
-        //   cellRenderer: ({
-        //     cellData,
-        //     rowData,
-        //   }: {
-        //     cellData: string
-        //     rowData: IOrder
-        //   }): JSX.Element => {
-        //     return (
-        //       <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-        //         {cellData}
-        //       </Link>
-        //     )
-        //   },
-        // },
+        orderId: {
+          title: 'VTEX #',
+          hidden: true,
+          width: 170,
+          cellRenderer: ({
+            cellData,
+            rowData,
+          }: {
+            cellData: string
+            rowData: IOrder
+          }): JSX.Element => {
+            return (
+              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                {cellData}
+              </Link>
+            )
+          },
+        },
         creationDate: {
           title: 'Creation Date',
           width: 140,
