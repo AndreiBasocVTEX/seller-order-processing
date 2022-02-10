@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { FC } from 'react'
 /* eslint-disable no-console */
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import type { FC } from 'react'
 import axios from 'axios'
 import {
   Button,
@@ -9,7 +9,6 @@ import {
   DatePicker,
   FilterBar,
   IconDownload,
-  Input,
   Link,
   Pagination,
   Table,
@@ -22,15 +21,21 @@ import { FormattedCurrency } from 'vtex.format-currency'
 import RequestAwbModal from '../../components/AwbModal'
 import '../../public/style.css'
 import type { IOrder } from '../../typings/order'
-import type { IOrderAwb, ITrackingObj } from '../../types/common'
+import type {
+  IStatement,
+  IDatePickerProp,
+  IOrderAwb,
+  ITrackingObj,
+} from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
+  const [dateUrl, setDateUrl] = useState('')
+  const [filterUrl, setFilterUrl] = useState('')
+  const [filterStatus, setFilterStatus] = useState<IStatement[]>([])
   const [searchValue, setSearchValue] = useState('')
-  const [filterStatus, setFilterStatus] = useState('')
-  const [statements, setStatements] = useState([])
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
   const [paginationParams, setPaginationParams] = useState({
@@ -53,32 +58,27 @@ const OrdersList: FC = () => {
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchTrackingNumbers = useCallback((orders: any[]) => {
-    console.log('fetchedTrackingNumbers OK!', orders)
-
-    orders.forEach(async (el) => {
-      const { data }: { data: any } = await axios.get(
+  const fetchTrackingNumbers = useCallback((orders: IOrder[]) => {
+    orders.forEach(async (el: IOrder) => {
+      const { data }: { data: IOrder } = await axios.get(
         `/api/oms/pvt/orders/${el.orderId}`
       )
 
       const lastOrder = data.packageAttachment.packages.length - 1
 
-      setOrderAwb((prevState) => {
+      setOrderAwb((prevState: IOrderAwb[]): IOrderAwb[] => {
         return [
           ...prevState,
           {
             orderId: el.orderId.toString(),
-            // potentially has to be first element of the array
             orderValue:
               data.packageAttachment?.packages[lastOrder]?.trackingNumber ||
               'Genereaza AWB & Factura',
-            courier:
-              data.packageAttachment?.packages[lastOrder]?.courier || null,
+            courier: data.packageAttachment?.packages[lastOrder]?.courier,
             payMethod: data.openTextField?.value,
             invoiceNumber:
               data.packageAttachment?.packages[lastOrder]?.invoiceNumber ||
               'No invoice',
-            packageAttachment: data.packageAttachment,
           },
         ]
       })
@@ -87,14 +87,18 @@ const OrdersList: FC = () => {
 
   const getItems = useCallback(
     async (newParams) => {
-      let url = `/api/oms/pvt/orders?_stats=1&f_creationdate&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}` // &_=${Date.now()}
+      let url = `/api/oms/pvt/orders?_stats=1&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}`
 
       if (searchValue !== '') {
         url += `&q=${searchValue}`
       }
 
-      if (filterStatus !== '') {
-        url += `&f_status=${filterStatus}`
+      if (filterUrl.length) {
+        url += `&f_status=${filterUrl}`
+      }
+
+      if (dateUrl) {
+        url += `&f_creationDate=creationDate:[${dateUrl}]`
       }
 
       try {
@@ -116,7 +120,7 @@ const OrdersList: FC = () => {
         console.log(err)
       }
     },
-    [fetchTrackingNumbers, searchValue, filterStatus]
+    [filterStatus, fetchTrackingNumbers, searchValue]
   )
 
   type SchemeDataType = {
@@ -171,8 +175,6 @@ const OrdersList: FC = () => {
   const printAwb = useCallback(
     async (orderId: string): Promise<any> => {
       const printOrder = orderAwb.find((order) => order?.orderId === orderId)
-      const typeOfResponse =
-        printOrder?.courier === 'Innoship' ? undefined : 'blob'
 
       try {
         const { data } = await axios.get(
@@ -181,14 +183,13 @@ const OrdersList: FC = () => {
             params: {
               awbTrackingNumber: printOrder?.orderValue.toString(),
             },
-            responseType: typeOfResponse,
+            responseType: 'blob',
           }
         )
 
         let buffer
         let blob
 
-        console.log(data.contents)
         if (printOrder?.courier === 'Innoship') {
           buffer = Buffer.from(data.contents, 'base64')
           blob = new Blob([buffer], { type: 'application/pdf' })
@@ -209,7 +210,7 @@ const OrdersList: FC = () => {
   const displayAwbInfoButton = useCallback(
     (rowData: IOrder) => {
       const order = orderAwb.find(
-        (labelOrder) => labelOrder?.orderId === rowData?.orderId
+        (labelOrder: IOrderAwb) => labelOrder?.orderId === rowData?.orderId
       )
 
       if (order?.courier && order?.orderValue) {
@@ -231,7 +232,7 @@ const OrdersList: FC = () => {
   const getInvoiceNumber = useCallback(
     (rowData: IOrder) => {
       const order = orderAwb.find(
-        (labelOrder) => labelOrder?.orderId === rowData?.orderId
+        (labelOrder: IOrderAwb) => labelOrder?.orderId === rowData?.orderId
       )
 
       return order ? `${order.invoiceNumber ? order.invoiceNumber : ' '}` : ''
@@ -242,7 +243,7 @@ const OrdersList: FC = () => {
   const getPayMethod = useCallback(
     (rowData: IOrder) => {
       const order = orderAwb.find(
-        (payOrder) => payOrder?.orderId === rowData?.orderId
+        (payOrder: IOrderAwb) => payOrder?.orderId === rowData?.orderId
       )
 
       if (order?.payMethod) {
@@ -259,7 +260,7 @@ const OrdersList: FC = () => {
   const getElefantOrderId = useCallback(
     (rowData: IOrder) => {
       const order = orderAwb.find(
-        (payOrder) => payOrder?.orderId === rowData?.orderId
+        (payOrder: IOrderAwb) => payOrder?.orderId === rowData?.orderId
       )
 
       if (order?.payMethod) {
@@ -286,7 +287,6 @@ const OrdersList: FC = () => {
 
     setPaginationParams(newParams)
     getItems(newParams)
-    console.log('PAG_NEXT', newParams)
   }
 
   const handlePrevClick = () => {
@@ -315,11 +315,6 @@ const OrdersList: FC = () => {
     getItems(newParams)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  useEffect(() => {
-    getItems(paginationParams)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [trackingNum])
 
   const handleInputSearchChange = useCallback(
     (e: any) => {
@@ -355,10 +350,9 @@ const OrdersList: FC = () => {
   }, [getItems, paginationParams])
 
   const handleInputSearchSubmit = useCallback(() => {
-    console.log('clicked+searchVal', searchValue)
     setPaginationParams({
       ...paginationParams,
-      currentItemFrom: paginationParams.paging.perPage,
+      currentItemFrom: 1 * paginationParams.paging.perPage,
       currentItemTo: 2 * paginationParams.paging.perPage,
       paging: {
         total: paginationParams.paging.total,
@@ -368,7 +362,7 @@ const OrdersList: FC = () => {
       },
     })
     getItems(paginationParams)
-  }, [getItems, paginationParams, searchValue]) // getProductsList
+  }, [getItems, paginationParams, searchValue])
 
   const tableOrdersSchema = useMemo(
     () => ({
@@ -384,7 +378,6 @@ const OrdersList: FC = () => {
           title: 'Elefant #',
           width: 90,
           cellRenderer: ({
-            // cellData,
             rowData,
           }: {
             cellData: string
@@ -551,91 +544,50 @@ const OrdersList: FC = () => {
     ]
   )
 
-  const renderSimpleFilterLabel = (statement: any) => {
-    if (!statement) {
-      // you should treat empty object cases only for alwaysVisibleFilters
-      return 'Any'
-    }
-
-    return `${
-      statement.verb === '='
-        ? 'is'
-        : statement.verb === '!='
-        ? 'is not'
-        : 'contains'
-    }`
-  }
-
-  const SimpleInputObject = ({ value, onChange }: any) => {
-    return (
-      <Input
-        value={value || ''}
-        onChange={(e: any) => onChange(e.target.value)}
-      />
-    )
-  }
-
-  const getSimpleVerbs = () => {
-    return [
-      {
-        label: 'is',
-        value: '=',
-        object: (props: any) => <SimpleInputObject {...props} />,
-      },
-      {
-        label: 'is not',
-        value: '!=',
-        object: (props: any) => <SimpleInputObject {...props} />,
-      },
-      {
-        label: 'contains',
-        value: 'contains',
-        object: (props: any) => <SimpleInputObject {...props} />,
-      },
-    ]
-  }
-
-  function DatePickerRangeObject({ value, onChange }: any) {
+  function DatePickerRangeObject({ value, onChange }: IDatePickerProp) {
     return (
       <div className="flex flex-column w-100">
         <br />
         <DatePicker
           label="from"
           value={(value && value.from) || new Date()}
-          onChange={(date: any) => {
+          onChange={(date: Date) => {
             onChange({ ...(value || {}), from: date })
           }}
-          locale="pt-BR"
+          locale="en-GB"
         />
         <br />
         <DatePicker
           label="to"
           value={(value && value.to) || new Date()}
-          onChange={(date: any) => {
+          onChange={(date: Date) => {
             onChange({ ...(value || {}), to: date })
           }}
-          locale="pt-BR"
+          locale="en-GB"
         />
       </div>
     )
   }
 
-  function StatusSelectorObject({ value, onChange }: any) {
-    const initialValue = {
-      'Window to cancelation': true,
-      Canceling: true,
-      Canceled: true,
-      'Payment pending': true,
-      'Payment approved': true,
-      'Ready for handling': true,
-      'Handling shipping': true,
-      'Ready for invoice': true,
-      Invoiced: true,
-      Complete: true,
+  function StatusSelectorObject({
+    value,
+    onChange,
+  }: {
+    value: Record<string, boolean>
+    onChange: (value: Record<string, boolean>) => void
+  }) {
+    const initialValue: Record<string, boolean> = {
+      canceled: true,
+      handling: true,
+      'payment-approved': true,
+      'ready-for-handling': true,
+      'waiting-for-sellers-confirmation': true,
+      'cancellation-requested': true,
+      invoiced: true,
       ...(value || {}),
     }
 
-    const toggleValueByKey = (key: any) => {
+    const toggleValueByKey = (key: string) => {
       return {
         ...(value || initialValue),
         [key]: value ? !value[key] : false,
@@ -666,75 +618,111 @@ const OrdersList: FC = () => {
     )
   }
 
+  const handleFiltersChange = useCallback((filterStatements: IStatement[]) => {
+    if (!filterStatements?.length) {
+      setFilterUrl('')
+      setDateUrl('')
+    }
+
+    filterStatements.forEach((statement: IStatement) => {
+      if (!statement?.object) return
+      const { subject, verb, object } = statement
+
+      console.log(verb)
+      if (subject === 'status') {
+        const url = Object.entries(object)
+          .filter(([key, value]) => {
+            console.log(key)
+
+            return value
+          })
+          .map(([key]) => key)
+          .join(',')
+          .toLowerCase()
+
+        setFilterUrl(url)
+      }
+
+      if (subject === 'creationdate') {
+        const from = object?.from?.toISOString?.() ?? new Date().toISOString()
+        const to = object?.to?.toISOString?.() ?? new Date().toISOString()
+
+        setDateUrl(`${from} TO ${to}`)
+      }
+
+      return ''
+    })
+    setFilterStatus(filterStatements)
+  }, [])
+
+  useEffect(() => {
+    getItems(paginationParams)
+  }, [
+    getItems,
+    filterStatus,
+    trackingNum,
+    handleFiltersChange,
+    dateUrl,
+    filterUrl,
+  ])
+
   return (
     <div className="f6 lh-copy">
       <FilterBar
-        alwaysVisibleFilters={['status', 'invoicedate']}
-        statements={statements}
+        alwaysVisibleFilters={['status', 'creationdate']}
+        statements={filterStatus}
         clearAllFiltersButtonLabel="Clear Filters"
-        onChangeStatements={(st: any) => {
-          console.log('onchangeStatements', st)
-          setStatements(st)
-        }}
+        onChangeStatements={handleFiltersChange}
         options={{
-          id: {
-            label: 'ID',
-            renderFilterLabel: renderSimpleFilterLabel,
-            verbs: getSimpleVerbs(),
-          },
-          invoicedate: {
-            label: 'Invoiced date',
-            renderFilterLabel: (st: any) => {
-              if (!st || !st.object) {
+          creationdate: {
+            label: 'Creation date',
+            renderFilterLabel: (statement: IStatement) => {
+              if (!statement || !statement.object) {
                 return 'All'
               }
 
               return `${
-                st.verb === 'between'
-                  ? `between ${st.object.from} and ${st.object.to}`
-                  : `is ${st.object}`
+                statement.verb === 'between'
+                  ? `between ${statement.object.from} and ${statement.object.to}`
+                  : `is ${statement.object}`
               }`
             },
             verbs: [
               {
                 value: 'between',
-                object: (props: any) => <DatePickerRangeObject {...props} />,
+                object: (props: IDatePickerProp) => (
+                  <DatePickerRangeObject {...props} />
+                ),
               },
             ],
           },
           status: {
             label: 'Status',
-            renderFilterLabel: (st: any) => {
-              if (!st || !st.object) {
-                // you should treat empty object cases only for alwaysVisibleFilters
+            renderFilterLabel: (statement: IStatement) => {
+              if (!statement || !statement.object) {
                 return 'All'
               }
 
-              const keys = st.object ? Object.keys(st.object) : [] // {} !!!!
-              const isAllTrue = !keys.some((key: any) => !st.object[key])
-              const isAllFalse = !keys.some((key: any) => st.object[key])
-              const trueKeys = keys.filter((key: any) => st.object[key])
+              const keys = statement.object ? Object.keys(statement.object) : []
+              const isAllTrue = !keys.some(
+                (key: string) => !statement.object[key]
+              )
+
+              const isAllFalse = !keys.some(
+                (key: string) => statement.object[key]
+              )
+
+              const trueKeys = keys.filter(
+                (key: string) => statement.object[key]
+              )
+
               let trueKeysLabel = ''
 
-              trueKeys.forEach((key: any, index: any) => {
+              trueKeys.forEach((key: string, index: number) => {
                 trueKeysLabel += `${key}${
                   index === trueKeys.length - 1 ? '' : ', '
                 }`
               })
-              console.log(
-                'filterData',
-                'keys',
-                keys,
-                'isAllTrue',
-                isAllTrue,
-                'isAllFalse',
-                isAllFalse,
-                'trueKeys:',
-                trueKeys,
-                'trueKeysLabel:',
-                trueKeysLabel
-              )
-              setFilterStatus('canceled')
 
               return `${
                 isAllTrue ? 'All' : isAllFalse ? 'None' : `${trueKeysLabel}`
@@ -744,9 +732,10 @@ const OrdersList: FC = () => {
               {
                 label: 'includes',
                 value: 'includes',
-                object: (props: any) => {
-                  console.log('VERBSPROPS', props)
-
+                object: (props: {
+                  value: Record<string, boolean>
+                  onChange: (value: Record<string, boolean>) => void
+                }) => {
                   return <StatusSelectorObject {...props} />
                 },
               },
@@ -809,41 +798,12 @@ const OrdersList: FC = () => {
         fullWidth
         items={paginationParams.items}
         schema={tableOrdersSchema}
-        bulkActions={{
-          texts: {
-            secondaryActionsLabel: 'Actions',
-            rowsSelected: (qty: React.ReactNode) => (
-              <React.Fragment>Selected rows: {qty}</React.Fragment>
-            ),
-            selectAll: 'Select all',
-            allRowsSelected: (qty: React.ReactNode) => (
-              <React.Fragment>All rows selected: {qty}</React.Fragment>
-            ),
-          },
-          totalItems: paginationParams.paging.total,
-          onChange: (params: unknown) => console.log(params),
-          others: [
-            {
-              label: 'GENEREAZA AWB',
-              handleCallback: (params: unknown) => console.log(params),
-            },
-            {
-              label: 'GENEREAZA AWB',
-              handleCallback: (params: unknown) => console.log(params),
-            },
-          ],
-        }}
         toolbar={{
           fields: {
             alignMenu: 'right',
             label: 'Toggle visible fields',
             showAllLabel: 'Show All',
             hideAllLabel: 'Hide All',
-            onToggleColumn: (params: any) => {
-              console.log('VISIBILITY_PARAMS', params)
-            },
-            onHideAllColumns: (activeFields: any) => console.log(activeFields),
-            onShowAllColumns: (activeFields: any) => console.log(activeFields),
           },
           density: {
             alignMenu: 'right',

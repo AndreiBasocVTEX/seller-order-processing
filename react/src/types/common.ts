@@ -15,3 +15,18 @@ export interface IOrderAwb {
   payMethod?: string
   invoiceNumber?: string
 }
+export interface IStatement {
+  error: any
+  object: Record<string, any>
+  subject: string
+  verb: string
+}
+export interface IVisibilityParams {
+  activeFields: string[]
+  toggleField: string
+}
+
+export interface IDatePickerProp {
+  value: { from: Date; to: Date }
+  onChange: (date: { from: Date; to: Date }) => void
+}
