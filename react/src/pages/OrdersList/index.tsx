@@ -471,7 +471,7 @@ const OrdersList: FC = () => {
         },
         awbShipping: {
           title: 'AWB Shipping',
-          width: 350,
+          width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
             return (
               <>
@@ -533,7 +533,6 @@ const OrdersList: FC = () => {
         },
       },
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       getPayMethod,
       displayAwbInfoButton,

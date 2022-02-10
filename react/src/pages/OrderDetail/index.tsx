@@ -142,7 +142,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                   <div className="mt2">AWB: {awbData?.trackingNumber}</div>
                 </>
               )}
-              <div className="flex w-50 mt5">
+              <div className="flex w-25 mt5">
                 {data?.orderId && (
                   <RequestAwbModal
                     updateAwbData={updateAwbData}

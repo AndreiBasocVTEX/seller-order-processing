@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
-import { NumericStepper, Table } from 'vtex.styleguide'
+import { Table } from 'vtex.styleguide'
 
 import type { IOrderTableItem } from '../../types/order'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
@@ -20,13 +20,6 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
       },
       productQuantity: {
         title: 'Cantitate',
-        cellRenderer: ({ cellData }: { cellData: string | number }) => {
-          return cellData ? (
-            <NumericStepper size="small" readOnly value={cellData} />
-          ) : (
-            ''
-          )
-        },
       },
       productPriceNoTva: {
         title: 'Pret fara TVA',
