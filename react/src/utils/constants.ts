@@ -9,12 +9,12 @@ export const priceMultiplier = 100
 export const promissory = 'promissory'
 
 export const deliveryStatus = {
-  READY_FOR_HANDLING: 'ready-for-handling' as const,
-  WAITING_FOR_SELLERS_CONFIRMATION: 'waiting-for-sellers-confirmation' as const,
-  PAYMENT_APPROVED: 'payment-approved' as const,
-  CANCELED: 'canceled' as const,
-  INVOICED: 'invoiced' as const,
-  HANDLING: 'handling' as const,
-  PAYMENT_PENDING: 'payment-pending' as const,
-  CANCELLATION_REQUESTED: 'cancellation-requested' as const,
-}
+  READY_FOR_HANDLING: 'ready-for-handling',
+  WAITING_FOR_SELLERS_CONFIRMATION: 'waiting-for-sellers-confirmation',
+  PAYMENT_APPROVED: 'payment-approved',
+  CANCELED: 'canceled',
+  INVOICED: 'invoiced',
+  HANDLING: 'handling',
+  PAYMENT_PENDING: 'payment-pending',
+  CANCELLATION_REQUESTED: 'cancellation-requested',
+} as const
