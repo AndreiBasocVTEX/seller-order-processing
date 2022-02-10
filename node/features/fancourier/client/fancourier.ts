@@ -17,6 +17,7 @@ import {
   transformResponseToText,
 } from '../../core/helpers/body-parser.helper'
 import type { FormDataPayload } from '../../core/models/form-data.model'
+import { UnhandledError } from '../../core/helpers/error.helper'
 
 export default class FancourierClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -215,6 +216,8 @@ export default class FancourierClient extends CarrierClient {
           .then(resolve)
           .catch(reject)
       })
+    }).catch((error) => {
+      throw UnhandledError.fromError(error)
     })
   }
 }
