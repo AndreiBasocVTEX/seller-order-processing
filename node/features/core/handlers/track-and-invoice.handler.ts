@@ -74,11 +74,13 @@ export async function trackAndInvoiceHandler(ctx: Context) {
       invoiceNumber: smartbillInvoice.number,
       issuanceDate: new Date().toISOString().slice(0, 10), // '2022-02-01'
       invoiceValue: order.value,
+      invoiceKey: invoice.provider,
     }
   } else {
     notifyInvoiceRequest = {
       ...trackingInfoPayload,
       ...invoice.params,
+      invoiceKey: invoice.provider,
       type: 'Output',
     }
   }
