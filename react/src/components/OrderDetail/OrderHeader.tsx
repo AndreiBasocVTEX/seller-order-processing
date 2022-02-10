@@ -1,6 +1,6 @@
 import React from 'react'
 import type { FC } from 'react'
-import { PageHeader, Tag } from 'vtex.styleguide'
+import { Link, PageHeader, Tag } from 'vtex.styleguide'
 import { useRuntime } from 'vtex.render-runtime'
 
 import type { IOrderHeaderProps } from '../../types/order'
@@ -18,15 +18,18 @@ const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
           title={`Order #${orderId}`}
         >
           <span className="flex items-center h-100 ml6">
-            <h5 className="t-heading-5 mv0">
-              Statut comanda:{' '}
-              <Tag
-                bgColor={orderStatus?.bgColor ?? '#979899'}
-                color={orderStatus?.color ?? '#FFF'}
-              >
-                {orderStatus?.longText ?? 'Necunoscut'}
-              </Tag>
-            </h5>
+            <h5 className="t-heading-5 mv0 mr2">Statut comanda:</h5>
+            <Tag
+              bgColor={orderStatus?.bgColor ?? '#979899'}
+              color={orderStatus?.color ?? '#FFF'}
+            >
+              {orderStatus?.longText ?? 'Necunoscut'}
+            </Tag>
+            <span className="ml5 underline">
+              <Link href={`/admin/checkout/#/orders/${orderId}`}>
+                Vezi pagina standard
+              </Link>
+            </span>
           </span>
         </PageHeader>
       </div>
