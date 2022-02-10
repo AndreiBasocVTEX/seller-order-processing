@@ -13,6 +13,7 @@ import type {
 } from '../dto/innoship-awb.dto'
 import { createOrderPayload } from '../helpers/innoship-create-payload.helper'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
+import { UnhandledError } from '../../core/helpers/error.helper'
 
 export default class InnoshipClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -47,23 +48,30 @@ export default class InnoshipClient extends CarrierClient {
       .then((data) => {
         return Buffer.from(data.contents, 'base64')
       })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 
   protected async requestAWB({
     settings,
     order,
     params,
-  }: CreateTrackingRequest): Promise<IInnoshipAwbResponse> {
+  }: CreateTrackingRequest) {
     const warehouseId = settings.innoship__warehouseId
 
     const body = createOrderPayload(order, warehouseId, params)
 
-    return this.http.post('/Order?api-version=1.0', body, {
-      headers: {
-        'api-version': '1.0',
-        'X-Api-Key': settings.innoship__apiToken,
-      },
-    })
+    return (this.http
+      .post('/Order?api-version=1.0', body, {
+        headers: {
+          'api-version': '1.0',
+          'X-Api-Key': settings.innoship__apiToken,
+        },
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      }) as unknown) as Promise<IInnoshipAwbResponse>
   }
 
   public async createTracking(request: CreateTrackingRequest) {
@@ -87,7 +95,7 @@ export default class InnoshipClient extends CarrierClient {
     trackingNumber: trackingInfo,
     invoiceNumber,
   }: GetTrackingStatusRequest) {
-    // @TODO: Change to the first element of an array after we will have only one packageAttachment per order
+    // TODO: Change to the first element of an array after we will have only one packageAttachment per order
 
     const [courierId, trackingNumber] = trackingInfo.split(':')
 
@@ -96,16 +104,16 @@ export default class InnoshipClient extends CarrierClient {
       awbList: [trackingNumber],
     }
 
-    const updatedAwbInfo: IInnoshipTrackAwbResponse[] = await this.http.post(
-      '/Track/by-awb/with-return?api-version=1.0',
-      body,
-      {
+    const updatedAwbInfo = ((await this.http
+      .post('/Track/by-awb/with-return?api-version=1.0', body, {
         headers: {
           'api-version': '1.0',
           'X-Api-Key': settings.innoship__apiToken,
         },
-      }
-    )
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })) as unknown) as IInnoshipTrackAwbResponse[]
 
     let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false

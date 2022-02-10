@@ -2,10 +2,11 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import { getInvoiceMiddleware } from './features/core/middlewares/get-invoice.middleware'
-import { getTrackingLabelMiddleware } from './features/core/middlewares/get-tracking-label.middleware'
-import { trackAndInvoiceMiddleware } from './features/core/middlewares/track-and-invoice.middleware'
-import { updateTrackingStatusMiddleware } from './features/core/middlewares/update-tracking-status.middleware'
+import { getInvoiceHandler } from './features/core/handlers/get-invoice.handler'
+import { getTrackingLabelHandler } from './features/core/handlers/get-tracking-label.handler'
+import { trackAndInvoiceHandler } from './features/core/handlers/track-and-invoice.handler'
+import { updateTrackingStatusHandler } from './features/core/handlers/update-tracking-invoice.handler'
+import { errorHandleMiddleware } from './features/core/middlewares/error.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -47,16 +48,16 @@ export default new Service({
   clients,
   routes: {
     updateTrackingStatus: method({
-      POST: [updateTrackingStatusMiddleware],
+      POST: [errorHandleMiddleware(updateTrackingStatusHandler)],
     }),
     trackAndInvoice: method({
-      POST: [trackAndInvoiceMiddleware],
+      POST: [errorHandleMiddleware(trackAndInvoiceHandler)],
     }),
     trackingLabel: method({
-      GET: [getTrackingLabelMiddleware],
+      GET: [errorHandleMiddleware(getTrackingLabelHandler)],
     }),
     getInvoice: method({
-      GET: [getInvoiceMiddleware],
+      GET: [errorHandleMiddleware(getInvoiceHandler)],
     }),
   },
 })

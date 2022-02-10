@@ -15,6 +15,7 @@ import type {
 import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
 import { PaperSize } from '../../shared/enums/paper-size.enum'
+import { UnhandledError } from '../../core/helpers/error.helper'
 
 export default class CargusClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -37,18 +38,22 @@ export default class CargusClient extends CarrierClient {
       Password: settings.cargus__password,
     }
 
-    return this.http.post('/LoginUser', body, {
-      headers: {
-        'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
-      },
-    })
+    return (this.http
+      .post('/LoginUser', body, {
+        headers: {
+          'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
+        },
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      }) as unknown) as Promise<string>
   }
 
   protected async requestAWB({
     settings,
     order,
     params,
-  }: CreateTrackingRequest): Promise<ICargusAwbResponse[]> {
+  }: CreateTrackingRequest) {
     const token = await this.getBearerToken(settings)
 
     const body = createCargusOrderPayload(
@@ -57,12 +62,16 @@ export default class CargusClient extends CarrierClient {
       params
     )
 
-    return this.http.post('/Awbs/WithGetAwb', body, {
-      headers: {
-        'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    return (this.http
+      .post('/Awbs/WithGetAwb', body, {
+        headers: {
+          'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .catch((error) => {
+        throw new UnhandledError({ message: error?.response?.data.pop() })
+      }) as unknown) as Promise<ICargusAwbResponse[]>
   }
 
   public async trackingLabel({
@@ -74,14 +83,18 @@ export default class CargusClient extends CarrierClient {
 
     const format = paperSize === PaperSize.A6 ? 1 : 0
 
-    return this.http.getStream(
-      `/PDF/AwbDocuments?Token=${token}&barCodes=${trackingNumber}&format=${format}`,
-      {
-        headers: {
-          'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
-        },
-      }
-    )
+    return this.http
+      .getStream(
+        `/PDF/AwbDocuments?Token=${token}&barCodes=${trackingNumber}&format=${format}`,
+        {
+          headers: {
+            'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
+          },
+        }
+      )
+      .catch((error) => {
+        throw new UnhandledError({ message: error?.response?.data })
+      })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
@@ -102,14 +115,15 @@ export default class CargusClient extends CarrierClient {
     trackingNumber,
     invoiceNumber,
   }: GetTrackingStatusRequest) {
-    const updatedAwbInfo: ICargusTrackAwbResponse[] = await this.http.get(
-      `/NoAuth/GetAwbTrace?barCode=${trackingNumber}`,
-      {
+    const updatedAwbInfo: ICargusTrackAwbResponse[] = await this.http
+      .get(`/NoAuth/GetAwbTrace?barCode=${trackingNumber}`, {
         headers: {
           'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
         },
-      }
-    )
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
 
     let trackingEvents: VtexTrackingEvent[] | undefined
     let isDelivered = false

@@ -15,6 +15,7 @@ import type {
 import type { IAuthDataSameday } from '../models/sameday-auth.model'
 import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
+import { UnhandledError } from '../../core/helpers/error.helper'
 
 export default class SamedayClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -78,11 +79,15 @@ export default class SamedayClient extends CarrierClient {
 
     const body = createOrderPayload(order, countyId, params)
 
-    return this.http.post('/api/awb', body, {
-      headers: {
-        'X-AUTH-TOKEN': token,
-      },
-    })
+    return (this.http
+      .post('/api/awb', body, {
+        headers: {
+          'X-AUTH-TOKEN': token,
+        },
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      }) as unknown) as Promise<ISamedayAwbResponse>
   }
 
   public async trackingLabel({
@@ -92,14 +97,15 @@ export default class SamedayClient extends CarrierClient {
   }: GetTrackingLabelRequest): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
 
-    return this.http.getStream(
-      `/api/awb/download/${trackingNumber}/${paperSize}`,
-      {
+    return this.http
+      .getStream(`/api/awb/download/${trackingNumber}/${paperSize}`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
-      }
-    )
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
@@ -119,14 +125,15 @@ export default class SamedayClient extends CarrierClient {
   }: GetTrackingStatusRequest) {
     const { token } = await this.getAuthToken(settings)
 
-    const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http.get(
-      `/api/client/awb/${trackingNumber}/status`,
-      {
+    const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http
+      .get(`/api/client/awb/${trackingNumber}/status`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
-      }
-    )
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
 
     let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
