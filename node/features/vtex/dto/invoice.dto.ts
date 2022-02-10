@@ -11,6 +11,7 @@ export interface NotifyInvoicePayload {
   issuanceDate: string
   invoiceValue: number
   invoiceUrl?: string
+  invoiceKey?: string
 }
 
 export interface InvoiceItem {
