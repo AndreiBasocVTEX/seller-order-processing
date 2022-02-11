@@ -66,6 +66,7 @@ export interface PackageData {
     finished: boolean
     status: string
   }
+  invoiceKey: string | null
   invoiceNumber: string
   invoiceUrl: string | null
   invoiceValue: number

@@ -1,16 +1,15 @@
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
-import { Box, Divider } from 'vtex.styleguide'
+import { Box, Divider, Link } from 'vtex.styleguide'
 import '../../public/style.css'
 
-import type { OrderDetailsData } from '../../typings/normalizedOrder'
 import RequestAwbModal from '../../components/AwbModal'
 import { OrderTable } from '../../components/OrderDetail'
 import type { IOrderDetailProps, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
+import InvoiceButton from '../../components/InvoiceButton'
 
 const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
-  const [data, setData] = useState<OrderDetailsData>()
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [awbUpdated, setAwbUpdated] = useState(false)
   const [awbData, updateAwbData] = useState<{
@@ -21,9 +20,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
     trackingNumber: string
   }>()
 
-  useEffect(() => {
-    setData(orderData)
-  }, [trackingNum, orderData])
+  useEffect(() => {}, [trackingNum])
 
   return (
     <>
@@ -32,16 +29,16 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
           <div className="w-50">
             <h3 className="t-heading-3">Date comanda</h3>
             <div className="flex flex-column">
-              <div className="mt2">Data comanda: {data?.creationDate}</div>
+              <div className="mt2">Data comanda: {orderData.creationDate}</div>
               <div className="mt2">
-                Elefant order ID: {data?.marketPlaceOrderId}
+                Elefant order ID: {orderData.marketPlaceOrderId}
               </div>
               <div className="mt2">
-                Metoda de plata: {data?.openTextField.value}
+                Metoda de plata: {orderData.openTextField.value}
               </div>
               <div className="mt2">Metoda de livrare: Curier standard</div>
               <div className="mt2">
-                Estimat livrare: {data?.shippingEstimatedDate}
+                Estimat livrare: {orderData.shippingEstimatedDate}
               </div>
 
               <div className="mt6">Observatii/Note: Bla bla bla</div>
@@ -51,30 +48,32 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
             <h3 className="t-heading-3">Client</h3>
             <div className="flex flex-column">
               <div className="mt2">
-                Nume: {data?.clientProfileData.firstName}{' '}
-                {data?.clientProfileData.lastName}
+                Nume: {orderData.clientProfileData.firstName}{' '}
+                {orderData.clientProfileData.lastName}
               </div>
               <div className="mt2">
-                Telefon: {data?.clientProfileData.phone}
+                Telefon: {orderData.clientProfileData.phone}
               </div>
-              <div className="mt2">Email: {data?.clientProfileData.email}</div>
+              <div className="mt2">
+                Email: {orderData.clientProfileData.email}
+              </div>
             </div>
           </div>
           <div className="w-50">
             <h3 className="t-heading-3">Cost total comanda</h3>
             <div className="mt2">
-              Articole: {(data?.orderTotals.items ?? 0) / 100} Lei
+              Articole: {(orderData.orderTotals.items ?? 0) / 100} Lei
             </div>
             <div className="mt2">
-              Expediere: {(data?.orderTotals.shipping ?? 0) / 100} Lei
+              Expediere: {(orderData.orderTotals.shipping ?? 0) / 100} Lei
             </div>
             <div className="w-50 mv4">
               <Divider />
             </div>
             <div className="mt2">
               Total:{' '}
-              {(data?.orderTotals.items ?? 0) / 100 +
-                (data?.orderTotals.shipping ?? 0) / 100}{' '}
+              {(orderData.orderTotals.items ?? 0) / 100 +
+                (orderData.orderTotals.shipping ?? 0) / 100}{' '}
               lei
             </div>
           </div>
@@ -82,56 +81,63 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
       </Box>
       <div className="flex mv6">
         <div className="w-50 mr6">
-          <Box>
+          <Box fit="fill-vertical">
             <div className="flex flex-column">
               <h3 className="t-heading-3">Adresa livrare</h3>
               <div className="mt2">
-                Nume: {data?.shippingData.address.receiverName}
+                Nume: {orderData.shippingData.address.receiverName}
               </div>
               <div className="mt2">
                 Telefon:{' '}
-                {data?.shippingData.address.phone ??
-                  data?.clientProfileData.phone}
+                {orderData.shippingData.address.phone ??
+                  orderData.clientProfileData.phone}
               </div>
               <div className="mt2">
-                Adresa: {data?.shippingData.address.street}
+                Adresa: {orderData.shippingData.address.street}
               </div>
               <div className="mt2">
-                Oras: {data?.shippingData.address.city}, Judet{' '}
-                {data?.shippingData.address.state}
+                Oras: {orderData.shippingData.address.city}, Judet{' '}
+                {orderData.shippingData.address.state}
               </div>
               <div className="mt2">
-                Code Postal: {data?.shippingData.address.postalCode}
+                Code Postal: {orderData.shippingData.address.postalCode}
               </div>
               <div className="mv6">
                 <Divider />
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="t-heading-3">AWB Livrare</h3>
-                {data?.packageAttachment.packages &&
-                  data?.marketPlaceOrderId && (
-                    <AwbStatus orderId={data?.orderId} size="large" />
+                {orderData.packageAttachment.packages &&
+                  orderData.marketPlaceOrderId && (
+                    <AwbStatus orderId={orderData.orderId} size="large" />
                   )}
                 {awbUpdated &&
-                  data?.orderId &&
-                  !data?.packageAttachment.packages && (
-                    <AwbStatus orderId={data?.orderId} size="large" />
+                  orderData.orderId &&
+                  !orderData.packageAttachment.packages && (
+                    <AwbStatus orderId={orderData.orderId} size="large" />
                   )}
               </div>
-              {data?.packageAttachment?.packages && (
+              {orderData.packageAttachment?.packages && (
                 <>
                   <div className="mt2">
                     Curier:{' '}
-                    {data?.packageAttachment.packages?.courier ?? 'Lipsa date'}
+                    {orderData.packageAttachment.packages?.courier ??
+                      'Lipsa date'}
                   </div>
                   <div className="mt2">
-                    AWB: {data?.packageAttachment.packages?.trackingNumber}
+                    AWB: {orderData.packageAttachment.packages?.trackingNumber}
                   </div>
-                  <div className="mt2">
-                    {' '}
-                    Tracking URL:{' '}
-                    {data?.packageAttachment.packages?.trackingUrl}
-                  </div>
+                  {orderData.packageAttachment.packages?.trackingUrl && (
+                    <div className="mt2">
+                      Tracking URL:{' '}
+                      <Link
+                        href={orderData.packageAttachment.packages?.trackingUrl}
+                        target="_blank"
+                      >
+                        {orderData.packageAttachment.packages?.trackingUrl}
+                      </Link>
+                    </div>
+                  )}
                 </>
               )}
               {awbUpdated && (
@@ -143,11 +149,11 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                 </>
               )}
               <div className="flex w-25 mt5">
-                {data?.orderId && (
+                {orderData.orderId && (
                   <RequestAwbModal
                     updateAwbData={updateAwbData}
                     setTrackingNum={setTrackingNum}
-                    neededOrderId={data?.orderId}
+                    neededOrderId={orderData.orderId}
                     onAwbUpdate={setAwbUpdated}
                   />
                 )}
@@ -160,43 +166,44 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
             <div className="flex flex-column">
               <h3 className="t-heading-3">Date facturare</h3>
               <div className="mt2">
-                Tip persoana: {data?.invoiceData.address.invoicedEntityType}
+                Tip persoana: {orderData.invoiceData.address.invoicedEntityType}
               </div>
               <div className="mt2">
                 Nume:{' '}
-                {data?.clientProfileData.corporateName ??
-                  `${data?.clientProfileData.firstName} ${data?.clientProfileData.lastName}`}
+                {orderData.clientProfileData.corporateName ??
+                  `${orderData.clientProfileData.firstName} ${orderData.clientProfileData.lastName}`}
               </div>
               <div className="mt2">CUI: RO2339394</div>
               <div className="mt2">
-                Adresa: {data?.invoiceData.address.street}
+                Adresa: {orderData.invoiceData.address.street}
               </div>
               <div className="mt2">
-                Oras: {data?.invoiceData.address.city}, Judet{' '}
-                {data?.invoiceData.address.state}
+                Oras: {orderData.invoiceData.address.city}, Judet{' '}
+                {orderData.invoiceData.address.state}
               </div>
               <div className="mv6">
                 <Divider />
               </div>
               <h3 className="t-heading-3">Factura</h3>
-              {data?.packageAttachment?.packages && (
+              {orderData.packageAttachment?.packages && (
                 <>
                   <div className="mt2">
                     ID factura:{' '}
-                    {data?.packageAttachment.packages?.invoiceNumber}
+                    {orderData.packageAttachment.packages?.invoiceNumber}
                   </div>
                   <div className="mt2">
                     Valoare:{' '}
-                    {(data?.packageAttachment.packages?.invoiceValue ?? 0) /
+                    {(orderData.packageAttachment.packages?.invoiceValue ?? 0) /
                       100 || 'Lipsa date'}{' '}
                     Lei
                   </div>
                   <div className="mt2">
                     Data factura:{' '}
-                    {data?.packageAttachment.packages?.issuanceDate}
+                    {orderData.packageAttachment.packages?.issuanceDate}
                   </div>
                   <div className="mt2">
-                    URL factura: {data?.packageAttachment.packages?.invoiceUrl}
+                    URL factura:{' '}
+                    {orderData.packageAttachment.packages?.invoiceUrl}
                   </div>
                 </>
               )}
@@ -211,6 +218,17 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                   </div>
                 </>
               )}
+              <div className="flex w-25 mt5">
+                <InvoiceButton
+                  orderId={orderData.orderId}
+                  invoiceKey={orderData.packageAttachment.packages?.invoiceKey}
+                  invoiceNumber={
+                    orderData.packageAttachment.packages?.invoiceNumber
+                  }
+                  invoiceUrl={orderData.packageAttachment.packages?.invoiceUrl}
+                  orderStatus={orderData.status}
+                />
+              </div>
             </div>
           </Box>
         </div>

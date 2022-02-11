@@ -2,10 +2,8 @@
 /* eslint-disable no-console */
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FC } from 'react'
-import type { AxiosError } from 'axios'
 import axios from 'axios'
 import {
-  Button,
   Checkbox,
   DatePicker,
   FilterBar,
@@ -30,8 +28,7 @@ import type {
 } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
-import { SMARTBILL } from '../../utils/constants'
-import ErrorPopUpMessage from '../../components/ErrorPopUpMessage'
+import InvoiceButton from '../../components/InvoiceButton'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
@@ -41,12 +38,6 @@ const OrdersList: FC = () => {
   const [searchValue, setSearchValue] = useState('')
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
-  const [axiosError, setAxiosError] = useState({
-    isError: false,
-    errorMessage: '',
-    errorStatus: 0,
-  })
-
   const [paginationParams, setPaginationParams] = useState({
     items: [],
     currentItemFrom: 1,
@@ -67,13 +58,6 @@ const OrdersList: FC = () => {
 
   const [isLoading, setIsLoading] = useState(true)
 
-  const removeAxiosError = () => {
-    setAxiosError({
-      ...axiosError,
-      isError: false,
-    })
-  }
-
   const fetchTrackingNumbers = useCallback((orders: IOrder[]) => {
     orders.forEach(async (el: IOrder) => {
       const { data }: { data: IOrder } = await axios.get(
@@ -89,12 +73,11 @@ const OrdersList: FC = () => {
             orderId: el.orderId.toString(),
             orderValue:
               data.packageAttachment?.packages[lastOrder]?.trackingNumber ||
-              'Genereaza AWB & Factura',
+              'Generează AWB & Factura',
             courier: data.packageAttachment?.packages[lastOrder]?.courier,
             payMethod: data.openTextField?.value,
             invoiceNumber:
-              data.packageAttachment?.packages[lastOrder]?.invoiceNumber ||
-              'No invoice',
+              data.packageAttachment?.packages[lastOrder]?.invoiceNumber,
             invoiceKey: data.packageAttachment?.packages[lastOrder]?.invoiceKey,
             invoiceUrl: data.packageAttachment?.packages[lastOrder]?.invoiceUrl,
           },
@@ -171,58 +154,6 @@ const OrdersList: FC = () => {
     }
 
     return <span>missing tag</span>
-  }
-
-  const printInvoice = async (invoiceNumber: string) => {
-    const data = await axios
-      .get(`/opa/orders/${invoiceNumber}/get-invoice`, {
-        params: {
-          paperSize: 'A4',
-        },
-        responseType: 'blob',
-      })
-      .then((res) => {
-        return res.data
-      })
-      .catch(async (error: AxiosError<Blob>) => {
-        if (!error.response) {
-          return
-        }
-
-        const response = error.response
-
-        const errorMessage = await new Promise((resolve) => {
-          const fileReader = new FileReader()
-
-          fileReader.readAsText(response.data)
-          fileReader.onload = () => {
-            const errorJSON = JSON.parse(fileReader.result as string) as {
-              message: string
-            }
-
-            resolve(errorJSON.message)
-          }
-        })
-
-        const errorData = {
-          message: errorMessage,
-          status: response.status,
-        }
-
-        setAxiosError({
-          ...axiosError,
-          isError: true,
-          errorMessage: String(errorData.message),
-          errorStatus: errorData.status,
-        })
-      })
-
-    if (data) {
-      const blob = new Blob([data], { type: 'application/pdf' })
-      const blobURL = URL.createObjectURL(blob)
-
-      window.open(blobURL)
-    }
   }
 
   const displayAwbInfoButton = useCallback(
@@ -382,18 +313,6 @@ const OrdersList: FC = () => {
     getItems(paginationParams)
   }, [getItems, paginationParams, searchValue])
 
-  const isFactureUrlAvailable = (order: IOrderAwb | undefined): string => {
-    if (order?.invoiceKey === SMARTBILL) {
-      return SMARTBILL
-    }
-
-    if (order?.invoiceUrl) {
-      return order.invoiceUrl
-    }
-
-    return ''
-  }
-
   const tableOrdersSchema = useMemo(
     () => ({
       properties: {
@@ -534,49 +453,20 @@ const OrdersList: FC = () => {
           title: 'Factura',
           width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
-            const invoiceNumber = getInvoiceNumber(rowData)
             const orderAwbById = orderAwb.find(
               (awbEl) => awbEl.orderId === rowData.orderId
             )
-
-            const invoiceButton = () => {
-              return (
-                <Button
-                  variation="secondary"
-                  block
-                  disabled={
-                    rowData.status === 'canceled' ||
-                    !isFactureUrlAvailable(orderAwbById)
-                  }
-                  onClick={() => {
-                    isFactureUrlAvailable(orderAwbById) &&
-                    isFactureUrlAvailable(orderAwbById) !== SMARTBILL
-                      ? window.open(
-                          `https://${isFactureUrlAvailable(orderAwbById)}`
-                        )
-                      : printInvoice(rowData.orderId)
-                  }}
-                >
-                  <span style={{ paddingRight: '10px' }}>
-                    <IconDownload />
-                  </span>
-
-                  <span className="mw-100 truncate f6">{invoiceNumber}</span>
-                </Button>
+            return (
+              orderAwbById && (
+                <InvoiceButton
+                  orderId={rowData.orderId}
+                  invoiceKey={orderAwbById?.invoiceKey}
+                  invoiceNumber={orderAwbById?.invoiceNumber}
+                  invoiceUrl={orderAwbById?.invoiceUrl}
+                  orderStatus={rowData.status}
+                />
               )
-            }
-
-            if (invoiceNumber !== 'No invoice') {
-              return isFactureUrlAvailable(orderAwbById) ? (
-                <Tooltip label={invoiceNumber} key={rowData.orderId}>
-                  {invoiceButton()}
-                </Tooltip>
-              ) : (
-                invoiceButton()
-              )
-            }
-
-            return null
+            )
           },
         },
       },
@@ -867,13 +757,6 @@ const OrdersList: FC = () => {
           },
         }}
       />
-      {axiosError.isError && (
-        <ErrorPopUpMessage
-          errorMessage={axiosError.errorMessage}
-          errorStatus={axiosError.errorStatus}
-          resetError={removeAxiosError}
-        />
-      )}
     </div>
   )
 }
