@@ -10,6 +10,7 @@ import {
   ActionMenu,
   Tooltip,
 } from 'vtex.styleguide'
+import type { AxiosError } from 'axios'
 import axios from 'axios'
 import type { FC, SetStateAction } from 'react'
 
@@ -22,7 +23,6 @@ import smartbill from '../../public/logos/smartbill.png'
 import download from '../../public/logos/download.png'
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { getErrorMessage } from '../../utils/api/errorResponse'
 import { getOrderDataById } from '../../utils/api'
 import { normalizeOrderData } from '../../utils/normalizeData/orderDetails'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
@@ -35,7 +35,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   onAwbUpdate,
 }) => {
   const [service, setService] = useState('')
-  const [axiosError, setAxiosEroor] = useState({
+  const [axiosError, setAxiosError] = useState({
     isError: false,
     errorMessage: '',
     errorStatus: 0,
@@ -54,7 +54,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   ])
 
   const removeAxiosError = () => {
-    setAxiosEroor({
+    setAxiosError({
       ...axiosError,
       isError: false,
     })
@@ -175,31 +175,43 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const getOrderData = async (orderId: string): Promise<unknown> => {
     try {
-      const { data } = await axios.post(
-        `/opa/orders/${orderId}/track-and-invoice`,
+      const data = await axios
+        .post(
+          `/opa/orders/${orderId}/track-and-invoice`,
 
-        {
-          tracking: {
-            generate: true,
-            provider: service.toLowerCase(),
-            params: {
-              weight,
-              numberOfParcels: packageAmount,
-            },
-          },
-          invoice: {
-            provider: courier,
-            ...(courier === 'manual' && {
+          {
+            tracking: {
+              generate: true,
+              provider: service.toLowerCase(),
               params: {
-                invoiceValue: orderData?.value,
-                type: 'Output',
-                issuanceDate: invoiceDate.toString(),
-                invoiceNumber: invoiceNum.toString(),
+                weight,
+                numberOfParcels: packageAmount,
               },
-            }),
-          },
-        }
-      )
+            },
+            invoice: {
+              provider: courier,
+              ...(courier === 'manual' && {
+                params: {
+                  invoiceValue: orderData?.value,
+                  type: 'Output',
+                  issuanceDate: invoiceDate.toString(),
+                  invoiceNumber: invoiceNum.toString(),
+                },
+              }),
+            },
+          }
+        )
+        .then((r) => {
+          return r.data
+        })
+        .catch((e: AxiosError<{ message: string }>) => {
+          if (e?.response) {
+            throw {
+              message: e.response.data.message,
+              status: e.response.status,
+            }
+          }
+        })
 
       setTrackingNum({
         [orderId]: data.trackingNumber,
@@ -223,17 +235,11 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
       return data
     } catch (error) {
-      // <! this is temporary until we will get the correct error type from backend>
-      const errorStatusRgx = /\d+/g
-      const status = String(error).match(errorStatusRgx)
-
-      const errorMessage = getErrorMessage(status?.[0] ?? '')
-
-      setAxiosEroor({
+      setAxiosError({
         ...axiosError,
         isError: true,
-        errorMessage: errorMessage.message,
-        errorStatus: errorMessage.status,
+        errorMessage: error.message,
+        errorStatus: error.status,
       })
 
       return error
@@ -249,24 +255,58 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const printAwb = async (_orderData: OrderDetailsData): Promise<any> => {
     setIsLoading(true)
-
     try {
-      const { data } = await axios.get(
-        `/opa/orders/${_orderData?.orderId}/tracking-label`,
-        {
+      const data = await axios
+        .get(`/opa/orders/${_orderData?.orderId}/tracking-label`, {
           params: {
             awbTrackingNumber: _orderData?.value.toString(),
             paperSize: 'A4',
           },
           responseType: 'blob',
-        }
-      )
+        })
+        .then((res) => {
+          return res.data
+        })
+        .catch(async (error: AxiosError<Blob>) => {
+          if (!error.response) {
+            return
+          }
 
-      const blob = new Blob([data], { type: 'application/pdf' })
+          const response = error.response
 
-      const blobURL = URL.createObjectURL(blob)
+          const errorMessage = await new Promise((resolve) => {
+            const fileReader = new FileReader()
 
-      window.open(blobURL)
+            fileReader.readAsText(response.data)
+            fileReader.onload = () => {
+              const errorJSON = JSON.parse(fileReader.result as string) as {
+                message: string
+              }
+
+              resolve(errorJSON.message)
+            }
+          })
+
+          const errorData = {
+            message: errorMessage,
+            status: response.status,
+          }
+
+          setAxiosError({
+            ...axiosError,
+            isError: true,
+            errorMessage: String(errorData.message),
+            errorStatus: errorData.status,
+          })
+        })
+
+      if (data) {
+        const blob = new Blob([data], { type: 'application/pdf' })
+
+        const blobURL = URL.createObjectURL(blob)
+
+        window.open(blobURL)
+      }
     } catch (e) {
       console.log(e)
     } finally {
