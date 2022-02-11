@@ -7,6 +7,7 @@ export const shipmentPaymentMethod = 1
 export const totalOrderDiscount = 0
 export const priceMultiplier = 100
 export const promissory = 'promissory'
+export const SMARTBILL = 'smartbill'
 
 export const deliveryStatus = {
   READY_FOR_HANDLING: 'ready-for-handling',
