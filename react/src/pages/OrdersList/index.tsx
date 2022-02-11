@@ -29,6 +29,7 @@ import type {
 } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
+import { SMARTBILL } from '../../utils/constants'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
@@ -79,6 +80,8 @@ const OrdersList: FC = () => {
             invoiceNumber:
               data.packageAttachment?.packages[lastOrder]?.invoiceNumber ||
               'No invoice',
+            invoiceKey: data.packageAttachment?.packages[lastOrder]?.invoiceKey,
+            invoiceUrl: data.packageAttachment?.packages[lastOrder]?.invoiceUrl,
           },
         ]
       })
@@ -155,16 +158,13 @@ const OrdersList: FC = () => {
     return <span>missing tag</span>
   }
 
-  const printInvoice = async (invoiceNumber: string) => {
-    const { data } = await axios.get(
-      `/opa/orders/${invoiceNumber}/get-invoice`,
-      {
-        params: {
-          paperSize: 'A4',
-        },
-        responseType: 'blob',
-      }
-    )
+  const printInvoice = async (orderId: string) => {
+    const { data } = await axios.get(`/opa/orders/${orderId}/get-invoice`, {
+      params: {
+        paperSize: 'A4',
+      },
+      responseType: 'blob',
+    })
 
     const blob = new Blob([data], { type: 'application/pdf' })
     const blobURL = URL.createObjectURL(blob)
@@ -337,7 +337,7 @@ const OrdersList: FC = () => {
     setSearchValue('')
     setPaginationParams({
       ...paginationParams,
-      currentItemFrom: 1 * paginationParams.paging.perPage,
+      currentItemFrom: paginationParams.paging.perPage,
       currentItemTo: 2 * paginationParams.paging.perPage,
       paging: {
         total: paginationParams.paging.total,
@@ -352,7 +352,7 @@ const OrdersList: FC = () => {
   const handleInputSearchSubmit = useCallback(() => {
     setPaginationParams({
       ...paginationParams,
-      currentItemFrom: 1 * paginationParams.paging.perPage,
+      currentItemFrom: paginationParams.paging.perPage,
       currentItemTo: 2 * paginationParams.paging.perPage,
       paging: {
         total: paginationParams.paging.total,
@@ -363,6 +363,18 @@ const OrdersList: FC = () => {
     })
     getItems(paginationParams)
   }, [getItems, paginationParams, searchValue])
+
+  const isFactureUrlAvailable = (order: IOrderAwb | undefined): string => {
+    if (order?.invoiceKey === SMARTBILL) {
+      return SMARTBILL
+    }
+
+    if (order?.invoiceUrl) {
+      return order.invoiceUrl
+    }
+
+    return ''
+  }
 
   const tableOrdersSchema = useMemo(
     () => ({
@@ -505,26 +517,44 @@ const OrdersList: FC = () => {
           width: 250,
           cellRenderer: ({ rowData }: SchemeDataType) => {
             const invoiceNumber = getInvoiceNumber(rowData)
+            const orderAwbById = orderAwb.find(
+              (awbEl) => awbEl.orderId === rowData.orderId
+            )
+
+            const invoiceButton = () => {
+              return (
+                <Button
+                  variation="secondary"
+                  block
+                  disabled={
+                    rowData.status === 'canceled' ||
+                    !isFactureUrlAvailable(orderAwbById)
+                  }
+                  onClick={() => {
+                    isFactureUrlAvailable(orderAwbById) &&
+                    isFactureUrlAvailable(orderAwbById) !== SMARTBILL
+                      ? window.open(
+                          `https://${isFactureUrlAvailable(orderAwbById)}`
+                        )
+                      : printInvoice(rowData.orderId)
+                  }}
+                >
+                  <span style={{ paddingRight: '10px' }}>
+                    <IconDownload />
+                  </span>
+
+                  <span className="mw-100 truncate f6">{invoiceNumber}</span>
+                </Button>
+              )
+            }
 
             if (invoiceNumber !== 'No invoice') {
-              return (
-                <Tooltip label={invoiceNumber}>
-                  <Button
-                    variation="secondary"
-                    block
-                    disabled={rowData.status === 'canceled'}
-                    onClick={() => {
-                      printInvoice(rowData.orderId)
-                    }}
-                  >
-                    <span style={{ paddingRight: '10px' }}>
-                      {' '}
-                      <IconDownload />
-                    </span>
-
-                    <span className="mw-100 truncate f6">{invoiceNumber}</span>
-                  </Button>
+              return isFactureUrlAvailable(orderAwbById) ? (
+                <Tooltip label={invoiceNumber} key={rowData.orderId}>
+                  {invoiceButton()}
                 </Tooltip>
+              ) : (
+                invoiceButton()
               )
             }
 
@@ -549,7 +579,7 @@ const OrdersList: FC = () => {
         <br />
         <DatePicker
           label="from"
-          value={(value && value.from) || new Date()}
+          value={value?.from || new Date()}
           onChange={(date: Date) => {
             onChange({ ...(value || {}), from: date })
           }}
@@ -558,7 +588,7 @@ const OrdersList: FC = () => {
         <br />
         <DatePicker
           label="to"
-          value={(value && value.to) || new Date()}
+          value={value?.to || new Date()}
           onChange={(date: Date) => {
             onChange({ ...(value || {}), to: date })
           }}

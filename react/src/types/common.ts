@@ -14,13 +14,17 @@ export interface IOrderAwb {
   courier: string
   payMethod?: string
   invoiceNumber?: string
+  invoiceKey?: string
+  invoiceUrl?: string | null
 }
+
 export interface IStatement {
   error: any
   object: Record<string, any>
   subject: string
   verb: string
 }
+
 export interface IVisibilityParams {
   activeFields: string[]
   toggleField: string
