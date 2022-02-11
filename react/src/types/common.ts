@@ -13,9 +13,9 @@ export interface IOrderAwb {
   orderValue: string
   courier: string
   payMethod?: string
-  invoiceNumber?: string
-  invoiceKey?: string
-  invoiceUrl?: string | null
+  invoiceNumber: string
+  invoiceKey: string | null
+  invoiceUrl: string | null
 }
 
 export interface IStatement {
@@ -33,4 +33,12 @@ export interface IVisibilityParams {
 export interface IDatePickerProp {
   value: { from: Date; to: Date }
   onChange: (date: { from: Date; to: Date }) => void
+}
+
+export interface InvoiceButtonProps {
+  orderId: string
+  invoiceKey?: string | null
+  invoiceNumber?: string
+  invoiceUrl?: string | null
+  orderStatus: string
 }

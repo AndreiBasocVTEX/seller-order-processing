@@ -180,6 +180,7 @@ const getPackageAttachment = (orderData: IOrder): AttachmentPackages | null => {
         finished: deliverStatus.finished,
         status: deliverStatus.status,
       },
+      invoiceKey: lastPackage.invoiceKey,
       invoiceNumber: lastPackage.invoiceNumber,
       invoiceUrl: lastPackage.invoiceUrl,
       invoiceValue: lastPackage.invoiceValue,
@@ -196,6 +197,7 @@ const getPackageAttachment = (orderData: IOrder): AttachmentPackages | null => {
 
   return {
     courier: lastPackage.courier,
+    invoiceKey: lastPackage.invoiceKey,
     invoiceNumber: lastPackage.invoiceNumber,
     invoiceUrl: lastPackage.invoiceUrl,
     invoiceValue: lastPackage.invoiceValue,
