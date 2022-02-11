@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+
 import type { FC } from 'react'
+import type { AxiosError } from 'axios'
 import axios from 'axios'
 import {
   Button,
@@ -30,6 +32,7 @@ import type {
 import AwbStatus from '../../components/AwbStatus'
 import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
 import { SMARTBILL } from '../../utils/constants'
+import ErrorPopUpMessage from '../../components/ErrorPopUpMessage'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
@@ -39,6 +42,12 @@ const OrdersList: FC = () => {
   const [searchValue, setSearchValue] = useState('')
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [orderAwb, setOrderAwb] = useState<IOrderAwb[]>([])
+  const [axiosError, setAxiosError] = useState({
+    isError: false,
+    errorMessage: '',
+    errorStatus: 0,
+  })
+
   const [paginationParams, setPaginationParams] = useState({
     items: [],
     currentItemFrom: 1,
@@ -58,6 +67,13 @@ const OrdersList: FC = () => {
   })
 
   const [isLoading, setIsLoading] = useState(true)
+
+  const removeAxiosError = () => {
+    setAxiosError({
+      ...axiosError,
+      isError: false,
+    })
+  }
 
   const fetchTrackingNumbers = useCallback((orders: IOrder[]) => {
     orders.forEach(async (el: IOrder) => {
@@ -158,54 +174,57 @@ const OrdersList: FC = () => {
     return <span>missing tag</span>
   }
 
-  const printInvoice = async (orderId: string) => {
-    const { data } = await axios.get(`/opa/orders/${orderId}/get-invoice`, {
-      params: {
-        paperSize: 'A4',
-      },
-      responseType: 'blob',
-    })
-
-    const blob = new Blob([data], { type: 'application/pdf' })
-    const blobURL = URL.createObjectURL(blob)
-
-    window.open(blobURL)
-  }
-
-  const printAwb = useCallback(
-    async (orderId: string): Promise<any> => {
-      const printOrder = orderAwb.find((order) => order?.orderId === orderId)
-
-      try {
-        const { data } = await axios.get(
-          `/_${printOrder?.courier.toLowerCase()}/printPDF`,
-          {
-            params: {
-              awbTrackingNumber: printOrder?.orderValue.toString(),
-            },
-            responseType: 'blob',
-          }
-        )
-
-        let buffer
-        let blob
-
-        if (printOrder?.courier === 'Innoship') {
-          buffer = Buffer.from(data.contents, 'base64')
-          blob = new Blob([buffer], { type: 'application/pdf' })
-        } else {
-          blob = new Blob([data], { type: 'application/pdf' })
+  const printInvoice = async (invoiceNumber: string) => {
+    const data = await axios
+      .get(`/opa/orders/${invoiceNumber}/get-invoice`, {
+        params: {
+          paperSize: 'A4',
+        },
+        responseType: 'blob',
+      })
+      .then((res) => {
+        return res.data
+      })
+      .catch(async (error: AxiosError<Blob>) => {
+        if (!error.response) {
+          return
         }
 
-        const blobURL = URL.createObjectURL(blob)
+        const response = error.response
 
-        window.open(blobURL)
-      } catch (e) {
-        console.log(e)
-      }
-    },
-    [orderAwb]
-  )
+        const errorMessage = await new Promise((resolve) => {
+          const fileReader = new FileReader()
+
+          fileReader.readAsText(response.data)
+          fileReader.onload = () => {
+            const errorJSON = JSON.parse(fileReader.result as string) as {
+              message: string
+            }
+
+            resolve(errorJSON.message)
+          }
+        })
+
+        const errorData = {
+          message: errorMessage,
+          status: response.status,
+        }
+
+        setAxiosError({
+          ...axiosError,
+          isError: true,
+          errorMessage: String(errorData.message),
+          errorStatus: errorData.status,
+        })
+      })
+
+    if (data) {
+      const blob = new Blob([data], { type: 'application/pdf' })
+      const blobURL = URL.createObjectURL(blob)
+
+      window.open(blobURL)
+    }
+  }
 
   const displayAwbInfoButton = useCallback(
     (rowData: IOrder) => {
@@ -568,7 +587,6 @@ const OrdersList: FC = () => {
       displayAwbInfoButton,
       trackingNum,
       orderAwb,
-      printAwb,
       getInvoiceNumber,
     ]
   )
@@ -850,6 +868,13 @@ const OrdersList: FC = () => {
           },
         }}
       />
+      {axiosError.isError && (
+        <ErrorPopUpMessage
+          errorMessage={axiosError.errorMessage}
+          errorStatus={axiosError.errorStatus}
+          resetError={removeAxiosError}
+        />
+      )}
     </div>
   )
 }
