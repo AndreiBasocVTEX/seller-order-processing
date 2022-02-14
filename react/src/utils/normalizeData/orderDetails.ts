@@ -6,6 +6,9 @@ import type {
 } from '../../typings/normalizedOrder'
 import { deliveryStatus } from '../constants'
 
+const getElelfantOrderId = (orderNote: string): string | null =>
+  orderNote.match(/(?<!ID:)\s?\d+/g)?.toString() || null
+
 const getPaymentMethod = (paymentData: string): string | null => {
   if (!paymentData) return null
 
@@ -241,6 +244,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
       second: 'numeric',
       timeZone: 'Europe/Bucharest',
     }),
+    elelfantOrderId: getElelfantOrderId(orderData.openTextField.value),
     formattedOrderStatus: getOrderStatus(orderData.status),
     invoiceData: {
       address: {
