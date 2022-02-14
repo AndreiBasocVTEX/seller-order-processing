@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import type { FC } from 'react'
 import { Button, IconDownload, Tooltip } from 'vtex.styleguide'
+import type { AxiosError } from 'axios'
 import axios from 'axios'
 
 import { SMARTBILL } from '../../utils/constants'
 import type { InvoiceButtonProps } from '../../types/common'
+import ErrorPopUpMessage from '../ErrorPopUpMessage'
 
 const InvoiceButton: FC<InvoiceButtonProps> = ({
   orderId,
@@ -15,6 +17,12 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [invoiceAvailable, setInvoiceAvailable] = useState<string | null>(null)
+  const [axiosError, setAxiosError] = useState({
+    isError: false,
+    errorMessage: '',
+    errorDetails: '',
+    errorStatus: 0,
+  })
 
   const isFactureUrlAvailable = (
     invoiceType?: string | null
@@ -36,18 +44,73 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
 
   const printInvoice = async (_orderId: string) => {
     setIsLoading(true)
-    const { data } = await axios.get(`/opa/orders/${_orderId}/get-invoice`, {
-      params: {
-        paperSize: 'A4',
-      },
-      responseType: 'blob',
-    })
+    const data = await axios
+      .get(`/opa/orders/${_orderId}/get-invoice`, {
+        params: {
+          paperSize: 'A4',
+        },
+        responseType: 'blob',
+      })
+      .then((res) => {
+        return res.data
+      })
+      .catch(async (error: AxiosError<Blob>) => {
+        if (!error.response) {
+          return
+        }
 
-    const blob = new Blob([data], { type: 'application/pdf' })
-    const blobURL = URL.createObjectURL(blob)
+        const response = error.response
 
-    window.open(blobURL)
+        const errorResponse = await new Promise<{
+          message: string
+          details: string
+        }>((resolve) => {
+          const fileReader = new FileReader()
+
+          fileReader.readAsText(response.data)
+          fileReader.onload = () => {
+            const errorJSON = JSON.parse(fileReader.result as string) as {
+              message: string
+              stack: string
+            }
+
+            resolve({
+              message: errorJSON.message,
+              details: errorJSON.stack,
+            })
+          }
+        })
+
+        const errorData = {
+          message: errorResponse.message,
+          details: errorResponse.details,
+          status: response.status,
+        }
+
+        setAxiosError({
+          ...axiosError,
+          isError: true,
+          errorDetails: errorData.details,
+          errorMessage: String(errorData.message),
+          errorStatus: errorData.status,
+        })
+      })
+
+    if (data && !axiosError.isError) {
+      const blob = new Blob([data], { type: 'application/pdf' })
+      const blobURL = URL.createObjectURL(blob)
+
+      window.open(blobURL)
+    }
+
     setIsLoading(false)
+  }
+
+  const removeAxiosError = () => {
+    setAxiosError({
+      ...axiosError,
+      isError: false,
+    })
   }
 
   useEffect(() => {
@@ -75,13 +138,25 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     </Button>
   )
 
-  return invoiceAvailable ? (
-    invoiceAvailable !== 'noUrl' ? (
-      <Tooltip label={invoiceNumber}>{invoiceButton()}</Tooltip>
-    ) : (
-      invoiceButton()
-    )
-  ) : null
+  return (
+    <>
+      {invoiceAvailable ? (
+        invoiceAvailable !== 'noUrl' ? (
+          <Tooltip label={invoiceNumber}>{invoiceButton()}</Tooltip>
+        ) : (
+          invoiceButton()
+        )
+      ) : null}
+      {axiosError.isError && (
+        <ErrorPopUpMessage
+          errorMessage={axiosError.errorMessage}
+          errorStatus={axiosError.errorStatus}
+          errorDetails={axiosError.errorDetails}
+          resetError={removeAxiosError}
+        />
+      )}
+    </>
+  )
 }
 
 export default InvoiceButton
