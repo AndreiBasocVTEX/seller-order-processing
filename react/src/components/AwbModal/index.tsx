@@ -38,6 +38,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [axiosError, setAxiosError] = useState({
     isError: false,
     errorMessage: '',
+    errorDetails: '',
     errorStatus: 0,
   })
 
@@ -204,11 +205,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         .then((r) => {
           return r.data
         })
-        .catch((e: AxiosError<{ message: string }>) => {
+        .catch((e: AxiosError<{ message: string; stack: string }>) => {
           if (e?.response) {
             throw {
               message: e.response.data.message,
               status: e.response.status,
+              details: e.response.data.stack,
             }
           }
         })
@@ -240,6 +242,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         isError: true,
         errorMessage: error.message,
         errorStatus: error.status,
+        errorDetails: error.details,
       })
 
       return error
@@ -274,27 +277,36 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
           const response = error.response
 
-          const errorMessage = await new Promise((resolve) => {
+          const errorResponse = await new Promise<{
+            message: string
+            details: string
+          }>((resolve) => {
             const fileReader = new FileReader()
 
             fileReader.readAsText(response.data)
             fileReader.onload = () => {
               const errorJSON = JSON.parse(fileReader.result as string) as {
                 message: string
+                stack: string
               }
 
-              resolve(errorJSON.message)
+              resolve({
+                message: errorJSON.message,
+                details: errorJSON.stack,
+              })
             }
           })
 
           const errorData = {
-            message: errorMessage,
+            message: errorResponse.message,
+            details: errorResponse.details,
             status: response.status,
           }
 
           setAxiosError({
             ...axiosError,
             isError: true,
+            errorDetails: errorData.details,
             errorMessage: String(errorData.message),
             errorStatus: errorData.status,
           })
@@ -582,6 +594,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         <ErrorPopUpMessage
           errorMessage={axiosError.errorMessage}
           errorStatus={axiosError.errorStatus}
+          errorDetails={axiosError.errorDetails}
           resetError={removeAxiosError}
         />
       )}
