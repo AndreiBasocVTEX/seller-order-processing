@@ -26,7 +26,10 @@ const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
               {orderStatus?.longText ?? 'Necunoscut'}
             </Tag>
             <span className="ml5 underline">
-              <Link href={`/admin/checkout/#/orders/GCB-${orderId}`}>
+              <Link
+                href={`/admin/checkout/#/orders/GCB-${orderId}`}
+                target="_blank"
+              >
                 Vezi pagina standard
               </Link>
             </span>
