@@ -52,9 +52,6 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
               <div className="mt2">
                 Telefon: {orderData.clientProfileData.phone}
               </div>
-              <div className="mt2">
-                Email: {orderData.clientProfileData.email}
-              </div>
             </div>
           </div>
           <div className="w-50">
