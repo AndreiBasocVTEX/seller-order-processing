@@ -171,7 +171,12 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                 {orderData.clientProfileData.corporateName ??
                   `${orderData.clientProfileData.firstName} ${orderData.clientProfileData.lastName}`}
               </div>
-              <div className="mt2">CUI: RO2339394</div>
+              {orderData.clientProfileData.isCorporate && (
+                <div className="mt2">
+                  CUI: {orderData.clientProfileData.stateInscription}
+                </div>
+              )}
+
               <div className="mt2">
                 Adresa: {orderData.invoiceData.address.street}
               </div>
