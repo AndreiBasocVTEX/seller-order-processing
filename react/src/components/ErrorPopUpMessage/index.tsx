@@ -5,7 +5,6 @@ import type { FC } from 'react'
 import type { IErrorPopUpMessage } from '../../types/errorModalMessage'
 
 const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
-  errorStatus,
   errorMessage,
   errorDetails,
   resetError,
@@ -21,9 +20,7 @@ const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
     <>
       <Modal isOpen={isModalOpen} showCloseIcon={false} onClose={onCLoseModal}>
         <div className="flex-column center pl6">
-          {errorStatus && (
-            <h3 className="t-heading-3 red">ERROR {errorStatus}</h3>
-          )}
+          <h3 className="t-heading-3 red">ERROR</h3>
           <h5 className="t-heading-5 black">{errorMessage}</h5>
           <div className="mv6">
             <Divider orientation="horizontal" />

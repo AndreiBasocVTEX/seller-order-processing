@@ -21,7 +21,6 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     isError: false,
     errorMessage: '',
     errorDetails: '',
-    errorStatus: 0,
   })
 
   const isFactureUrlAvailable = (
@@ -84,7 +83,6 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
         const errorData = {
           message: errorResponse.message,
           details: errorResponse.details,
-          status: response.status,
         }
 
         setAxiosError({
@@ -92,7 +90,6 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
           isError: true,
           errorDetails: errorData.details,
           errorMessage: String(errorData.message),
-          errorStatus: errorData.status,
         })
       })
 
@@ -150,7 +147,6 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
       {axiosError.isError && (
         <ErrorPopUpMessage
           errorMessage={axiosError.errorMessage}
-          errorStatus={axiosError.errorStatus}
           errorDetails={axiosError.errorDetails}
           resetError={removeAxiosError}
         />

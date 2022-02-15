@@ -39,7 +39,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     isError: false,
     errorMessage: '',
     errorDetails: '',
-    errorStatus: 0,
   })
 
   const [isLoading, setIsLoading] = useState(true)
@@ -209,7 +208,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           if (e?.response) {
             throw {
               message: e.response.data.message,
-              status: e.response.status,
               details: e.response.data.stack,
             }
           }
@@ -241,7 +239,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         ...axiosError,
         isError: true,
         errorMessage: error.message,
-        errorStatus: error.status,
         errorDetails: error.details,
       })
 
@@ -300,7 +297,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           const errorData = {
             message: errorResponse.message,
             details: errorResponse.details,
-            status: response.status,
           }
 
           setAxiosError({
@@ -308,7 +304,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             isError: true,
             errorDetails: errorData.details,
             errorMessage: String(errorData.message),
-            errorStatus: errorData.status,
           })
         })
 
@@ -319,8 +314,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
         window.open(blobURL)
       }
-    } catch (e) {
-      console.log(e)
     } finally {
       setIsLoading(false)
     }
@@ -593,7 +586,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
       {axiosError.isError && (
         <ErrorPopUpMessage
           errorMessage={axiosError.errorMessage}
-          errorStatus={axiosError.errorStatus}
           errorDetails={axiosError.errorDetails}
           resetError={removeAxiosError}
         />

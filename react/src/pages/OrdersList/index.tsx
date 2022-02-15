@@ -253,8 +253,7 @@ const OrdersList: FC = () => {
     getItems(newParams)
   }
 
-  const handleRowsChange = useCallback((e: unknown, value: number) => {
-    console.log(e)
+  const handleRowsChange = useCallback((_e: unknown, value: number) => {
     const newParams = {
       ...paginationParams,
       paging: { ...paginationParams.paging, perPage: Number(value) },
@@ -456,6 +455,7 @@ const OrdersList: FC = () => {
             const orderAwbById = orderAwb.find(
               (awbEl) => awbEl.orderId === rowData.orderId
             )
+
             return (
               orderAwbById && (
                 <InvoiceButton
@@ -562,14 +562,11 @@ const OrdersList: FC = () => {
 
     filterStatements.forEach((statement: IStatement) => {
       if (!statement?.object) return
-      const { subject, verb, object } = statement
+      const { subject, object } = statement
 
-      console.log(verb)
       if (subject === 'status') {
         const url = Object.entries(object)
-          .filter(([key, value]) => {
-            console.log(key)
-
+          .filter(([_key, value]) => {
             return value
           })
           .map(([key]) => key)
