@@ -97,9 +97,6 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                 Oras: {orderData.shippingData.address.city}, Judet{' '}
                 {orderData.shippingData.address.state}
               </div>
-              <div className="mt2">
-                Code Postal: {orderData.shippingData.address.postalCode}
-              </div>
               <div className="mv6">
                 <Divider />
               </div>
