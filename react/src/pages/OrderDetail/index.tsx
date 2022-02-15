@@ -89,7 +89,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
               </div>
               <div className="mt2">
                 Telefon:{' '}
-                {orderData.shippingData.address.phone ??
+                {orderData.shippingData.address.phone ||
                   orderData.clientProfileData.phone}
               </div>
               <div className="mt2">
