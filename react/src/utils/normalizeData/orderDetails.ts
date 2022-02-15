@@ -241,6 +241,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
       lastName: orderData?.clientProfileData?.lastName,
       phone: orderData?.clientProfileData?.phone,
       email: orderData?.clientProfileData?.email,
+      stateInscription: orderData.clientProfileData.stateInscription,
       isCorporate: orderData?.clientProfileData?.isCorporate,
     },
     creationDate: formatDate(orderData?.creationDate, {

@@ -40,7 +40,7 @@ export interface ClientProfileData {
   corporateName?: string | null
   tradeName?: string | null
   corporateDocument?: unknown | null
-  stateInscription?: string | null
+  stateInscription: string | null
   corporatePhone?: string | null
   isCorporate: boolean
   userProfileId?: string | null

@@ -8,12 +8,21 @@ export interface AddressData {
 }
 
 export interface ClientData {
-  corporateName: string | null
-  firstName: string
-  isCorporate: boolean
-  lastName: string
-  phone: string
+  id?: string
   email: string
+  firstName: string
+  lastName: string
+  documentType?: string
+  document?: string
+  phone: string
+  corporateName?: string | null
+  tradeName?: string | null
+  corporateDocument?: unknown | null
+  stateInscription: string | null
+  corporatePhone?: string | null
+  isCorporate: boolean
+  userProfileId?: string | null
+  customerClass?: string | null
 }
 
 export interface OrderTotals {
