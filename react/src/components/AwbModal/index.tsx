@@ -458,9 +458,9 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <p>Curier:</p>
                 <Dropdown
                   options={[
-                    { value: 'FanCourier', label: 'FanCourier' },
-                    { value: 'Cargus', label: 'Cargus' },
-                    { value: 'SameDay', label: 'SameDay' },
+                    { value: 'fancourier', label: 'FanCourier' },
+                    { value: 'cargus', label: 'Cargus' },
+                    { value: 'sameDay', label: 'SameDay' },
                     { value: 'TNT', label: 'TNT' },
                     { value: 'DHL', label: 'DHL' },
                     { value: 'GLS', label: 'GLS' },
@@ -561,6 +561,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   onChange={(e: React.SetStateAction<any>) =>
                     setInvoiceNum(e.target.value)
                   }
+                  maxLength={20}
                   value={invoiceNum}
                   required
                 />

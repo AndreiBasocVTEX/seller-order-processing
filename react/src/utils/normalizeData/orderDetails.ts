@@ -93,6 +93,14 @@ export const getOrderStatus = (
         shortText: 'CR',
       }
 
+    case deliveryStatus.WINDOW_TO_CANCEL:
+      return {
+        color: '#FFF',
+        bgColor: '#44c767',
+        longText: 'Window to cancellation',
+        shortText: 'WTC',
+      }
+
     default:
       return undefined
   }
@@ -244,7 +252,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
       second: 'numeric',
       timeZone: 'Europe/Bucharest',
     }),
-    elelfantOrderId: getElelfantOrderId(orderData.openTextField.value),
+    elefantOrderId: getElelfantOrderId(orderData.openTextField.value),
     formattedOrderStatus: getOrderStatus(orderData.status),
     invoiceData: {
       address: {
