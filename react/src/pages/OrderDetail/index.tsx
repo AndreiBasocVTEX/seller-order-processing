@@ -40,8 +40,6 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
               <div className="mt2">
                 Estimat livrare: {orderData.shippingEstimatedDate}
               </div>
-
-              <div className="mt6">Observatii/Note: Bla bla bla</div>
             </div>
           </div>
           <div className="w-50">
