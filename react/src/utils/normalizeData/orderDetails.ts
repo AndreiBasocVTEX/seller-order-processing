@@ -96,7 +96,7 @@ export const getOrderStatus = (
     case deliveryStatus.WINDOW_TO_CANCEL:
       return {
         color: '#FFF',
-        bgColor: '#44c767',
+        bgColor: '#c7bd44',
         longText: 'Window to cancellation',
         shortText: 'WTC',
       }
