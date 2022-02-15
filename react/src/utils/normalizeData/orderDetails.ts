@@ -97,7 +97,7 @@ export const getOrderStatus = (
       return {
         color: '#FFF',
         bgColor: '#44c767',
-        longText: 'Window to cancel',
+        longText: 'Window to cancellation',
         shortText: 'WTC',
       }
 
