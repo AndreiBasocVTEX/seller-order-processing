@@ -62,7 +62,7 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
       {
         productSku: '',
         productName: 'Taxa de livrare',
-        productQuantity: 0,
+        productQuantity: null,
         productPriceNoTva: `${orderData?.orderTotals.shipping} Lei`,
         tvaProcent: '0%',
         productPriceTva: `${orderData?.orderTotals.shipping} Lei`,
@@ -70,7 +70,7 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
       {
         productSku: '',
         productName: 'Total',
-        productQuantity: 0,
+        productQuantity: null,
         productPriceNoTva: `${
           (orderTotals.items + orderTotals.shipping) / 100
         } Lei`,
