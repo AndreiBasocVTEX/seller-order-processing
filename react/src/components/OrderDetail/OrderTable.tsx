@@ -41,49 +41,45 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
     const orderTotals: { [key: string]: number } = {}
     const result: IOrderTableItem[] = []
 
-    items.forEach((element, index) => {
-      result.push(
-        {
-          productSku: element.sellerSku,
-          productName: element.name,
-          productQuantity: element.quantity,
-          productPriceNoTva: `${element.priceDefinition.total / 100} Lei`,
-          tvaProcent: `${element.tax}%`,
-          productPriceTva: `${
-            (element.priceDefinition.total + element.tax) / 100
-          } Lei`,
-        },
-        {
-          productSku: '',
-          productName: 'Taxa de livrare',
-          productQuantity: 0,
-          productPriceNoTva: `${
-            data.shippingData.logisticsInfo[index].price / 100
-          } Lei`,
-          tvaProcent: '0%',
-          productPriceTva: `${
-            data.shippingData.logisticsInfo[index].price / 100
-          } Lei`,
-        }
-      )
+    items.forEach((element) => {
+      result.push({
+        productSku: element.sellerSku,
+        productName: element.name,
+        productQuantity: element.quantity,
+        productPriceNoTva: `${element.priceDefinition.total / 100} Lei`,
+        tvaProcent: `${element.tax}%`,
+        productPriceTva: `${
+          (element.priceDefinition.total + element.tax) / 100
+        } Lei`,
+      })
     })
     data.totals.forEach((element) => {
       Object.assign(orderTotals, {
         [element.id.toLocaleLowerCase()]: element.value,
       })
     })
-    result.push({
-      productSku: '',
-      productName: 'Total',
-      productQuantity: 0,
-      productPriceNoTva: `${
-        (orderTotals.items + orderTotals.shipping) / 100
-      } Lei`,
-      tvaProcent: '',
-      productPriceTva: `${
-        (orderTotals.items + orderTotals.shipping + orderTotals.tax) / 100
-      } Lei`,
-    })
+    result.push(
+      {
+        productSku: '',
+        productName: 'Taxa de livrare',
+        productQuantity: 0,
+        productPriceNoTva: `${orderData?.orderTotals.shipping} Lei`,
+        tvaProcent: '0%',
+        productPriceTva: `${orderData?.orderTotals.shipping} Lei`,
+      },
+      {
+        productSku: '',
+        productName: 'Total',
+        productQuantity: 0,
+        productPriceNoTva: `${
+          (orderTotals.items + orderTotals.shipping) / 100
+        } Lei`,
+        tvaProcent: '',
+        productPriceTva: `${
+          (orderTotals.items + orderTotals.shipping + orderTotals.tax) / 100
+        } Lei`,
+      }
+    )
     setTableData(result)
   }
 
