@@ -94,7 +94,7 @@ export interface ShippingData {
 export interface OrderDetailsData {
   clientProfileData: ClientProfileData
   creationDate: string
-  elelfantOrderId: string | null
+  elefantOrderId: string | null
   formattedOrderStatus?: FormattedOrderStatus
   invoiceData: {
     address: InvoiceDataAddress

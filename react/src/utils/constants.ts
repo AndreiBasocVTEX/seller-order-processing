@@ -18,4 +18,5 @@ export const deliveryStatus = {
   HANDLING: 'handling',
   PAYMENT_PENDING: 'payment-pending',
   CANCELLATION_REQUESTED: 'cancellation-requested',
+  WINDOW_TO_CANCEL: 'window-to-cancel',
 } as const
