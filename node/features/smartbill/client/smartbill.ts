@@ -1,6 +1,7 @@
 import type { IOContext, InstanceOptions } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
+import { UnhandledError } from '../../core/helpers/error.helper'
 import type {
   CreateInvoiceRequest,
   SmartBillGenerateInvoiceRes,
@@ -36,11 +37,15 @@ export default class SmartBillClient extends ExternalClient {
   private async getTaxCodeName(
     settings: IOContext['settings']
   ): Promise<SmartbillTaxCodeNamesResponse> {
-    return this.http.get(`/tax?cif=${settings.smartbill__vatCode}`, {
-      headers: {
-        ...SmartBillClient.getAuthorization(settings),
-      },
-    })
+    return this.http
+      .get(`/tax?cif=${settings.smartbill__vatCode}`, {
+        headers: {
+          ...SmartBillClient.getAuthorization(settings),
+        },
+      })
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 
   public async generateInvoice({
@@ -55,24 +60,34 @@ export default class SmartBillClient extends ExternalClient {
       productTaxNames,
     })
 
-    return this.http.post('/invoice', smartbillPayload, {
-      headers: {
-        ...SmartBillClient.getAuthorization(settings),
-      },
-    })
+    return (this.http
+      .post('/invoice', smartbillPayload, {
+        headers: {
+          ...SmartBillClient.getAuthorization(settings),
+        },
+      })
+      .catch((error) => {
+        throw new UnhandledError({
+          message: error?.response?.data?.errorText || error,
+        })
+      }) as unknown) as Promise<SmartBillGenerateInvoiceRes>
   }
 
   public async getInvoice({
     settings,
     invoiceNumber,
   }: GetInvoiceRequest): Promise<unknown> {
-    return this.http.getStream(
-      `/invoice/pdf?cif=${settings.smartbill__vatCode}&seriesname=${settings.smartbill__seriesName}&number=${invoiceNumber}`,
-      {
-        headers: {
-          ...SmartBillClient.getAuthorization(settings),
-        },
-      }
-    )
+    return this.http
+      .getStream(
+        `/invoice/pdf?cif=${settings.smartbill__vatCode}&seriesname=${settings.smartbill__seriesName}&number=${invoiceNumber}`,
+        {
+          headers: {
+            ...SmartBillClient.getAuthorization(settings),
+          },
+        }
+      )
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 }
