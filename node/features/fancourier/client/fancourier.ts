@@ -29,7 +29,7 @@ export default class FancourierClient extends CarrierClient {
     order,
     params,
   }: CreateTrackingRequest): Promise<{
-    _: string
+    resStatus: string
     lineNumber: string
     rate: string
     trackingNumber: string
@@ -110,13 +110,19 @@ export default class FancourierClient extends CarrierClient {
       )
     }
 
-    const [lineNumber, _, trackingNumber, rate] = res?.split(',') ?? []
+    const [lineNumber, resStatus, trackingNumber, rate] = res?.split(',') ?? []
+
+    if (resStatus === '0') {
+      // If there is an error, then on the third position of the response array (trackingNumber)
+      // will be an error message
+      throw new Error(`${trackingNumber}`)
+    }
 
     return {
       lineNumber,
       trackingNumber,
       rate,
-      _,
+      resStatus,
     }
   }
 
