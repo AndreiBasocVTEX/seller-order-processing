@@ -4,6 +4,7 @@ import type { CustomError } from '../models/request.model'
 class CustomErrorConstructor extends Error implements CustomError {
   protected _meta: ObjectLiteral
   protected _statusCode: number
+  protected _errors?: ObjectLiteral[]
 
   constructor(
     name: string,
@@ -12,11 +13,13 @@ class CustomErrorConstructor extends Error implements CustomError {
       message,
       stack,
       meta,
+      errors,
     }: {
       statusCode: number
       message: string
       stack?: string
       meta?: ObjectLiteral
+      errors?: ObjectLiteral[]
     }
   ) {
     super(message)
@@ -31,6 +34,8 @@ class CustomErrorConstructor extends Error implements CustomError {
       .join('\n')
 
     this._statusCode = statusCode
+
+    this._errors = errors ?? []
   }
 
   public get meta(): ObjectLiteral {
@@ -39,6 +44,10 @@ class CustomErrorConstructor extends Error implements CustomError {
 
   public get statusCode(): number {
     return this._statusCode
+  }
+
+  public get errors(): ObjectLiteral[] | undefined {
+    return this._errors
   }
 }
 
@@ -61,12 +70,14 @@ export class UnhandledError extends CustomErrorConstructor {
     message,
     stack,
     meta,
+    errors,
   }: {
     message: string
     stack?: string
     meta?: ObjectLiteral
+    errors?: ObjectLiteral[]
   }) {
-    super('ValidationError', { message, stack, meta, statusCode: 500 })
+    super('ValidationError', { message, stack, meta, statusCode: 500, errors })
   }
 
   public static fromError(err: Error): UnhandledError {

@@ -25,6 +25,7 @@ export function errorHandleMiddleware(handler: Handler) {
         message: handledError.message,
         stack: handledError.stack,
         meta: handledError.meta,
+        errors: handledError.errors,
       }
 
       // eslint-disable-next-line no-console
