@@ -31,7 +31,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
             <div className="flex flex-column">
               <div className="mt2">Data comanda: {orderData.creationDate}</div>
               <div className="mt2">
-                Elefant order ID: {orderData.elefantOrderId}
+                Marketplace order ID: {orderData.elefantOrderId}
               </div>
               <div className="mt2">
                 Metoda de plata: {orderData.openTextField.value}
