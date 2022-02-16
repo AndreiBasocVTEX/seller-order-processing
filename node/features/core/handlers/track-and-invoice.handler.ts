@@ -34,14 +34,14 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     vtex_appToken: settings.vtex_appToken,
   }
 
+  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
+    vtexAuthData,
+    orderId
+  )
+
   let trackingInfoPayload: TrackingInfoDTO
 
   if (tracking.generate) {
-    const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
     trackingInfoPayload = await carrier.createTracking({
       settings,
       order,
@@ -58,11 +58,6 @@ export async function trackAndInvoiceHandler(ctx: Context) {
   let notifyInvoiceRequest: NotifyInvoicePayload
 
   if (invoice.provider.toLowerCase() === 'smartbill') {
-    const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-      vtexAuthData,
-      orderId
-    )
-
     const smartbillInvoice = await smartbill.generateInvoice({
       settings,
       order,
@@ -90,6 +85,13 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     orderId,
     payload: notifyInvoiceRequest,
   })
+
+  if (order.status === 'ready-for-handling') {
+    await vtexOrderClient.setOrderStatusToInvoiced({
+      authData: vtexAuthData,
+      orderId,
+    })
+  }
 
   return notifyInvoiceRequest
 }
