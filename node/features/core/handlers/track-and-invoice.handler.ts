@@ -24,11 +24,6 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
   const settings = await getVtexAppSettings(ctx)
 
-  const carrier = carrierClient.getCarrierClientByName(
-    ctx,
-    tracking.provider as CarrierValues
-  )
-
   const vtexAuthData: VtexAuthData = {
     vtex_appKey: settings.vtex_appKey,
     vtex_appToken: settings.vtex_appToken,
@@ -42,6 +37,11 @@ export async function trackAndInvoiceHandler(ctx: Context) {
   let trackingInfoPayload: TrackingInfoDTO
 
   if (tracking.generate) {
+    const carrier = carrierClient.getCarrierClientByName(
+      ctx,
+      tracking.provider as CarrierValues
+    )
+
     trackingInfoPayload = await carrier.createTracking({
       settings,
       order,
