@@ -16,6 +16,7 @@ import type { IAuthDataSameday } from '../models/sameday-auth.model'
 import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
 import { UnhandledError } from '../../core/helpers/error.helper'
+import findAllObjectPropsByKey from '../../core/utils/findAllObjectPropsByKey'
 
 export default class SamedayClient extends CarrierClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -86,7 +87,18 @@ export default class SamedayClient extends CarrierClient {
         },
       })
       .catch((error) => {
-        throw UnhandledError.fromError(error)
+        const { data: errorData } = error?.response
+        const { children } = errorData.errors
+
+        const errorMessages = findAllObjectPropsByKey(
+          children,
+          'errors'
+        ).map((msg) => ({ message: msg }))
+
+        throw new UnhandledError({
+          message: errorData.message,
+          errors: errorMessages,
+        })
       }) as unknown) as Promise<ISamedayAwbResponse>
   }
 
