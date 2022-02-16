@@ -158,12 +158,13 @@ const formatOrderState = (state: string | undefined) => {
 export const formatDate = (
   date: string | undefined,
   config: {
-    year: 'numeric' | '2-digit' | undefined
-    month: 'numeric' | '2-digit' | undefined
-    day: 'numeric' | '2-digit' | undefined
-    hour?: 'numeric' | '2-digit' | undefined
-    minute?: 'numeric' | '2-digit' | undefined
-    second?: 'numeric' | '2-digit' | undefined
+    year: 'numeric' | 'short' | '2-digit' | undefined
+    month: 'numeric' | 'short' | '2-digit' | undefined
+    day: 'numeric' | 'short' | '2-digit' | undefined
+    hour?: 'numeric' | 'short' | '2-digit' | undefined
+    minute?: 'numeric' | 'short' | '2-digit' | undefined
+    second?: 'numeric' | 'short' | '2-digit' | undefined
+    hour12?: boolean
     timeZone?: string
   }
 ): string => {
@@ -246,11 +247,11 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
     },
     creationDate: formatDate(orderData?.creationDate, {
       year: 'numeric',
-      month: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: 'numeric',
       minute: 'numeric',
-      second: 'numeric',
+      hour12: false,
       timeZone: 'Europe/Bucharest',
     }),
     elefantOrderId: getElelfantOrderId(orderData.openTextField.value),
