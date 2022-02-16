@@ -564,26 +564,73 @@ const OrdersList: FC = () => {
       if (!statement?.object) return
       const { subject, object } = statement
 
-      if (subject === 'status') {
-        const url = Object.entries(object)
-          .filter(([_key, value]) => {
-            return value
-          })
-          .map(([key]) => key)
-          .join(',')
-          .toLowerCase()
+      if (filterStatements.length > 1) {
+        switch (subject) {
+          case 'status':
+            {
+              const url = Object.entries(object)
+                .filter(([key, value]) => {
+                  return value ? key.toLowerCase() : ''
+                })
+                .join(',')
 
-        setFilterUrl(url)
+              setFilterUrl(url)
+            }
+
+            break
+
+          case 'creationdate':
+            {
+              const from =
+                object?.from?.toISOString?.() ?? new Date().toISOString()
+
+              const to = object?.to?.toISOString?.() ?? new Date().toISOString()
+
+              setDateUrl(`${from} TO ${to}`)
+            }
+
+            break
+
+          default:
+            break
+
+            return
+        }
       }
 
-      if (subject === 'creationdate') {
-        const from = object?.from?.toISOString?.() ?? new Date().toISOString()
-        const to = object?.to?.toISOString?.() ?? new Date().toISOString()
+      if (filterStatements.length === 1) {
+        switch (subject) {
+          case 'status':
+            {
+              const url = Object.entries(object)
+                .filter(([key, value]) => {
+                  return value ? key.toLowerCase() : ''
+                })
+                .join(',')
 
-        setDateUrl(`${from} TO ${to}`)
+              setDateUrl('')
+              setFilterUrl(url)
+            }
+
+            break
+
+          case 'creationdate':
+            {
+              const from =
+                object?.from?.toISOString?.() ?? new Date().toISOString()
+
+              const to = object?.to?.toISOString?.() ?? new Date().toISOString()
+
+              setFilterUrl('')
+              setDateUrl(`${from} TO ${to}`)
+            }
+
+            break
+
+          default:
+            break
+        }
       }
-
-      return ''
     })
     setFilterStatus(filterStatements)
   }, [])
@@ -687,12 +734,12 @@ const OrdersList: FC = () => {
           {
             label: 'Prețul mediu de comandă',
             value: `${
-              Math.round(
-                (paginationParams.stats.stats.totalValue.Sum /
-                  100 /
-                  paginationParams.stats.stats.totalValue.Count) *
-                  100
-              ) / 100
+              paginationParams.stats.stats.totalValue.Sum
+                ? Math.round(
+                    paginationParams.stats.stats.totalValue.Sum /
+                      paginationParams.stats.stats.totalValue.Count
+                  ) / 100
+                : '0'
             } Lei`,
             inverted: true,
           },

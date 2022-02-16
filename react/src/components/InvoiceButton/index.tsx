@@ -127,11 +127,13 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
           : printInvoice(orderId)
       }}
     >
-      <span style={{ paddingRight: '10px' }}>
-        <IconDownload />
-      </span>
+      <div className="tl">
+        <span className="pr3">
+          <IconDownload />
+        </span>
+      </div>
 
-      <span className="mw-100 truncate f6">{invoiceNumber}</span>
+      <span className="w-100 pr3 tc truncate f6">{invoiceNumber}</span>
     </Button>
   )
 
