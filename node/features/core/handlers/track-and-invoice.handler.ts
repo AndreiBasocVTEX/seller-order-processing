@@ -47,12 +47,14 @@ export async function trackAndInvoiceHandler(ctx: Context) {
       order,
       params: { ...tracking.params },
     })
-  } else {
+  } else if (tracking.params.trackingNumber) {
     trackingInfoPayload = {
       courier: tracking.provider,
-      trackingNumber: tracking.params.trackingNumber as string,
+      trackingNumber: tracking.params.trackingNumber,
       trackingUrl: tracking.params.trackingUrl ?? '',
     }
+  } else {
+    throw new Error('Tracking number is required for manual input')
   }
 
   let notifyInvoiceRequest: NotifyInvoicePayload
