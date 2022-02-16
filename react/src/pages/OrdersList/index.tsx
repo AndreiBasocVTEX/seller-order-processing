@@ -323,8 +323,8 @@ const OrdersList: FC = () => {
           },
         },
         marketPlaceOrderId: {
-          title: 'Elefant #',
-          width: 90,
+          title: 'Marketplace #',
+          width: 110,
           cellRenderer: ({
             rowData,
           }: {
@@ -332,9 +332,11 @@ const OrdersList: FC = () => {
             rowData: IOrder
           }): JSX.Element => {
             return (
-              <Link href={`/admin/app/order-details/${rowData.orderId}`}>
-                {getElefantOrderId(rowData)}
-              </Link>
+              <div className="center">
+                <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                  {getElefantOrderId(rowData)}
+                </Link>
+              </div>
             )
           },
         },
