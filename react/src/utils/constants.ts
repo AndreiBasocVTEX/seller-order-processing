@@ -1,3 +1,11 @@
+import cargus from '../public/logos/cargus.png'
+import fancourier from '../public/logos/fancourier.png'
+import innoship from '../public/logos/innoship.png'
+import sameday from '../public/logos/sameday.png'
+import facturis from '../public/logos/facturis.png'
+import smartbill from '../public/logos/smartbill.png'
+import download from '../public/logos/download.png'
+
 export const awbContent = 'goods'
 export const awbSourceChannel = 'ONLINE'
 export const defaultCountryCode = 'RO'
@@ -20,3 +28,46 @@ export const deliveryStatus = {
   CANCELLATION_REQUESTED: 'cancellation-requested',
   WINDOW_TO_CANCEL: 'window-to-cancel',
 } as const
+
+export const courierIcons: { [key: string]: string } = {
+  fancourier,
+  cargus,
+  innoship,
+  sameday,
+  facturis,
+  smartbill,
+  download,
+  tnt: download,
+  dhl: download,
+  gls: download,
+  dpd: download,
+}
+
+export const courierData = [
+  {
+    src: 'cargus',
+    label: 'Cargus',
+    service: 'cargus',
+  },
+  {
+    src: 'sameday',
+    label: 'SameDay',
+    service: 'sameday',
+  },
+  {
+    src: 'innoship',
+    label: 'Innoship',
+    service: 'innoship',
+  },
+  {
+    src: 'fancourier',
+    label: 'Fan Courier',
+    service: 'fancourier',
+  },
+  {
+    src: 'download',
+    label: 'Incarca AWB Manual',
+    service: 'manual',
+  },
+]
+export const disabledCouriers = ['DHL', 'TNT', 'GLS', 'DPD']

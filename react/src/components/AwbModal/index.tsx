@@ -14,18 +14,16 @@ import type { AxiosError } from 'axios'
 import axios from 'axios'
 import type { FC, SetStateAction } from 'react'
 
-import fancourier from '../../public/logos/fancourier.png'
-import cargus from '../../public/logos/cargus.png'
-import innoship from '../../public/logos/innoship.png'
-import sameday from '../../public/logos/sameday.png'
-import facturis from '../../public/logos/facturis.png'
-import smartbill from '../../public/logos/smartbill.png'
-import download from '../../public/logos/download.png'
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { getOrderDataById } from '../../utils/api'
+import { createAwbShipping, getOrderDataById } from '../../utils/api'
 import { normalizeOrderData } from '../../utils/normalizeData/orderDetails'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
+import {
+  courierData,
+  courierIcons,
+  disabledCouriers,
+} from '../../utils/constants'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
   setTrackingNum,
@@ -35,14 +33,18 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   onAwbUpdate,
 }) => {
   const [service, setService] = useState('')
-  const [axiosError, setAxiosError] = useState({
-    isError: false,
-    errorMessage: '',
-    errorDetails: '',
-  })
-
+  const [courier, setCourier] = useState('')
+  const [packageAmount, setPackageAmount] = useState(1)
+  const [invoiceUrl, setInvoiceUrl] = useState('')
+  const [weight, setWeight] = useState(1)
+  const [packageType, setPackageType] = useState('')
+  const [newAwbGenerated, setNewAwbGenerated] = useState(false)
+  const [invoiceNum, setInvoiceNum] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [manualAwb, setManualAwb] = useState('')
+  const [manualUrl, setManualUrl] = useState('')
   const [orderData, setOrderData] = useState<OrderDetailsData>()
+  const [modalOpen, setModalOpen] = useState(false)
   const [courierSetManually, setCourierManually] = useState([
     { value: 'FanCourier', label: 'FanCourier' },
     { value: 'Cargus', label: 'Cargus' },
@@ -53,6 +55,21 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     { value: 'DPD', label: 'DPD' },
   ])
 
+  const [invoiceDate, setInvoiceDate] = useState(
+    new Date().toISOString().slice(0, 10)
+  )
+
+  const [axiosError, setAxiosError] = useState({
+    isError: false,
+    errorMessage: '',
+    errorDetails: '',
+  })
+
+  const packageTypeOptions = [
+    { value: 'Colet', disabled: false, label: 'Colet' },
+    { value: 'Plic', disabled: false, label: 'Plic' },
+  ]
+
   const removeAxiosError = () => {
     setAxiosError({
       ...axiosError,
@@ -60,190 +77,89 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     })
   }
 
-  const [newAwbGenerated, setNewAwbGenerated] = useState(false)
-
-  const [modalOpen, setModalOpen] = useState(false)
-  const dropDownOptions = [
-    {
+  const dropDownOptions = courierData.map((_courier) => {
+    return {
       label: (
         <>
           <img
             alt="logo"
             style={{ width: '20px', paddingRight: '6px' }}
-            src={cargus}
-          />{' '}
-          Cargus
+            src={courierIcons[_courier.src]}
+          />
+          {_courier.label}
         </>
       ),
       onClick: () => {
-        setService('cargus')
+        setService(_courier.service)
       },
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={sameday}
-          />{' '}
-          SameDay
-        </>
-      ),
-      disabled: false,
-      onClick: () => {
-        setService('sameday')
-      },
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={innoship}
-          />{' '}
-          Innoship
-        </>
-      ),
-      disabled: false,
-      onClick: () => {
-        setService('innoship')
-      },
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={fancourier}
-          />{' '}
-          Fan Courier
-        </>
-      ),
-      disabled: false,
-      onClick: () => {
-        setService('fancourier')
-      },
-    },
-    {
-      label: (
-        <>
-          <img
-            alt="logo"
-            style={{ width: '20px', paddingRight: '6px' }}
-            src={download}
-          />{' '}
-          Incarca AWB Manual
-        </>
-      ),
-      disabled: false,
-      onClick: () => {
-        setService('manual')
-      },
-    },
-  ]
-
-  const [courier, setCourier] = useState('')
-  const [packageAmount, setPackageAmount] = useState(1)
-  const [invoiceUrl, setInvoiceUrl] = useState('')
-  const [invoiceDate, setInvoiceDate] = useState(
-    new Date().toISOString().slice(0, 10)
-  )
-
-  const [weight, setWeight] = useState(1)
-  const [packageType, setPackageType] = useState('')
-  const packageTypeOptions = [
-    { value: 'Colet', disabled: false, label: 'Colet' },
-    { value: 'Plic', disabled: false, label: 'Plic' },
-  ]
-
-  const [invoiceNum, setInvoiceNum] = useState('')
-  const courierIcons: { [key: string]: string } = {
-    fancourier,
-    cargus,
-    innoship,
-    sameday,
-    facturis,
-    smartbill,
-  }
+    }
+  })
 
   const handlePopUpToggle = () => {
     setModalOpen(!modalOpen)
   }
 
-  const getOrderData = async (orderId: string): Promise<unknown> => {
-    try {
-      const data = await axios
-        .post(
-          `/opa/orders/${orderId}/track-and-invoice`,
+  const getOrderDetails = async () => {
+    const rawData = await getOrderDataById(neededOrderId)
+    const normalizedData = normalizeOrderData(rawData)
 
-          {
-            tracking: {
-              generate: true,
-              provider: service.toLowerCase(),
-              params: {
-                weight,
-                numberOfParcels: packageAmount,
-              },
-            },
-            invoice: {
-              provider: courier,
-              ...(courier === 'manual' && {
-                params: {
-                  invoiceValue: orderData?.value,
-                  type: 'Output',
-                  issuanceDate: invoiceDate.toString(),
-                  invoiceNumber: invoiceNum.toString(),
-                },
-              }),
-            },
-          }
-        )
-        .then((r) => {
-          return r.data
-        })
-        .catch((e: AxiosError<{ message: string; stack: string }>) => {
-          if (e?.response) {
-            throw {
-              message: e.response.data.message,
-              details: e.response.data.stack,
-            }
-          }
-        })
+    setOrderData(normalizedData)
+    setIsLoading(false)
+  }
 
-      setTrackingNum({
-        [orderId]: data.trackingNumber,
-      })
-      updateAwbData && updateAwbData(data)
-      setNewAwbGenerated(true)
-      onAwbUpdate(true)
-      // changing specific order to an updated one onClick generate in modal.
-      setOrderAwb &&
-        setOrderAwb((prevState) =>
-          prevState.map((el) => {
-            if (el.orderId === orderId) {
-              el.orderValue = data.invoiceValue
-              el.courier = data.courier
-              el.invoiceNumber = data.invoiceNumber
-            }
-
-            return el
+  const getOrderData = async (orderId: string) => {
+    createAwbShipping(
+      orderId,
+      service,
+      weight,
+      courierSetManually.toString(),
+      packageAmount,
+      manualAwb,
+      manualUrl,
+      courier,
+      orderData?.value,
+      invoiceDate.toString(),
+      invoiceNum.toString(),
+      invoiceUrl
+    )
+      .then((data) => {
+        if (data) {
+          setTrackingNum({
+            [orderId]: data.trackingNumber,
           })
-        )
 
-      return data
-    } catch (error) {
-      setAxiosError({
-        ...axiosError,
-        isError: true,
-        errorMessage: error.message,
-        errorDetails: error.details,
+          updateAwbData && updateAwbData(data)
+          setNewAwbGenerated(true)
+          onAwbUpdate(true)
+          // changing specific order to an updated one onClick generate in modal.
+          setOrderAwb &&
+            setOrderAwb((prevState) =>
+              prevState.map((el) => {
+                if (el.orderId === orderId) {
+                  el.orderValue = String(data.invoiceValue)
+                  el.courier = data.courier
+                  el.invoiceNumber = data.invoiceNumber
+                }
+
+                return el
+              })
+            )
+        }
       })
+      .catch((error) => {
+        if (error.status === 504) {
+          getOrderDetails()
 
-      return error
-    }
+          return
+        }
+
+        setAxiosError({
+          ...axiosError,
+          isError: true,
+          errorMessage: error.message,
+          errorDetails: error.details,
+        })
+      })
   }
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
@@ -254,6 +170,14 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   }
 
   const printAwb = async (_orderData: OrderDetailsData): Promise<any> => {
+    // TODO <we are waiting for an answer from Laurentiu about this case>
+
+    // if (_orderData?.packageAttachment?.packages?.trackingUrl) {
+    //   return window.open(
+    //     `https://${_orderData.packageAttachment.packages.trackingUrl}`
+    //   )
+    // }
+
     setIsLoading(true)
     try {
       const data = await axios
@@ -319,14 +243,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     }
   }
 
-  const getOrderDetails = async () => {
-    const rawData = await getOrderDataById(neededOrderId)
-    const normalizedData = normalizeOrderData(rawData)
-
-    setOrderData(normalizedData)
-    setIsLoading(false)
-  }
-
   useEffect(() => {
     getOrderDetails()
   }, [newAwbGenerated, neededOrderId])
@@ -340,7 +256,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           <Button
             block
             variation="secondary"
-            disabled={isLoading || orderData?.status === 'canceled'}
+            disabled={
+              isLoading ||
+              orderData?.status === 'canceled' ||
+              disabledCouriers.includes(
+                orderData?.packageAttachment.packages.courier
+              )
+            }
             isLoading={isLoading}
             onClick={() => {
               printAwb(orderData)
@@ -473,9 +395,21 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   ) => setCourierManually(v)}
                 />
                 <p>AWB :</p>
-                <Input placeholder="AWB" />
+                <Input
+                  required
+                  placeholder="AWB"
+                  onChange={(e: { target: { value: string } }) => {
+                    setManualAwb(e.target.value)
+                  }}
+                />
                 <p>Track URL :</p>
-                <Input placeholder="Track URL" />
+
+                <Input
+                  placeholder="Track URL"
+                  onChange={(e: { target: { value: string } }) => {
+                    setManualUrl(e.target.value)
+                  }}
+                />
               </>
             )}
 
@@ -494,7 +428,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                         <img
                           alt="logo"
                           style={{ width: '20px', paddingRight: '6px' }}
-                          src={facturis}
+                          src={courierIcons.facturis}
                         />{' '}
                         Facturis
                       </>
@@ -509,7 +443,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                         <img
                           alt="logo"
                           style={{ width: '20px', paddingRight: '6px' }}
-                          src={smartbill}
+                          src={courierIcons.smartbill}
                         />{' '}
                         Smartbill
                       </>
@@ -525,7 +459,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                         <img
                           alt="logo"
                           style={{ width: '20px', paddingRight: '6px' }}
-                          src={download}
+                          src={courierIcons.download}
                         />
                         Incarca Factura Manual
                       </>

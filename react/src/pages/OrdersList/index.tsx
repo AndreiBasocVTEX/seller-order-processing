@@ -29,6 +29,7 @@ import type {
 import AwbStatus from '../../components/AwbStatus'
 import { getOrderStatus } from '../../utils/normalizeData/orderDetails'
 import InvoiceButton from '../../components/InvoiceButton'
+import { disabledCouriers } from '../../utils/constants'
 
 const OrdersList: FC = () => {
   const [awbUpdate, setAwbUpdate] = useState(false)
@@ -443,8 +444,15 @@ const OrdersList: FC = () => {
               (order) => order?.orderId === rowData.orderId
             )
 
-            if (rowAwbInfo?.courier || (rowAwbInfo?.courier && awbUpdate)) {
-              return <AwbStatus orderId={rowAwbInfo.orderId} size="small" />
+            const courierInfo = rowAwbInfo?.courier
+
+            if (
+              (courierInfo && rowAwbInfo?.orderId) ||
+              (rowAwbInfo?.courier && awbUpdate)
+            ) {
+              if (courierInfo && !disabledCouriers.includes(courierInfo)) {
+                return <AwbStatus orderId={rowAwbInfo.orderId} size="small" />
+              }
             }
 
             return null
