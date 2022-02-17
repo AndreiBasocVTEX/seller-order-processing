@@ -229,7 +229,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
     orderData?.shippingData?.logisticsInfo[0]?.shippingEstimateDate,
     {
       year: 'numeric',
-      month: 'numeric',
+      month: 'short',
       day: 'numeric',
       timeZone: 'Europe/Bucharest',
     }

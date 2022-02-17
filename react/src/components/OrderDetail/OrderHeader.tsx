@@ -18,12 +18,15 @@ const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
           title={`Order #${orderId}`}
         >
           <span className="flex items-center h-100 ml6">
-            <h5 className="t-heading-5 mv0 mr2">Statut comanda:</h5>
+            <span className="mv0 mr2 f5">Statut comanda:</span>
             <Tag
               bgColor={orderStatus?.bgColor ?? '#979899'}
               color={orderStatus?.color ?? '#FFF'}
             >
-              {orderStatus?.longText ?? 'Necunoscut'}
+              <span className="f7">
+                {' '}
+                {orderStatus?.longText ?? 'Necunoscut'}
+              </span>
             </Tag>
             <span className="ml5 underline">
               <Link
