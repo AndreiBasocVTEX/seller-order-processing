@@ -2,6 +2,7 @@ import type { OrderDetailsData } from '../typings/normalizedOrder'
 
 export interface IOrderDetailProps {
   orderData: OrderDetailsData
+  refreshOrderData?: () => void
 }
 
 export interface ITrackingObj {

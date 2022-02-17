@@ -87,6 +87,28 @@ const OrdersList: FC = () => {
     })
   }, [])
 
+  const resetOrdersData = (
+    orderId: string,
+    invoiceKey: string | null,
+    invoiceNumber: string,
+    invoiceUrl: string | null
+  ) => {
+    let updatedOrderAwb = orderAwb.find((order) => order.orderId === orderId)
+    const filteredListOrderAwb = orderAwb.filter(
+      (order) => order.orderId !== orderId
+    )
+
+    if (updatedOrderAwb) {
+      updatedOrderAwb = {
+        ...updatedOrderAwb,
+        invoiceKey,
+        invoiceNumber,
+        invoiceUrl,
+      }
+      setOrderAwb([...filteredListOrderAwb, updatedOrderAwb])
+    }
+  }
+
   const getItems = useCallback(
     async (newParams) => {
       let url = `/api/oms/pvt/orders?_stats=1&page=${newParams.paging.currentPage}&per_page=${newParams.paging.perPage}`
@@ -431,6 +453,7 @@ const OrdersList: FC = () => {
                   setOrderAwb={setOrderAwb}
                   neededOrderId={rowData.orderId}
                   onAwbUpdate={setAwbUpdate}
+                  resetOrdersData={resetOrdersData}
                 />
               </>
             )
@@ -482,6 +505,7 @@ const OrdersList: FC = () => {
       },
     }),
     [
+      awbUpdate,
       getPayMethod,
       displayAwbInfoButton,
       trackingNum,

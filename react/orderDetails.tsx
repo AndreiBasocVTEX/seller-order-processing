@@ -47,7 +47,9 @@ const OrderDetails: FC = () => {
           />
         }
       >
-        {order && <OrderDetail orderData={order} />}
+        {order && (
+          <OrderDetail orderData={order} refreshOrderData={getOrderData} />
+        )}
       </Layout>
     </>
   )

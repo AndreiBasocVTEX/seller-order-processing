@@ -12,4 +12,11 @@ export type IOrderAwbProps = {
   }) => void
   neededOrderId: string
   onAwbUpdate: (v: boolean) => void
+  refreshOrderDetails?: () => void
+  resetOrdersData?: (
+    orderId: string,
+    invoiceKey: string | null,
+    invoiceNumber: string,
+    invoiceUrl: string | null
+  ) => void
 }
