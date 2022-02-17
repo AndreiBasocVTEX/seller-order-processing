@@ -337,8 +337,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
               </div>
             </div>
 
-            {!service && <div className="dib c-muted-1 pa1 tc vh-25" />}
-
             {service && service !== 'manual' && (
               <>
                 <p>Tip pachet:</p>
@@ -473,9 +471,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
               />
             </div>
 
-            {(!courier || courier === 'smartbill') && (
-              <div className="dib c-muted-1 pa1 tc vh-25" />
-            )}
             {courier === 'manual' && (
               <>
                 <span>
