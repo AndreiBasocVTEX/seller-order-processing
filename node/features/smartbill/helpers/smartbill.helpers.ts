@@ -1,4 +1,4 @@
-import type { Item } from '../../vtex/dto/order.dto'
+import type { Item, VtexOrderTotals } from '../../vtex/dto/order.dto'
 import type { CreateInvoicePayload, TaxName } from '../dto/smartbill.dto'
 
 type SmartBillTagType = { [key: string]: string | boolean | number }
@@ -47,11 +47,11 @@ export default function getProducts({
     }
   })
 
-  if (
-    settings.smartbill__invoiceShippingCost &&
-    Object.prototype.hasOwnProperty.call(order, 'shippingTotal') &&
-    order.shippingTotal > 0
-  ) {
+  const shippingTotal = order?.totals.find(
+    (el: VtexOrderTotals) => el.id === 'Shipping'
+  )
+
+  if (settings.smartbill__invoiceShippingCost && shippingTotal.value > 0) {
     const taxName = generateTaxName(
       productTaxNames.taxes,
       settings.smartbill__defaultVATPercentage
@@ -63,7 +63,7 @@ export default function getProducts({
       isTaxIncluded: true,
       measuringUnitName: 'buc',
       name: settings.smartbill__invoiceShippingProductName,
-      price: order.shippingTotal / 100,
+      price: shippingTotal.value / 100,
       quantity: 1,
       taxName,
       taxPercentage: settings.smartbill__defaultVATPercentage,
