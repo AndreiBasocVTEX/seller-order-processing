@@ -165,7 +165,8 @@
       "smartbill__invoiceShippingCost": {
         "title": "Invoice shipping cost",
         "description": "Do you want to invoice the shipping cost?",
-        "type": "boolean"
+        "type": "boolean",
+        "default": true
       },
       "smartbill__invoiceShippingProductName": {
         "title": "Shipping cost product name",
@@ -184,11 +185,11 @@
         "description": "Use VTEX priceTags VAT percentage if available",
         "type": "boolean"
       },
-      "smartbill__smartbillDefaultVATPercentage": {
+      "smartbill__defaultVATPercentage": {
         "title": "Smartbill default VAT percentage",
         "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
         "type": "string",
-        "default": "0"
+        "default": "19"
       }
     }
   },
