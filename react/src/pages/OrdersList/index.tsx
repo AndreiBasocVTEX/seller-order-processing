@@ -15,7 +15,6 @@ import {
   Tooltip,
   Totalizer,
 } from 'vtex.styleguide'
-import { FormattedCurrency } from 'vtex.format-currency'
 
 import RequestAwbModal from '../../components/AwbModal'
 import '../../public/style.css'
@@ -409,8 +408,8 @@ const OrdersList: FC = () => {
         totalValue: {
           title: 'Total Value',
           width: 100,
-          cellRenderer: ({ cellData }: SchemeDataType) => {
-            return <FormattedCurrency key={cellData} value={+cellData / 100} />
+          cellRenderer: ({ cellData }: { cellData: number }) => {
+            return <span>{cellData / 100} Lei</span>
           },
         },
         paymentNames: {
