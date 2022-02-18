@@ -45,6 +45,7 @@ export interface InvoiceData {
 export interface Item {
   freightCommission: number
   name: string
+  id: string
   priceDefinition: {
     calculatedSellingPrice: number
     total: number

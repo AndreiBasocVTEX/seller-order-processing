@@ -7,7 +7,10 @@ export interface IOrderHeaderProps {
 
 export interface IOrderTableItem {
   productSku: string
-  productName: string
+  productName: {
+    name: string
+    id?: string
+  }
   productQuantity: number | null
   productPriceTva: string
 }
