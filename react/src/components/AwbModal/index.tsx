@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Modal,
-  Button,
-  Input,
-  IconDownload,
-  Dropdown,
-  NumericStepper,
-  DatePicker,
   ActionMenu,
+  Button,
+  DatePicker,
+  Dropdown,
+  IconDownload,
+  Input,
+  Modal,
+  NumericStepper,
   Tooltip,
 } from 'vtex.styleguide'
 import type { AxiosError } from 'axios'
@@ -106,13 +106,14 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     const normalizedData = normalizeOrderData(rawData)
 
     if (reset) {
-      refreshOrderDetails && refreshOrderDetails()
+      refreshOrderDetails?.()
 
       if (normalizedData.packageAttachment?.packages && resetOrdersData) {
         const {
           invoiceKey,
           invoiceNumber,
           invoiceUrl: invUrl,
+          courier: _courier,
         } = normalizedData?.packageAttachment?.packages
 
         if (invoiceKey && invoiceNumber) {
@@ -123,6 +124,18 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             invUrl
           )
         }
+
+        setOrderAwb?.((prevState) =>
+          prevState.map((el) => {
+            if (el.orderId === normalizedData.orderId) {
+              el.orderValue = String(invUrl)
+              el.courier = _courier
+              el.invoiceNumber = invoiceNumber
+            }
+
+            return el
+          })
+        )
 
         onAwbUpdate(true)
       }
@@ -148,28 +161,16 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
       invoiceUrl
     )
       .then((data) => {
-        if (data) {
-          setTrackingNum({
-            [orderId]: data.trackingNumber,
-          })
-
-          updateAwbData && updateAwbData(data)
-          setNewAwbGenerated(true)
-          // changing specific order to an updated one onClick generate in modal.
-          setOrderAwb &&
-            setOrderAwb((prevState) =>
-              prevState.map((el) => {
-                if (el.orderId === orderId) {
-                  el.orderValue = String(data.invoiceValue)
-                  el.courier = data.courier
-                  el.invoiceNumber = data.invoiceNumber
-                }
-
-                return el
-              })
-            )
-          getOrderDetails(true)
+        if (!data) {
+          return
         }
+
+        setTrackingNum({
+          [orderId]: data.trackingNumber,
+        })
+        updateAwbData?.(data)
+        setNewAwbGenerated(true)
+        getOrderDetails(true)
       })
       .catch((error) => {
         if (error.status === 504) {
@@ -194,15 +195,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     orderData?.orderId && getOrderData(orderData?.orderId)
   }
 
-  const printAwb = async (_orderData: OrderDetailsData): Promise<any> => {
-    // TODO <we are waiting for an answer from Laurentiu about this case>
-
-    // if (_orderData?.packageAttachment?.packages?.trackingUrl) {
-    //   return window.open(
-    //     `https://${_orderData.packageAttachment.packages.trackingUrl}`
-    //   )
-    // }
-
+  const printAwb = async (_orderData: OrderDetailsData) => {
     setIsLoading(true)
     try {
       const data = await axios
@@ -217,7 +210,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           return res.data
         })
         .catch(async (error: AxiosError<Blob>) => {
-          if (!error.response) {
+          if (!error.response || error.response.status === 504) {
             return
           }
 
@@ -272,53 +265,63 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     getOrderDetails()
   }, [newAwbGenerated, neededOrderId])
 
+  const awbButton = () =>
+    orderData?.packageAttachment.packages && (
+      <Button
+        block
+        variation="secondary"
+        disabled={
+          isLoading ||
+          orderData?.status === 'canceled' ||
+          disabledCouriers.includes(
+            orderData?.packageAttachment.packages.courier
+          )
+        }
+        isLoading={isLoading}
+        onClick={() => {
+          printAwb(orderData)
+        }}
+      >
+        <div className="flex w-100">
+          <span>
+            <IconDownload />
+          </span>
+          <div className="w-100 truncate">
+            <span className="mh3">
+              {orderData?.packageAttachment.packages.courier && (
+                <img
+                  width="20px"
+                  src={
+                    courierIcons[
+                      orderData?.packageAttachment.packages.courier.toLowerCase()
+                    ]
+                  }
+                  alt=""
+                />
+              )}
+            </span>
+            <span className="f6">
+              {orderData?.packageAttachment.packages.trackingNumber}
+            </span>
+          </div>
+        </div>
+      </Button>
+    )
+
   return (
     <>
-      {orderData?.packageAttachment.packages && (
-        <Tooltip
-          label={`${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`}
-        >
-          <Button
-            block
-            variation="secondary"
-            disabled={
-              isLoading ||
-              orderData?.status === 'canceled' ||
-              disabledCouriers.includes(
-                orderData?.packageAttachment.packages.courier
-              )
-            }
-            isLoading={isLoading}
-            onClick={() => {
-              printAwb(orderData)
-            }}
+      {orderData?.packageAttachment.packages &&
+        (!disabledCouriers.includes(
+          orderData?.packageAttachment.packages.courier
+        ) ? (
+          <Tooltip
+            label={`${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`}
           >
-            <div className="flex w-100">
-              <span>
-                <IconDownload />
-              </span>
-              <div className="w-100 truncate">
-                <span className="mh3">
-                  {orderData?.packageAttachment.packages.courier && (
-                    <img
-                      width="20px"
-                      src={
-                        courierIcons[
-                          orderData?.packageAttachment.packages.courier.toLowerCase()
-                        ]
-                      }
-                      alt=""
-                    />
-                  )}
-                </span>
-                <span className="f6">
-                  {orderData?.packageAttachment.packages.trackingNumber}
-                </span>
-              </div>
-            </div>
-          </Button>
-        </Tooltip>
-      )}
+            {awbButton()}
+          </Tooltip>
+        ) : (
+          awbButton()
+        ))}
       {!orderData?.packageAttachment.packages && (
         <Button
           block
@@ -378,7 +381,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   minValue={1}
                   maxValue={5}
                   value={packageAmount}
-                  onChange={(event: React.SetStateAction<any>) =>
+                  onChange={(event: { value: number }) =>
                     setPackageAmount(event.value)
                   }
                 />
@@ -503,7 +506,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   <p>Issuance Date</p>{' '}
                   <DatePicker
                     value={new Date()}
-                    onChange={(e: any) => {
+                    onChange={(e: Date) => {
                       return setInvoiceDate(e.toISOString().split('T')[0])
                     }}
                     locale="en-GB"
@@ -513,7 +516,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <p>Invoice Number</p>
                 <Input
                   placeholder="any value"
-                  onChange={(e: React.SetStateAction<any>) =>
+                  onChange={(e: { target: { value: string } }) =>
                     setInvoiceNum(e.target.value)
                   }
                   maxLength={20}
@@ -524,7 +527,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <p>Invoice URL (Optional) </p>
                 <Input
                   placeholder="any value"
-                  onChange={(e: React.SetStateAction<any>) =>
+                  onChange={(e: { target: { value: string } }) =>
                     setInvoiceUrl(e.target.value)
                   }
                   value={invoiceUrl}

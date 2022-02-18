@@ -42,4 +42,5 @@ export interface InvoiceButtonProps {
   invoiceNumber?: string
   invoiceUrl?: string | null
   orderStatus: string
+  service?: string
 }

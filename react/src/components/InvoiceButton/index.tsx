@@ -14,6 +14,7 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
   invoiceNumber,
   invoiceUrl,
   orderStatus,
+  service,
 }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [invoiceAvailable, setInvoiceAvailable] = useState<string | null>(null)
@@ -141,7 +142,9 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     <>
       {invoiceAvailable ? (
         invoiceAvailable !== 'noUrl' ? (
-          <Tooltip label={invoiceNumber}>{invoiceButton()}</Tooltip>
+          <Tooltip label={`${service}-${invoiceNumber}`}>
+            {invoiceButton()}
+          </Tooltip>
         ) : (
           invoiceButton()
         )
