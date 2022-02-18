@@ -21,14 +21,6 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
       productQuantity: {
         title: 'Cantitate',
       },
-      productPriceNoTva: {
-        title: 'Pret fara TVA',
-        width: 100,
-      },
-      tvaProcent: {
-        title: 'TVA',
-        width: 50,
-      },
       productPriceTva: {
         title: 'Pret cu TVA',
         width: 100,
@@ -46,8 +38,6 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
         productSku: element.sellerSku,
         productName: element.name,
         productQuantity: element.quantity,
-        productPriceNoTva: `${element.priceDefinition.total / 100} Lei`,
-        tvaProcent: `${element.tax}%`,
         productPriceTva: `${
           (element.priceDefinition.total + element.tax) / 100
         } Lei`,
@@ -63,20 +53,12 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
         productSku: '',
         productName: 'Taxa de livrare',
         productQuantity: null,
-        productPriceNoTva: `${
-          (orderData?.orderTotals.shipping ?? 0) / 100
-        } Lei`,
-        tvaProcent: '0%',
         productPriceTva: `${(orderData?.orderTotals.shipping ?? 0) / 100} Lei`,
       },
       {
         productSku: '',
         productName: 'Total',
         productQuantity: null,
-        productPriceNoTva: `${
-          (orderTotals.items + orderTotals.shipping) / 100
-        } Lei`,
-        tvaProcent: '',
         productPriceTva: `${
           (orderTotals.items + orderTotals.shipping + orderTotals.tax) / 100
         } Lei`,

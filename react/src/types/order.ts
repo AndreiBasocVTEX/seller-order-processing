@@ -9,7 +9,5 @@ export interface IOrderTableItem {
   productSku: string
   productName: string
   productQuantity: number | null
-  productPriceNoTva: string
-  tvaProcent: string
   productPriceTva: string
 }
