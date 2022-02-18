@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
-import { Table } from 'vtex.styleguide'
+import { Table, Link } from 'vtex.styleguide'
 
 import type { IOrderTableItem } from '../../types/order'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
@@ -17,6 +17,21 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
       productName: {
         title: 'Numele Produslui',
         width: 600,
+        cellRenderer: ({
+          cellData,
+        }: {
+          cellData: IOrderTableItem['productName']
+        }) => {
+          if (cellData?.id) {
+            return (
+              <Link href={`/admin/products/${cellData.id}`} target="_blank">
+                {cellData.name}
+              </Link>
+            )
+          }
+
+          return cellData.name
+        },
       },
       productQuantity: {
         title: 'Cantitate',
@@ -36,7 +51,7 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
     items.forEach((element) => {
       result.push({
         productSku: element.sellerSku,
-        productName: element.name,
+        productName: { name: element.name, id: element.id },
         productQuantity: element.quantity,
         productPriceTva: `${
           (element.priceDefinition.total + element.tax) / 100
@@ -51,13 +66,13 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
     result.push(
       {
         productSku: '',
-        productName: 'Taxa de livrare',
+        productName: { name: 'Taxa de livrare' },
         productQuantity: null,
         productPriceTva: `${(orderData?.orderTotals.shipping ?? 0) / 100} Lei`,
       },
       {
         productSku: '',
-        productName: 'Total',
+        productName: { name: 'Total' },
         productQuantity: null,
         productPriceTva: `${
           (orderTotals.items + orderTotals.shipping + orderTotals.tax) / 100
