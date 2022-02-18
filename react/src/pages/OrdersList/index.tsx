@@ -468,10 +468,7 @@ const OrdersList: FC = () => {
 
             const courierInfo = rowAwbInfo?.courier
 
-            if (
-              (courierInfo && rowAwbInfo?.orderId) ||
-              (rowAwbInfo?.courier && awbUpdate)
-            ) {
+            if (rowAwbInfo?.courier || (rowAwbInfo?.courier && awbUpdate)) {
               if (courierInfo && !disabledCouriers.includes(courierInfo)) {
                 return <AwbStatus orderId={rowAwbInfo.orderId} size="small" />
               }
@@ -504,7 +501,6 @@ const OrdersList: FC = () => {
       },
     }),
     [
-      awbUpdate,
       getPayMethod,
       displayAwbInfoButton,
       trackingNum,

@@ -115,8 +115,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           invoiceUrl: invUrl,
         } = normalizedData?.packageAttachment?.packages
 
-        onAwbUpdate(true)
-
         if (invoiceKey && invoiceNumber) {
           resetOrdersData(
             normalizedData.orderId,
@@ -125,6 +123,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             invUrl
           )
         }
+
+        onAwbUpdate(true)
       }
     }
 
@@ -155,7 +155,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
           updateAwbData && updateAwbData(data)
           setNewAwbGenerated(true)
-          onAwbUpdate(true)
           // changing specific order to an updated one onClick generate in modal.
           setOrderAwb &&
             setOrderAwb((prevState) =>
