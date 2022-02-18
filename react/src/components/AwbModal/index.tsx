@@ -31,6 +31,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   updateAwbData,
   neededOrderId,
   onAwbUpdate,
+  resetOrdersData,
+  refreshOrderDetails,
 }) => {
   const [service, setService] = useState('')
   const [courier, setCourier] = useState('')
@@ -99,9 +101,32 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     setModalOpen(!modalOpen)
   }
 
-  const getOrderDetails = async () => {
+  const getOrderDetails = async (reset?: boolean) => {
     const rawData = await getOrderDataById(neededOrderId)
     const normalizedData = normalizeOrderData(rawData)
+
+    if (reset) {
+      refreshOrderDetails && refreshOrderDetails()
+
+      if (normalizedData.packageAttachment?.packages && resetOrdersData) {
+        const {
+          invoiceKey,
+          invoiceNumber,
+          invoiceUrl: invUrl,
+        } = normalizedData?.packageAttachment?.packages
+
+        onAwbUpdate(true)
+
+        if (invoiceKey && invoiceNumber) {
+          resetOrdersData(
+            normalizedData.orderId,
+            invoiceKey,
+            invoiceNumber,
+            invUrl
+          )
+        }
+      }
+    }
 
     setOrderData(normalizedData)
     setIsLoading(false)
@@ -144,11 +169,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 return el
               })
             )
+          getOrderDetails(true)
         }
       })
       .catch((error) => {
         if (error.status === 504) {
-          getOrderDetails()
+          getOrderDetails(true)
 
           return
         }

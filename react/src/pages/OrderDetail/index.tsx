@@ -9,7 +9,10 @@ import type { IOrderDetailProps, ITrackingObj } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import InvoiceButton from '../../components/InvoiceButton'
 
-const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
+const OrderDetail: FC<IOrderDetailProps> = ({
+  orderData,
+  refreshOrderData,
+}) => {
   const [trackingNum, setTrackingNum] = useState<ITrackingObj>({})
   const [awbUpdated, setAwbUpdated] = useState(false)
   const [awbData, updateAwbData] = useState<{
@@ -147,6 +150,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({ orderData }) => {
                     setTrackingNum={setTrackingNum}
                     neededOrderId={orderData.orderId}
                     onAwbUpdate={setAwbUpdated}
+                    refreshOrderDetails={refreshOrderData}
                   />
                 )}
               </div>
