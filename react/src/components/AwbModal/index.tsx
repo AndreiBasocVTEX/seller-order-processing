@@ -395,6 +395,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <p>AWB :</p>
                 <Input
                   required
+                  maxLength={30}
                   placeholder="AWB"
                   onChange={(e: { target: { value: string } }) => {
                     setManualAwb(e.target.value)
