@@ -3,6 +3,7 @@ import {
   ActionMenu,
   Button,
   DatePicker,
+  Divider,
   Dropdown,
   IconDownload,
   Input,
@@ -349,198 +350,197 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         centered
         zIndex={9}
       >
-        <div className="mb4">
-          <h2>AWB Generation</h2>
-
-          <form onSubmit={formHandler}>
-            <div className="flex">
-              <div className="flex flex-column">
-                <div className="mt2">
-                  <ActionMenu
-                    label={service || 'Alege Modalitatea'}
-                    zIndex={9999999}
-                    options={dropDownOptions}
-                  />
-                </div>
+        <form onSubmit={formHandler}>
+          <div className="flex flex-row">
+            <div className="flex flex-column w-100 mr5 pb5">
+              <h2>AWB Generation</h2>
+              <div className="flex">
+                <ActionMenu
+                  label={service || 'Alege Modalitatea'}
+                  zIndex={9999999}
+                  options={dropDownOptions}
+                />
               </div>
-            </div>
 
-            {service && service !== 'manual' && (
-              <>
-                <p>Tip pachet:</p>
-                <Dropdown
-                  options={packageTypeOptions}
-                  value={packageType || 'Colet'}
-                  onChange={(_: any, v: React.SetStateAction<string>) =>
-                    setPackageType(v)
-                  }
-                />
-                <p>Numar colete :</p>
-                <NumericStepper
-                  label="Minimum 1, maximum 5"
-                  minValue={1}
-                  maxValue={5}
-                  value={packageAmount}
-                  onChange={(event: { value: number }) =>
-                    setPackageAmount(event.value)
-                  }
-                />
-                <p>Greutate :</p>
-                <NumericStepper
-                  label="Maximum 30 kg"
-                  unitMultiplier={1}
-                  suffix="kg"
-                  minValue={0}
-                  maxValue={30}
-                  value={weight}
-                  defaultValue={1}
-                  onChange={(event: React.SetStateAction<any>) =>
-                    setWeight(event.value)
-                  }
-                />
-              </>
-            )}
+              {service && service !== 'manual' && (
+                <>
+                  <p>Tip pachet:</p>
+                  <Dropdown
+                    options={packageTypeOptions}
+                    value={packageType || 'Colet'}
+                    onChange={(_: any, v: React.SetStateAction<string>) =>
+                      setPackageType(v)
+                    }
+                  />
+                  <p>Numar colete :</p>
+                  <NumericStepper
+                    label="Minimum 1, maximum 5"
+                    minValue={1}
+                    maxValue={5}
+                    value={packageAmount}
+                    onChange={(event: { value: number }) =>
+                      setPackageAmount(event.value)
+                    }
+                  />
+                  <p>Greutate :</p>
+                  <NumericStepper
+                    label="Maximum 30 kg"
+                    unitMultiplier={1}
+                    suffix="kg"
+                    minValue={0}
+                    maxValue={30}
+                    value={weight}
+                    defaultValue={1}
+                    onChange={(event: React.SetStateAction<any>) =>
+                      setWeight(event.value)
+                    }
+                  />
+                </>
+              )}
 
-            {service === 'manual' && (
-              <>
-                <p>Curier:</p>
-                <Dropdown
-                  options={[
-                    { value: 'fancourier', label: 'FanCourier' },
-                    { value: 'cargus', label: 'Cargus' },
-                    { value: 'sameDay', label: 'SameDay' },
-                    { value: 'TNT', label: 'TNT' },
-                    { value: 'DHL', label: 'DHL' },
-                    { value: 'GLS', label: 'GLS' },
-                    { value: 'DPD', label: 'DPD' },
-                  ]}
-                  value={courierSetManually}
-                  onChange={(
-                    _: unknown,
-                    v: SetStateAction<Array<{ value: string; label: string }>>
-                  ) => setCourierManually(v)}
-                />
-                <p>AWB :</p>
-                <Input
-                  required
-                  maxLength={30}
-                  placeholder="AWB"
-                  onChange={(e: { target: { value: string } }) => {
-                    setManualAwb(e.target.value)
-                  }}
-                />
-                <p>Track URL :</p>
-
-                <Input
-                  placeholder="Track URL"
-                  onChange={(e: { target: { value: string } }) => {
-                    setManualUrl(e.target.value)
-                  }}
-                />
-              </>
-            )}
-
-            <br />
-            <hr />
-            <h2>Factura</h2>
-            <div className="flex items-center">
-              <ActionMenu
-                label={courier || 'Alege Modalitatea'}
-                zIndex={999999}
-                options={[
-                  {
-                    disabled: true,
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={courierIcons.facturis}
-                        />{' '}
-                        Facturis
-                      </>
-                    ),
-                    onClick: () => {
-                      setCourier('facturis')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={courierIcons.smartbill}
-                        />{' '}
-                        Smartbill
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setCourier('smartbill')
-                    },
-                  },
-                  {
-                    label: (
-                      <>
-                        <img
-                          alt="logo"
-                          style={{ width: '20px', paddingRight: '6px' }}
-                          src={courierIcons.download}
-                        />
-                        Incarca Factura Manual
-                      </>
-                    ),
-                    disabled: false,
-                    onClick: () => {
-                      setCourier('manual')
-                    },
-                  },
-                ]}
-              />
-            </div>
-
-            {courier === 'manual' && (
-              <>
-                <span>
-                  <p>Issuance Date</p>{' '}
-                  <DatePicker
-                    value={new Date()}
-                    onChange={(e: Date) => {
-                      return setInvoiceDate(e.toISOString().split('T')[0])
+              {service === 'manual' && (
+                <>
+                  <p>Curier:</p>
+                  <Dropdown
+                    options={[
+                      { value: 'fancourier', label: 'FanCourier' },
+                      { value: 'cargus', label: 'Cargus' },
+                      { value: 'sameDay', label: 'SameDay' },
+                      { value: 'TNT', label: 'TNT' },
+                      { value: 'DHL', label: 'DHL' },
+                      { value: 'GLS', label: 'GLS' },
+                      { value: 'DPD', label: 'DPD' },
+                    ]}
+                    value={courierSetManually}
+                    onChange={(
+                      _: unknown,
+                      v: SetStateAction<Array<{ value: string; label: string }>>
+                    ) => setCourierManually(v)}
+                  />
+                  <p>AWB :</p>
+                  <Input
+                    required
+                    maxLength={30}
+                    placeholder="AWB"
+                    onChange={(e: { target: { value: string } }) => {
+                      setManualAwb(e.target.value)
                     }}
-                    locale="en-GB"
+                  />
+                  <p>Track URL :</p>
+
+                  <Input
+                    placeholder="Track URL"
+                    onChange={(e: { target: { value: string } }) => {
+                      setManualUrl(e.target.value)
+                    }}
+                  />
+                </>
+              )}
+            </div>
+
+            <Divider orientation="vertical" />
+            <div className="flex flex-column w-100 ml5">
+              <h2>Factura</h2>
+              <div className="flex items-center">
+                <ActionMenu
+                  label={courier || 'Alege Modalitatea'}
+                  zIndex={999999}
+                  options={[
+                    {
+                      disabled: true,
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={courierIcons.facturis}
+                          />{' '}
+                          Facturis
+                        </>
+                      ),
+                      onClick: () => {
+                        setCourier('facturis')
+                      },
+                    },
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={courierIcons.smartbill}
+                          />{' '}
+                          Smartbill
+                        </>
+                      ),
+                      disabled: false,
+                      onClick: () => {
+                        setCourier('smartbill')
+                      },
+                    },
+                    {
+                      label: (
+                        <>
+                          <img
+                            alt="logo"
+                            style={{ width: '20px', paddingRight: '6px' }}
+                            src={courierIcons.download}
+                          />
+                          Incarca Factura Manual
+                        </>
+                      ),
+                      disabled: false,
+                      onClick: () => {
+                        setCourier('manual')
+                      },
+                    },
+                  ]}
+                />
+              </div>
+
+              {courier === 'manual' && (
+                <>
+                  <span>
+                    <p>Issuance Date</p>{' '}
+                    <DatePicker
+                      value={new Date()}
+                      onChange={(e: Date) => {
+                        return setInvoiceDate(e.toISOString().split('T')[0])
+                      }}
+                      locale="en-GB"
+                      required
+                    />
+                  </span>
+                  <p>Invoice Number</p>
+                  <Input
+                    placeholder="any value"
+                    onChange={(e: { target: { value: string } }) =>
+                      setInvoiceNum(e.target.value)
+                    }
+                    maxLength={20}
+                    value={invoiceNum}
                     required
                   />
-                </span>
-                <p>Invoice Number</p>
-                <Input
-                  placeholder="any value"
-                  onChange={(e: { target: { value: string } }) =>
-                    setInvoiceNum(e.target.value)
-                  }
-                  maxLength={20}
-                  value={invoiceNum}
-                  required
-                />
 
-                <p>Invoice URL (Optional) </p>
-                <Input
-                  placeholder="any value"
-                  onChange={(e: { target: { value: string } }) =>
-                    setInvoiceUrl(e.target.value)
-                  }
-                  value={invoiceUrl}
-                  required={false}
-                />
-              </>
-            )}
-
-            <br />
-            <br />
-            <Button type="submit">Generate AWB</Button>
-          </form>
-        </div>
+                  <p>Invoice URL (Optional) </p>
+                  <Input
+                    placeholder="any value"
+                    onChange={(e: { target: { value: string } }) =>
+                      setInvoiceUrl(e.target.value)
+                    }
+                    value={invoiceUrl}
+                    required={false}
+                  />
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex justify-center w-100 mt7">
+            <Button disabled={!service || !courier} type="submit">
+              Generate
+            </Button>
+          </div>
+        </form>
       </Modal>
       {axiosError.isError && (
         <ErrorPopUpMessage
