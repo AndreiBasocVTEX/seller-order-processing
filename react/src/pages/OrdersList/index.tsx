@@ -493,6 +493,7 @@ const OrdersList: FC = () => {
                   invoiceNumber={orderAwbById?.invoiceNumber}
                   invoiceUrl={orderAwbById?.invoiceUrl}
                   orderStatus={rowData.status}
+                  service={orderAwbById.courier}
                 />
               )
             )
