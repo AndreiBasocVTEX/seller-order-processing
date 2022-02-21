@@ -138,7 +138,7 @@
         "type": "string"
       },
       "sameday__sandbox": {
-        "title": "Sandbox mode",
+        "title": "Sandbox Mode",
         "description": "",
         "type": "boolean"
       },
@@ -163,19 +163,19 @@
         "type": "string"
       },
       "smartbill__invoiceShippingCost": {
-        "title": "Invoice shipping cost",
+        "title": "Invoice Shipping Cost",
         "description": "Do you want to invoice the shipping cost?",
         "type": "boolean",
         "default": true
       },
       "smartbill__invoiceShippingProductName": {
-        "title": "Shipping cost product name",
+        "title": "Shipping Cost Product Name",
         "description": "Name of the shipping cost product that will appear on the invoice",
         "type": "string",
         "default": "Shipping TAX"
       },
       "smartbill__invoiceShippingProductCode": {
-        "title": "Shipping cost product code",
+        "title": "Shipping Cost Product Code",
         "description": "Code of the shipping cost product that will appear on the invoice",
         "type": "string",
         "default": "shipping-tax"
@@ -186,10 +186,15 @@
         "type": "boolean"
       },
       "smartbill__defaultVATPercentage": {
-        "title": "Smartbill default VAT percentage",
+        "title": "Smartbill Default VAT Percentage",
         "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
-        "type": "string",
-        "default": "19"
+        "type": "number",
+        "default": 19
+      },
+      "smartbill_shippingVAT": {
+        "title": "Smartbill Shipping VAT Percentage",
+        "type": "number",
+        "default": 19
       }
     }
   },

@@ -66,10 +66,12 @@ export default function getProducts({
       price: shippingTotal.value / 100,
       quantity: 1,
       taxName,
-      taxPercentage: settings.smartbill__defaultVATPercentage,
+      taxPercentage: settings.smartbill_shippingVAT,
       isService: true,
     })
   }
+
+  console.log('ITEMS', items)
 
   return items
 }
