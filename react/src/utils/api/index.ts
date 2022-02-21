@@ -32,6 +32,7 @@ export const createAwbShipping = (
   manualAwb: string,
   manualUrl: string,
   courier: string,
+  packageType: string,
   invoiceValue: number | undefined,
   issuanceDate: string,
   invoiceNumber: string,
@@ -48,6 +49,7 @@ export const createAwbShipping = (
             service === 'manual' ? courierSetManually : service.toLowerCase(),
           params: {
             weight,
+            packageType,
             numberOfParcels: packageAmount,
             ...(service === 'manual' && {
               trackingNumber: manualAwb,

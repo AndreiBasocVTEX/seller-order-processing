@@ -4,4 +4,5 @@ export interface ICreateAwbResult {
   invoiceNumber: string
   invoiceValue: number
   issuanceDate: string
+  packageType: string
 }
