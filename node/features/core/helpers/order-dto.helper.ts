@@ -22,3 +22,9 @@ export function getTotalDiscount(order: IVtexOrder): number {
     0
   )
 }
+
+export const getPaymentMethod = (paymentData: string): string | null => {
+  if (!paymentData) return null
+
+  return paymentData.match(/\b(\w+)$/g)?.toString() ?? null
+}

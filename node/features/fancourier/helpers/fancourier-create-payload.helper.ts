@@ -1,9 +1,7 @@
 import {
   shipmentPaymentMethod,
   defaultEnvelopeCount,
-  promissory,
   pickup,
-  priceMultiplier,
   defaultCountryCode,
   awbContent,
   awbSourceChannel,
@@ -12,10 +10,13 @@ import {
 import {
   getTotalWeight,
   getTotalDiscount,
+  getPaymentMethod,
 } from '../../core/helpers/order-dto.helper'
 import type { IFancourierAwbPayload } from '../dto/fancourier-awb.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import { priceMultiplier } from '../../shared/enums/constants'
+import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
@@ -33,16 +34,17 @@ export function createFancourierOrderPayload(
   const { address } = order.shippingData
   const { courierId } = order?.shippingData?.logisticsInfo?.[0].deliveryIds?.[0]
 
-  const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const paymentPromissory =
-    order?.paymentData?.transactions?.[0]?.payments?.[0]?.group === promissory
-
   let value: number = order?.value
 
   // totalDiscount could be 0 or a negative number
   value += totalDiscount
 
-  const payment = firstDigits || paymentPromissory ? 0 : value / priceMultiplier
+  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+
+  const payment =
+    typeOfPayment?.toLowerCase() === TypeOfPayment.CARD
+      ? 0
+      : value / priceMultiplier
 
   const numberOfParcels = trackingParams.numberOfParcels
     ? trackingParams.numberOfParcels

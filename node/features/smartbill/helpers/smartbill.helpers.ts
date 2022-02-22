@@ -1,3 +1,4 @@
+import { priceMultiplier } from '../../shared/enums/constants'
 import type { Item, VtexOrderTotals } from '../../vtex/dto/order.dto'
 import type { CreateInvoicePayload, TaxName } from '../dto/smartbill.dto'
 
@@ -63,15 +64,13 @@ export default function getProducts({
       isTaxIncluded: true,
       measuringUnitName: 'buc',
       name: settings.smartbill__invoiceShippingProductName,
-      price: shippingTotal.value / 100,
+      price: shippingTotal.value / priceMultiplier,
       quantity: 1,
       taxName,
       taxPercentage: settings.smartbill_shippingVAT,
       isService: true,
     })
   }
-
-  console.log('ITEMS', items)
 
   return items
 }

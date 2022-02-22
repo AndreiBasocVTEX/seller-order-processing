@@ -1,13 +1,14 @@
 import {
   getTotalWeight,
   getTotalDiscount,
+  getPaymentMethod,
 } from '../../core/helpers/order-dto.helper'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import { priceMultiplier } from '../../shared/enums/constants'
+import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'
 import {
-  promissory,
-  priceMultiplier,
   selectedPickup,
   pickupServiceId,
   pickup,
@@ -66,11 +67,12 @@ export function createOrderPayload(
     .filter(Boolean)
     .join(', ')
 
-  const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const paymentPromissory =
-    order.paymentData.transactions[0].payments[0].group === promissory
+  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
 
-  const payment = firstDigits || paymentPromissory ? 0 : value / priceMultiplier
+  const payment =
+    typeOfPayment?.toLowerCase() === TypeOfPayment.CARD
+      ? 0
+      : value / priceMultiplier
 
   const samedayPayload = {
     awbPayment: 1,

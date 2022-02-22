@@ -1,22 +1,32 @@
-import { getTotalWeight } from '../../core/helpers/order-dto.helper'
+import {
+  getPaymentMethod,
+  getTotalWeight,
+} from '../../core/helpers/order-dto.helper'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import { priceMultiplier } from '../../shared/enums/constants'
+import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import type { InnoshipAwbPayload } from '../dto/innoship-awb.dto'
 import {
   defaultCountryCode,
   awbContent,
   awbSourceChannel,
-  priceMultiplier,
 } from './innoship-constants.helper'
 
 export function createOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
   trackingParams: CreateTrackingRequestParams
-) {
+): InnoshipAwbPayload {
   const totalWeight = trackingParams.weight ?? getTotalWeight(order)
 
-  const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const payment = firstDigits ? 0 : order.value / priceMultiplier
+  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+
+  const payment =
+    typeOfPayment?.toLowerCase() === TypeOfPayment.CARD
+      ? 0
+      : order.value / priceMultiplier
+
   const { address } = order.shippingData
 
   const numberOfParcels = trackingParams.numberOfParcels ?? 1
@@ -43,7 +53,6 @@ export function createOrderPayload(
     })
   }
 
-  // TODO interface for InnoshipPayload
   return {
     serviceId: 1,
     shipmentDate: new Date().toISOString(),
