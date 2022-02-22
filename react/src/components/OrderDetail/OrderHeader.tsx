@@ -7,7 +7,7 @@ import type { IOrderHeaderProps } from '../../types/order'
 
 const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
   const { navigate } = useRuntime()
-  const handleLinkClick = () => navigate({ to: '/admin/app/seller-dashboard' })
+  const handleLinkClick = () => navigate({ to: '/admin/app/order-processing' })
 
   return (
     <>

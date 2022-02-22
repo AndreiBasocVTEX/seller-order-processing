@@ -2,7 +2,7 @@
   "vendor": "vtex",
   "name": "admin-example",
   "version": "0.0.13",
-  "title": "Seller Dashboard",
+  "title": "Order Processing",
   "description": "",
   "builders": {
     "react": "3.x",
@@ -69,7 +69,7 @@
     }
   ],
   "settingsSchema": {
-    "title": "Elefant Sellers Dashboard POC",
+    "title": "Order Processing",
     "type": "object",
     "properties": {
       "vtex_appKey": {

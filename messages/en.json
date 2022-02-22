@@ -1,5 +1,5 @@
 {
-  "admin-example.navigation.sellerDashboard": "Seller Dashboard",
-  "admin-example.navigation.seller-dashboard": "Seller Dashboard",
-  "admin-example.navigation.search.kws": "order, invoice, AWB, seller"
+  "admin.navigation.orderProcessing": "Order Processing",
+  "admin.navigation.order-processing": "Order Processing",
+  "admin.navigation.search.kws": "order, invoice, AWB, seller"
 }

@@ -1,7 +1,7 @@
 {
-  "admin.app.sellerDashboard": {
-    "component": "sellerDashboard",
-    "path": "/admin/app/seller-dashboard"
+  "admin.app.orderProcessing": {
+    "component": "orderProcessing",
+    "path": "/admin/app/order-processing"
   },
   "admin.app.orderDetails": {
     "component": "orderDetails",

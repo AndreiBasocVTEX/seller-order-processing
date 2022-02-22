@@ -1,13 +1,20 @@
-{
-  "section": "products",
-  "subSection": "catalog",
-  "titleId": "admin-example.navigation.seller-dashboard",
-  "subSectionItems": [
-    {
-      "isNew": true,
-      "labelId": "admin-example.navigation.seller-dashboard",
-      "path": "/admin/seller-dashboard"
-    }
-  ],
-  "searchKeyWordsHelpers": "admin-example.navigation.search.kws"
-}
+[
+  {
+    "section": "orders",
+    "subSection": "order-processing",
+    "subSectionItems": [
+      {
+        "id": "order-processing",
+        "labelId": "admin.navigation.order-processing",
+        "path": "/admin/order-processing"
+      }
+    ]
+  },
+  {
+    "id": "order-processing",
+    "section": "orders",
+    "titleId": "admin.navigation.order-processing",
+    "path": "/admin/order-processing",
+    "adminVersion": 4
+  }
+]
