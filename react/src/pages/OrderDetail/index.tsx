@@ -228,7 +228,6 @@ const OrderDetail: FC<IOrderDetailProps> = ({
                   }
                   invoiceUrl={orderData.packageAttachment.packages?.invoiceUrl}
                   orderStatus={orderData.status}
-                  service={awbData?.courier}
                 />
               </div>
             </div>
