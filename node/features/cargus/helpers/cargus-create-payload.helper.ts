@@ -1,16 +1,17 @@
 import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
 import {
   defaultEnvelopeCount,
-  priceMultiplier,
-  promissory,
   shipmentPaymentMethod,
 } from './cargus-constants.helper'
 import {
+  getPaymentMethod,
   getTotalDiscount,
   getTotalWeight,
 } from '../../core/helpers/order-dto.helper'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import { priceMultiplier } from '../../shared/enums/constants'
+import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 
 export function createCargusOrderPayload(
   order: IVtexOrder,
@@ -55,11 +56,12 @@ export function createCargusOrderPayload(
     .filter(Boolean)
     .join(', ')
 
-  const { firstDigits } = order?.paymentData?.transactions?.[0].payments?.[0]
-  const paymentPromissory =
-    order.paymentData.transactions[0].payments[0].group === promissory
+  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
 
-  const payment = firstDigits || paymentPromissory ? 0 : value / priceMultiplier
+  const payment =
+    typeOfPayment?.toLowerCase() === TypeOfPayment.CARD
+      ? 0
+      : value / priceMultiplier
 
   let county = ''
   let locality = ''
