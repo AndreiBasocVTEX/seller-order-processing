@@ -48,15 +48,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [manualUrl, setManualUrl] = useState('')
   const [orderData, setOrderData] = useState<OrderDetailsData>()
   const [modalOpen, setModalOpen] = useState(false)
-  const [courierSetManually, setCourierManually] = useState([
-    { value: 'FanCourier', label: 'FanCourier' },
-    { value: 'Cargus', label: 'Cargus' },
-    { value: 'SameDay', label: 'SameDay' },
-    { value: 'TNT', label: 'TNT' },
-    { value: 'DHL', label: 'DHL' },
-    { value: 'GLS', label: 'GLS' },
-    { value: 'DPD', label: 'DPD' },
-  ])
+  const [courierSetManually, setCourierManually] = useState('')
 
   const [invoiceDate, setInvoiceDate] = useState(
     new Date().toISOString().slice(0, 10)
@@ -69,8 +61,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   })
 
   const packageTypeOptions = [
-    { value: 'Colet', disabled: false, label: 'Colet' },
-    { value: 'Plic', disabled: false, label: 'Plic' },
+    { value: 'parcel', disabled: false, label: 'Colet' },
+    { value: 'envelope', disabled: false, label: 'Plic' },
   ]
 
   const removeAxiosError = () => {
@@ -151,11 +143,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
       orderId,
       service,
       weight,
-      courierSetManually.toString(),
+      courierSetManually,
       packageAmount,
       manualAwb,
       manualUrl,
       courier,
+      packageType,
       orderData?.value,
       invoiceDate.toString(),
       invoiceNum.toString(),
@@ -366,8 +359,9 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <>
                   <p>Tip pachet:</p>
                   <Dropdown
+                    required
                     options={packageTypeOptions}
-                    value={packageType || 'Colet'}
+                    value={packageType}
                     onChange={(_: any, v: React.SetStateAction<string>) =>
                       setPackageType(v)
                     }
@@ -402,20 +396,20 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                 <>
                   <p>Curier:</p>
                   <Dropdown
+                    required
                     options={[
                       { value: 'fancourier', label: 'FanCourier' },
                       { value: 'cargus', label: 'Cargus' },
                       { value: 'sameDay', label: 'SameDay' },
-                      { value: 'TNT', label: 'TNT' },
-                      { value: 'DHL', label: 'DHL' },
-                      { value: 'GLS', label: 'GLS' },
-                      { value: 'DPD', label: 'DPD' },
+                      { value: 'tnt', label: 'TNT' },
+                      { value: 'dhl', label: 'DHL' },
+                      { value: 'gls', label: 'GLS' },
+                      { value: 'dpd', label: 'DPD' },
                     ]}
                     value={courierSetManually}
-                    onChange={(
-                      _: unknown,
-                      v: SetStateAction<Array<{ value: string; label: string }>>
-                    ) => setCourierManually(v)}
+                    onChange={(_: unknown, v: SetStateAction<string>) =>
+                      setCourierManually(v)
+                    }
                   />
                   <p>AWB :</p>
                   <Input
