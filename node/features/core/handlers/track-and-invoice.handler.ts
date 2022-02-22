@@ -7,6 +7,7 @@ import type { TrackingInfoDTO } from '../../shared/clients/carrier-client'
 import type { TrackAndInvoiceRequestDTO } from '../dto/order-api.dto'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 import type { VtexAuthData } from '../../vtex/dto/auth.dto'
+import { OrderStatus } from '../../vtex/enums/order-status.enum'
 
 export async function trackAndInvoiceHandler(ctx: Context) {
   const {
@@ -33,6 +34,12 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     vtexAuthData,
     orderId
   )
+
+  if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
+    throw new Error(
+      'You need to wait until the window-to-cancel period ends to generate AWB'
+    )
+  }
 
   let trackingInfoPayload: TrackingInfoDTO
 
@@ -88,7 +95,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     payload: notifyInvoiceRequest,
   })
 
-  if (order.status === 'ready-for-handling') {
+  if (order.status === OrderStatus.READY_FOR_HANDLING) {
     await vtexOrderClient.setOrderStatusToInvoiced({
       authData: vtexAuthData,
       orderId,
