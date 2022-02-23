@@ -25,7 +25,7 @@ export default function createSmartbillOrderPayload({
   }
 
   if (client.isCorporate) {
-    clientData.vatCode = client.corporateDocument
+    clientData.vatCode = client.stateInscription
     clientData.name = client.tradeName ?? client.corporateName
   }
 
