@@ -87,7 +87,9 @@ export function createCargusOrderPayload(
       LocationId: senderLocationId || null,
     },
     Recipient: {
-      Name: address.receiverName,
+      Name: order.clientProfileData.isCorporate
+        ? order.clientProfileData.corporateName
+        : address.receiverName,
       ContactPerson: address.receiverName,
       CountyName: county,
       LocalityName: locality,

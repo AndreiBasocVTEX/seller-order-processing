@@ -58,7 +58,9 @@ export function createOrderPayload(
     shipmentDate: new Date().toISOString(),
     addressFrom: null,
     addressTo: {
-      name: address.receiverName,
+      name: order.clientProfileData.isCorporate
+        ? order.clientProfileData.corporateName
+        : address.receiverName,
       contactPerson: address.receiverName,
       country: defaultCountryCode,
       countyName: address.state,
