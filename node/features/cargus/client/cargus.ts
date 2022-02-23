@@ -56,11 +56,12 @@ export default class CargusClient extends CarrierClient {
   }: CreateTrackingRequest) {
     const token = await this.getBearerToken(settings)
 
-    const body = createCargusOrderPayload(
+    const body = createCargusOrderPayload({
       order,
-      settings.senderLocationId, // TODO: sholud be something like settings.cargus__locationId
-      params
-    )
+      senderLocationId: settings.cargus__locationId,
+      priceTableId: settings.cargus__priceTableId,
+      trackingParams: params,
+    })
 
     return (this.http
       .post('/Awbs/WithGetAwb', body, {
