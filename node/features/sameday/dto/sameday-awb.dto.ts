@@ -44,6 +44,7 @@ interface AwbRecipient {
   personType: number
   phoneNumber: string
   postalCode: string
+  companyName?: string
 }
 
 export interface ISamedayAwbResponse {

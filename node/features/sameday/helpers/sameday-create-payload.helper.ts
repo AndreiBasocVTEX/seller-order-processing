@@ -74,7 +74,7 @@ export function createOrderPayload(
       ? 0
       : value / priceMultiplier
 
-  const samedayPayload = {
+  const samedayPayload: ISamedayAwbPayload = {
     awbPayment: 1,
     awbRecipient: {
       address: addressText,
@@ -107,6 +107,12 @@ export function createOrderPayload(
     samedayPayload.awbRecipient.address = order.shippingData.address.street
     samedayPayload.awbRecipient.postalCode =
       order.shippingData.address.postalCode
+  }
+
+  if (order.clientProfileData.isCorporate) {
+    samedayPayload.awbRecipient.personType = 1
+    samedayPayload.awbRecipient.companyName =
+      order.clientProfileData.corporateName
   }
 
   return samedayPayload
