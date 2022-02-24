@@ -1,4 +1,7 @@
-import type { ICargusAwbPayload } from '../dto/cargus-awb.dto'
+import type {
+  CargusDataToCreateAwb,
+  ICargusAwbPayload,
+} from '../dto/cargus-awb.dto'
 import {
   defaultEnvelopeCount,
   shipmentPaymentMethod,
@@ -8,16 +11,15 @@ import {
   getTotalDiscount,
   getTotalWeight,
 } from '../../core/helpers/order-dto.helper'
-import type { IVtexOrder } from '../../vtex/dto/order.dto'
-import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 
-export function createCargusOrderPayload(
-  order: IVtexOrder,
-  senderLocationId: string,
-  trackingParams: CreateTrackingRequestParams
-): ICargusAwbPayload {
+export function createCargusOrderPayload({
+  order,
+  senderLocationId,
+  priceTableId,
+  trackingParams,
+}: CargusDataToCreateAwb): ICargusAwbPayload {
   // The selected service does not allow parts weighing more than 31 kg
   const totalWeight = trackingParams.weight
     ? trackingParams.weight
@@ -100,6 +102,7 @@ export function createCargusOrderPayload(
     },
     Parcels: numberOfParcels,
     ServiceId: null,
+    PriceTableId: priceTableId,
     Envelopes: defaultEnvelopeCount,
     TotalWeight: totalWeight,
     ShipmentPayer: shipmentPaymentMethod,

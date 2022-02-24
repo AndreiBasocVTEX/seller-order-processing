@@ -1,3 +1,13 @@
+import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
+import type { IVtexOrder } from '../../vtex/dto/order.dto'
+
+export interface CargusDataToCreateAwb {
+  order: IVtexOrder
+  senderLocationId: string
+  priceTableId: number
+  trackingParams: CreateTrackingRequestParams
+}
+
 export interface ICargusAwbPayload {
   DeliveryPudoPoint?: number | null
   ReturnCodeExpiration?: string
