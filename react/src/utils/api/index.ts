@@ -4,10 +4,32 @@ import axios from 'axios'
 import type { IOrder } from '../../typings/order'
 import type { OrderAwbStatus } from '../../typings/OrderAwbStatus'
 import type { ICreateAwbResult } from '../../types/api'
+import type { OrderStats } from '../../typings/orderStats'
+import type { GetOrderStatsParams } from '../../types/common'
 
 export const getOrderDataById = (orderId: string): Promise<IOrder> =>
   axios
     .get(`/api/oms/pvt/orders/${orderId}`)
+    .then((response) => response.data)
+    .catch(() => {
+      return null
+    })
+export const getOrderStats = (
+  statsParams: GetOrderStatsParams
+): Promise<OrderStats> =>
+  axios
+    .get(`/api/oms/pvt/orders`, {
+      params: {
+        _stats: 1,
+        page: statsParams.page,
+        per_page: statsParams.perPage,
+        q: statsParams.search,
+        f_status: statsParams.status,
+        f_creationDate: statsParams.date
+          ? `creationDate:[${statsParams.date}]`
+          : '',
+      },
+    })
     .then((response) => response.data)
     .catch(() => {
       return null

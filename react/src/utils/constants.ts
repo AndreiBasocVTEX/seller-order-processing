@@ -66,7 +66,6 @@ export const courierData = [
   },
   {
     src: 'download',
-    label: 'Incarca AWB Manual',
     service: 'manual',
   },
 ]

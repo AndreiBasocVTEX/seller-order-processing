@@ -1,21 +1,26 @@
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
 import { Table, Link } from 'vtex.styleguide'
+import { useIntl } from 'react-intl'
 
 import type { IOrderTableItem } from '../../types/order'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
 
 const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
   const [tableData, setTableData] = useState<IOrderTableItem[]>([])
-
+  const intl = useIntl()
   const customSchema = {
     properties: {
       productSku: {
-        title: 'SKU-ul produsului',
+        title: intl.formatMessage({
+          id: 'order-detail.table.sku',
+        }),
         width: 200,
       },
       productName: {
-        title: 'Numele Produslui',
+        title: intl.formatMessage({
+          id: 'order-detail.table.product-name',
+        }),
         width: 600,
         cellRenderer: ({
           cellData,
@@ -34,10 +39,14 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
         },
       },
       productQuantity: {
-        title: 'Cantitate',
+        title: intl.formatMessage({
+          id: 'order-detail.table.product-quantity',
+        }),
       },
       productPriceTva: {
-        title: 'Pret cu TVA',
+        title: intl.formatMessage({
+          id: 'order-detail.table.price-with-vat',
+        }),
         width: 100,
       },
     },
@@ -66,7 +75,11 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
     result.push(
       {
         productSku: '',
-        productName: { name: 'Taxa de livrare' },
+        productName: {
+          name: intl.formatMessage({
+            id: 'order-detail.table.shipping-cost',
+          }),
+        },
         productQuantity: null,
         productPriceTva: `${(orderData?.orderTotals.shipping ?? 0) / 100} Lei`,
       },
@@ -88,7 +101,11 @@ const OrderTable: FC<{ orderData?: OrderDetailsData }> = ({ orderData }) => {
 
   return (
     <div className="flex flex-column mb7">
-      <h3 className="t-heading-3">Produse</h3>
+      <h3 className="t-heading-3">
+        {intl.formatMessage({
+          id: 'order-detail.table.title',
+        })}
+      </h3>
       <div className="mb5">
         <Table fullWidth schema={customSchema} items={tableData} />
       </div>

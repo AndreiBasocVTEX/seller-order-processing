@@ -3,6 +3,7 @@ import type { FC } from 'react'
 import { Button, IconDownload, Tooltip } from 'vtex.styleguide'
 import type { AxiosError } from 'axios'
 import axios from 'axios'
+import { useIntl } from 'react-intl'
 
 import { SMARTBILL } from '../../utils/constants'
 import type { InvoiceButtonProps } from '../../types/common'
@@ -22,6 +23,8 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     errorMessage: '',
     errorDetails: '',
   })
+
+  const intl = useIntl()
 
   const isFactureUrlAvailable = (
     invoiceType?: string | null
@@ -141,7 +144,17 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     <>
       {invoiceAvailable ? (
         invoiceAvailable !== 'noUrl' ? (
-          <Tooltip label={`${invoiceKey}-${invoiceNumber}`}>
+          <Tooltip
+            label={
+              invoiceKey === 'smartbill'
+                ? ` ${intl.formatMessage({
+                    id: 'seller-dashboard.table-column.download-invoice',
+                  })} ${invoiceKey} ${invoiceNumber}`
+                : `${intl.formatMessage({
+                    id: 'seller-dashboard.table-column.download-invoice',
+                  })} ${invoiceNumber}`
+            }
+          >
             {invoiceButton()}
           </Tooltip>
         ) : (
