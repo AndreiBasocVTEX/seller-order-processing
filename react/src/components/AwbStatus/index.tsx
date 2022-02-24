@@ -1,15 +1,32 @@
-import type { FC } from 'react'
-import React, { useEffect, useState } from 'react'
-import { Button, Spinner, Tooltip, IconVisibilityOn } from 'vtex.styleguide'
+import type {FC} from 'react'
+import React, {useEffect, useState} from 'react'
+import {Button, Spinner, Tooltip} from 'vtex.styleguide'
+import {useIntl} from 'react-intl'
 
-import type { IAwbStatusProps } from '../../types/awbStatus'
-import { getOrderAwbStatus } from '../../utils/api'
+import type {IAwbStatusProps} from '../../types/awbStatus'
+import {getOrderAwbStatus} from '../../utils/api'
+import type {AttachmentPackages} from '../../typings/normalizedOrder'
 
-const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
+const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
   const [awbStatus, setAwbStatus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const intl = useIntl()
 
-  const getAwbStatus = async () => {
+  const setInitialStatus = (data: AttachmentPackages | null) => {
+    const orderDeliveryStatus = data?.courierStatus?.data?.description
+
+    if (orderDeliveryStatus) {
+      setAwbStatus(orderDeliveryStatus)
+    } else if (data?.courierStatus?.finished) {
+      setAwbStatus('Comanda a fost livrata')
+    } else if (data) {
+      setAwbStatus('Comanda nu a fost livrata')
+    }
+
+    setIsLoading(false)
+  }
+
+  const updateStatus = async () => {
     const data = await getOrderAwbStatus(orderId)
 
     const lastEvent = data?.events?.length && data?.events[0]
@@ -19,11 +36,19 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
     } else if (data) {
       switch (data.isDelivered) {
         case true:
-          setAwbStatus('Comanda a fost livrata')
+          setAwbStatus(
+            intl.formatMessage({
+              id: 'seller-dashboard.order-status.order-was-delivered',
+            })
+          )
           break
 
         case false:
-          setAwbStatus('Comanda nu a fost livrata')
+          setAwbStatus(
+            intl.formatMessage({
+              id: 'seller-dashboard.order-status.order-was-not-delivered',
+            })
+          )
           break
 
         default:
@@ -36,44 +61,38 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
 
   const handleUpdateStatus = () => {
     setIsLoading(true)
-    getAwbStatus()
+    updateStatus()
   }
 
   useEffect(() => {
-    getAwbStatus()
+    if (!initialData) {
+      updateStatus()
+    } else {
+      setInitialStatus(initialData)
+    }
   }, [])
 
   switch (size) {
     case 'small':
       return (
-        <div className="flex items-center mw-100">
-          <div className="mr2">
-            <Button
-              size="small"
-              disabled={isLoading}
-              onClick={handleUpdateStatus}
-            >
-              <IconVisibilityOn />
-            </Button>
-          </div>
-          <div
-            style={{ minWidth: '8rem' }}
-            className="flex justify-center items-center pr1"
-          >
-            {isLoading ? (
-              <Spinner size={20} />
-            ) : awbStatus ? (
-              <Tooltip label={awbStatus}>
-                <div className="br-pill bg-muted-2 tc w5 white-90 truncate fw4 ph4 pv2 f7">
-                  {awbStatus}
-                </div>
-              </Tooltip>
-            ) : (
-              <div className="br-pill bg-muted-2 w5 white-90 fw4 pv2 tc f7">
-                Lipsa date
+        <div
+          className="flex justify-center items-center pr1 w-100"
+        >
+          {isLoading ? (
+            <Spinner size={20}/>
+          ) : awbStatus ? (
+            <Tooltip label={awbStatus}>
+              <div className="br-pill bg-muted-2 tc white-90 truncate fw4 ph4 pv2 f7 w-100">
+                {awbStatus}
               </div>
-            )}
-          </div>
+            </Tooltip>
+          ) : (
+            <div className="br-pill bg-muted-2 w5 white-90 fw4 pv2 tc f7 truncate w-100">
+              {intl.formatMessage({
+                id: 'order-detail.common.no-data',
+              })}
+            </div>
+          )}
         </div>
       )
 
@@ -81,14 +100,19 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
       return (
         <div className="flex flex-column">
           <div className="flex items-center">
-            <p className="fw5 mr2">Status AWB: </p>
+            <p className="fw5 mr2">
+              {intl.formatMessage({
+                id: 'seller-dashboard.table-column.status',
+              })}{' '}
+              AWB:{' '}
+            </p>
             <div className="flex justify-center items-center">
               {isLoading ? (
                 <div
                   className="flex justify-center"
-                  style={{ minWidth: '12rem' }}
+                  style={{minWidth: '12rem'}}
                 >
-                  <Spinner size={20} />
+                  <Spinner size={20}/>
                 </div>
               ) : awbStatus ? (
                 <Tooltip label={awbStatus}>
@@ -98,19 +122,27 @@ const AwbStatus: FC<IAwbStatusProps> = ({ orderId, size }) => {
                 </Tooltip>
               ) : (
                 <div className="mw5 br-pill bg-muted-2 tc white-90 fw4 ph4 pv2 truncate f7">
-                  Lipsa date
+                  {intl.formatMessage({
+                    id: 'order-detail.common.no-data',
+                  })}
                 </div>
               )}
             </div>
           </div>
           <div className="self-end">
-            <Button
-              size="small"
-              disabled={isLoading}
-              onClick={handleUpdateStatus}
+            <Tooltip
+              label={intl.formatMessage({
+                id: 'seller-dashboard.table-column.update-status',
+              })}
             >
-              Update status
-            </Button>
+              <Button
+                size="small"
+                disabled={isLoading}
+                onClick={handleUpdateStatus}
+              >
+                Update status
+              </Button>
+            </Tooltip>
           </div>
         </div>
       )

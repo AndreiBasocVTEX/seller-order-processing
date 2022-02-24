@@ -14,6 +14,7 @@ import {
 import type { AxiosError } from 'axios'
 import axios from 'axios'
 import type { FC, SetStateAction } from 'react'
+import { useIntl } from 'react-intl'
 
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
@@ -27,10 +28,9 @@ import {
 } from '../../utils/constants'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
-  setTrackingNum,
   setOrderAwb,
   updateAwbData,
-  neededOrderId,
+  order,
   onAwbUpdate,
   resetOrdersData,
   refreshOrderDetails,
@@ -60,9 +60,23 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     errorDetails: '',
   })
 
+  const intl = useIntl()
+
   const packageTypeOptions = [
-    { value: 'parcel', disabled: false, label: 'Colet' },
-    { value: 'envelope', disabled: false, label: 'Plic' },
+    {
+      value: 'parcel',
+      disabled: false,
+      label: intl.formatMessage({
+        id: 'awb-shipping-modal.modal-awb.form.package-parcel',
+      }),
+    },
+    {
+      value: 'envelope',
+      disabled: false,
+      label: intl.formatMessage({
+        id: 'awb-shipping-modal.modal-awb.form.package-envelope',
+      }),
+    },
   ]
 
   const removeAxiosError = () => {
@@ -81,7 +95,11 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             style={{ width: '20px', paddingRight: '6px' }}
             src={courierIcons[_courier.src]}
           />
-          {_courier.label}
+          {_courier.service === 'manual'
+            ? intl.formatMessage({
+                id: 'awb-shipping-modal.modal-awb.list.manual-option',
+              })
+            : _courier.label}
         </>
       ),
       onClick: () => {
@@ -95,7 +113,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   }
 
   const getOrderDetails = async (reset?: boolean) => {
-    const rawData = await getOrderDataById(neededOrderId)
+    const rawData = await getOrderDataById(order.orderId)
     const normalizedData = normalizeOrderData(rawData)
 
     if (reset) {
@@ -129,8 +147,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             return el
           })
         )
-
-        onAwbUpdate(true)
       }
     }
 
@@ -159,16 +175,15 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           return
         }
 
-        setTrackingNum({
-          [orderId]: data.trackingNumber,
-        })
         updateAwbData?.(data)
         setNewAwbGenerated(true)
+
         getOrderDetails(true)
       })
       .catch((error) => {
         if (error.status === 504) {
           getOrderDetails(true)
+          onAwbUpdate(true)
 
           return
         }
@@ -256,8 +271,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   }
 
   useEffect(() => {
-    getOrderDetails()
-  }, [newAwbGenerated, neededOrderId])
+    setOrderData(order)
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    if (newAwbGenerated) getOrderData(order.orderId)
+  }, [newAwbGenerated])
 
   const awbButton = () =>
     orderData?.packageAttachment.packages && (
@@ -309,7 +329,11 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           orderData?.packageAttachment.packages.courier
         ) ? (
           <Tooltip
-            label={`${orderData?.packageAttachment.packages.courier} ${orderData?.packageAttachment.packages.trackingNumber}`}
+            label={`${intl.formatMessage({
+              id: 'seller-dashboard.table-column.download-awb',
+            })} ${orderData?.packageAttachment.packages.courier} ${
+              orderData?.packageAttachment.packages.trackingNumber
+            }`}
           >
             {awbButton()}
           </Tooltip>
@@ -317,17 +341,27 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           awbButton()
         ))}
       {!orderData?.packageAttachment.packages && (
-        <Button
-          block
-          variation="primary"
-          disabled={isLoading || orderData?.status === 'canceled'}
-          isLoading={isLoading}
-          onClick={() => {
-            setModalOpen(!modalOpen)
-          }}
+        <Tooltip
+          label={intl.formatMessage({
+            id: 'awb-shipping-modal.button-tooltip',
+          })}
         >
-          <span className="f6"> Generează AWB & Factura</span>
-        </Button>
+          <Button
+            block
+            variation="primary"
+            disabled={isLoading || orderData?.status === 'canceled'}
+            isLoading={isLoading}
+            onClick={() => {
+              setModalOpen(!modalOpen)
+            }}
+          >
+            <span className="f6 mw-100 truncate">
+              {intl.formatMessage({
+                id: 'awb-shipping-modal.button-label',
+              })}
+            </span>
+          </Button>
+        </Tooltip>
       )}
       <Modal
         isOpen={modalOpen}
@@ -346,10 +380,19 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         <form onSubmit={formHandler}>
           <div className="flex flex-row">
             <div className="flex flex-column w-100 mr5 pb5">
-              <h2>AWB Generation</h2>
+              <h2>
+                {intl.formatMessage({
+                  id: 'awb-shipping-modal.modal-awb.title',
+                })}
+              </h2>
               <div className="flex">
                 <ActionMenu
-                  label={service || 'Alege Modalitatea'}
+                  label={
+                    service ||
+                    intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.button.choose-service',
+                    })
+                  }
                   zIndex={9999999}
                   options={dropDownOptions}
                 />
@@ -357,7 +400,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
               {service && service !== 'manual' && (
                 <>
-                  <p>Tip pachet:</p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.form.package-type',
+                    })}
+                    :
+                  </p>
                   <Dropdown
                     required
                     options={packageTypeOptions}
@@ -366,9 +414,18 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                       setPackageType(v)
                     }
                   />
-                  <p>Numar colete :</p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.form.package-number',
+                    })}
+                    :
+                  </p>
                   <NumericStepper
-                    label="Minimum 1, maximum 5"
+                    label={`${intl.formatMessage({
+                      id: 'order-detail.common.minimum',
+                    })} 1 - ${intl.formatMessage({
+                      id: 'order-detail.common.maximum',
+                    })} 5`}
                     minValue={1}
                     maxValue={5}
                     value={packageAmount}
@@ -376,9 +433,16 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                       setPackageAmount(event.value)
                     }
                   />
-                  <p>Greutate :</p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.form.package-weight',
+                    })}
+                    :
+                  </p>
                   <NumericStepper
-                    label="Maximum 30 kg"
+                    label={`${intl.formatMessage({
+                      id: 'order-detail.common.maximum',
+                    })} 30 kg`}
                     unitMultiplier={1}
                     suffix="kg"
                     minValue={0}
@@ -394,7 +458,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
               {service === 'manual' && (
                 <>
-                  <p>Curier:</p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.form.courier',
+                    })}
+                    :
+                  </p>
                   <Dropdown
                     required
                     options={[
@@ -420,7 +489,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                       setManualAwb(e.target.value)
                     }}
                   />
-                  <p>Track URL :</p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-awb.form.track-url',
+                    })}
+                    :
+                  </p>
 
                   <Input
                     placeholder="Track URL"
@@ -434,10 +508,20 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
             <Divider orientation="vertical" />
             <div className="flex flex-column w-100 ml5">
-              <h2>Factura</h2>
+              <h2>
+                {intl.formatMessage({
+                  id: 'order-detail.common.invoice',
+                })}
+              </h2>
               <div className="flex items-center">
                 <ActionMenu
-                  label={courier || 'Alege Modalitatea'}
+                  label={
+                    courier ||
+                    intl.formatMessage({
+                      id:
+                        'awb-shipping-modal.modal-invoice.button.choose-service',
+                    })
+                  }
                   zIndex={999999}
                   options={[
                     {
@@ -480,7 +564,10 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                             style={{ width: '20px', paddingRight: '6px' }}
                             src={courierIcons.download}
                           />
-                          Incarca Factura Manual
+                          {intl.formatMessage({
+                            id:
+                              'awb-shipping-modal.modal-invoice.list.manual-option',
+                          })}
                         </>
                       ),
                       disabled: false,
@@ -495,7 +582,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
               {courier === 'manual' && (
                 <>
                   <span>
-                    <p>Issuance Date</p>{' '}
+                    <p>
+                      {intl.formatMessage({
+                        id: 'awb-shipping-modal.modal-invoice.form.date',
+                      })}
+                      :
+                    </p>{' '}
                     <DatePicker
                       value={new Date()}
                       onChange={(e: Date) => {
@@ -505,7 +597,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                       required
                     />
                   </span>
-                  <p>Invoice Number</p>
+                  <p>
+                    {intl.formatMessage({
+                      id:
+                        'awb-shipping-modal.modal-invoice.form.invoice-number',
+                    })}
+                    :
+                  </p>
                   <Input
                     placeholder="any value"
                     onChange={(e: { target: { value: string } }) =>
@@ -516,7 +614,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                     required
                   />
 
-                  <p>Invoice URL (Optional) </p>
+                  <p>
+                    {intl.formatMessage({
+                      id: 'awb-shipping-modal.modal-invoice.form.invoice-url',
+                    })}
+                    :
+                  </p>
                   <Input
                     placeholder="any value"
                     onChange={(e: { target: { value: string } }) =>
@@ -531,7 +634,9 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           </div>
           <div className="flex justify-center w-100 mt7">
             <Button disabled={!service || !courier} type="submit">
-              Generate
+              {intl.formatMessage({
+                id: 'awb-shipping-modal.submit-button',
+              })}
             </Button>
           </div>
         </form>

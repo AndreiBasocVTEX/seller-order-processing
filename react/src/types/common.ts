@@ -44,3 +44,36 @@ export interface InvoiceButtonProps {
   orderStatus: string
   service?: string | null
 }
+export interface GetOrderStatsParams {
+  page: number
+  perPage: number
+  search: string
+  status: string
+  date: string
+}
+export interface TablePaginationParams {
+  page: number
+  perPage: number
+  itemsFrom: number
+  itemsTo: number
+}
+export interface TableFilterParams {
+  search: string
+  status: string
+  date: string
+}
+export interface TableTotalizerData {
+  ordersAmount: number
+  ordersAverageValue: number
+  ordersTotalValue: number
+}
+export interface TablePaginationProps {
+  paginationParams: TablePaginationParams
+  totalizerData: TableTotalizerData
+  handleTableLoading: (b: boolean) => void
+  handlePaginationParams: (p: TablePaginationParams) => void
+}
+export interface TableFiltersProps {
+  filterParams: TableFilterParams
+  setFilterParams: (o: TableFilterParams) => void
+}

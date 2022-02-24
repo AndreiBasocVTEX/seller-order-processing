@@ -1,7 +1,7 @@
 import type { IOrderAwb } from './common'
+import type { OrderDetailsData } from '../typings/normalizedOrder'
 
 export type IOrderAwbProps = {
-  setTrackingNum: (v: { [k: string]: string }) => void
   setOrderAwb?: (v: (a: IOrderAwb[]) => IOrderAwb[]) => void
   updateAwbData?: (v: {
     courier: string
@@ -10,7 +10,8 @@ export type IOrderAwbProps = {
     issuanceDate: string
     trackingNumber: string
   }) => void
-  neededOrderId: string
+  neededOrderId?: string
+  order: OrderDetailsData
   onAwbUpdate: (v: boolean) => void
   refreshOrderDetails?: () => void
   resetOrdersData?: (
