@@ -100,14 +100,14 @@ const OrdersList: FC = () => {
         }): JSX.Element => {
           return (
             <>
-              <Tooltip label={cellData.longText} position="bottom">
+              <Tooltip label={cellData?.longText} position="bottom">
                 <div>
-                  <Tag bgColor={cellData.bgColor} color={cellData.color}>
+                  <Tag bgColor={cellData?.bgColor} color={cellData?.color}>
                     {cellData?.shortText ? (
-                      <span className="fw3 f7 ph4">{cellData.shortText}</span>
+                      <span className="fw3 f7 ph4">{cellData?.shortText}</span>
                     ) : (
                       <span className="fw3 f7 helvetica">
-                        {cellData.longText}
+                        {cellData?.longText}
                       </span>
                     )}
                   </Tag>
