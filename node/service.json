@@ -21,6 +21,10 @@
     "getInvoice": {
       "path": "/opa/orders/:orderId/get-invoice",
       "public": true
+    },
+    "getAvailableProviders": {
+      "path": "/opa/get-active-providers",
+      "public": true
     }
   }
 }

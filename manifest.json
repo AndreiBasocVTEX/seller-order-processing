@@ -82,6 +82,17 @@
         "description": "",
         "type": "string"
       },
+      "fancourier__titleSettings": {
+        "title": "Fancourier Settings",
+        "description": "",
+        "type": "object"
+      },
+      "fancourier__isEnabled": {
+        "title": "Enable FanCourier Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
       "fancourier__username": {
         "title": "FanCourier Username",
         "description": "",
@@ -101,6 +112,17 @@
         "title": "FanCourier Warehouse ID",
         "description": "",
         "type": "string"
+      },
+      "cargus__titleSettings": {
+        "title": "Cargus Settings",
+        "description": "",
+        "type": "object"
+      },
+      "cargus__isEnabled": {
+        "title": "Enable Cargus Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
       },
       "cargus__username": {
         "title": "Cargus Username",
@@ -127,6 +149,17 @@
         "description": "",
         "type": "number"
       },
+      "innoship__titleSettings": {
+        "title": "Innoship Settings",
+        "description": "",
+        "type": "object"
+      },
+      "innoship__isEnabled": {
+        "title": "Enable Innoship Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
       "innoship__apiToken": {
         "title": "Innoship API Token",
         "description": "",
@@ -136,6 +169,17 @@
         "title": "Innoship Warehouse ID",
         "description": "",
         "type": "string"
+      },
+      "sameday__titleSettings": {
+        "title": "Sameday Settings",
+        "description": "",
+        "type": "object"
+      },
+      "sameday__isEnabled": {
+        "title": "Enable Sameday Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
       },
       "sameday__username": {
         "title": "Sameday Username",
@@ -151,6 +195,17 @@
         "title": "Sandbox Mode",
         "description": "",
         "type": "boolean"
+      },
+      "smartbill__titleSettings": {
+        "title": "Smartbill Settings",
+        "description": "",
+        "type": "object"
+      },
+      "smartbill__isEnabled": {
+        "title": "Enable Smartbill Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
       },
       "smartbill__username": {
         "title": "SmartBill Username",
@@ -168,7 +223,7 @@
         "type": "string"
       },
       "smartbill__seriesName": {
-        "title": "SmartBill Series Name ",
+        "title": "SmartBill Series Name",
         "description": "",
         "type": "string"
       },

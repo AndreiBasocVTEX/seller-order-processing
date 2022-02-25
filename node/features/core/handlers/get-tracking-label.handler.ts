@@ -12,13 +12,14 @@ export async function getTrackingLabelHandler(ctx: Context) {
     clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
   } = ctx
 
-  const orderId = params.orderId as string
   const settings = await getVtexAppSettings(ctx)
+
   const vtexAuthData: VtexAuthData = {
     vtex_appKey: settings.vtex_appKey,
     vtex_appToken: settings.vtex_appToken,
   }
 
+  const orderId = params.orderId as string
   const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
     vtexAuthData,
     orderId
@@ -33,6 +34,8 @@ export async function getTrackingLabelHandler(ctx: Context) {
     ctx,
     carrierName.toLowerCase() as CarrierValues
   )
+
+  carrier.throwIfDisabled(settings)
 
   const pdfData = await carrier.trackingLabel({
     settings,

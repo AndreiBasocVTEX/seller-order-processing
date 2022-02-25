@@ -15,9 +15,15 @@ import type {
 import { createCargusOrderPayload } from '../helpers/cargus-create-payload.helper'
 import type { IAuthDataCargus } from '../models/cargus-auth.model'
 import { PaperSize } from '../../shared/enums/paper-size.enum'
-import { UnhandledError } from '../../core/helpers/error.helper'
+import {
+  UnhandledError,
+  ValidationError,
+} from '../../core/helpers/error.helper'
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class CargusClient extends CarrierClient {
+  protected static ENABLED_SETTING_NAME = 'cargus__isEnabled'
+
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://urgentcargus.azure-api.net/api', ctx, {
       ...options,
@@ -28,6 +34,18 @@ export default class CargusClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
+  }
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return !!settings[CargusClient.ENABLED_SETTING_NAME]
+  }
+
+  public throwIfDisabled(settings: ObjectLiteral): void | never {
+    if (!this.isActive(settings)) {
+      throw new ValidationError({
+        message: `You need to enable ${CarriersEnum.CARGUS} integration to perform this action`,
+      })
+    }
   }
 
   private async getBearerToken(

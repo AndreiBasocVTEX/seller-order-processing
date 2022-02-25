@@ -1,7 +1,12 @@
 import type { IOContext, InstanceOptions } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-import { UnhandledError } from '../../core/helpers/error.helper'
+import {
+  UnhandledError,
+  ValidationError,
+} from '../../core/helpers/error.helper'
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
+import { BillingsEnum } from '../../shared/enums/billings.enum'
 import type {
   CreateInvoiceRequest,
   SmartBillGenerateInvoiceRes,
@@ -11,6 +16,8 @@ import createSmartbillOrderPayload from '../helpers/smartbill-create-payload.hel
 import type { GetInvoiceRequest } from '../models/smartbill-get-invoice.model'
 
 export default class SmartBillClient extends ExternalClient {
+  protected static ENABLED_SETTING_NAME = 'smartbill__isEnabled'
+
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('https://ws.smartbill.ro/SBORO/api', ctx, {
       ...options,
@@ -21,6 +28,18 @@ export default class SmartBillClient extends ExternalClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
+  }
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return !!settings[SmartBillClient.ENABLED_SETTING_NAME]
+  }
+
+  public throwIfDisabled(settings: ObjectLiteral): void | never {
+    if (!this.isActive(settings)) {
+      throw new ValidationError({
+        message: `You need to enable ${BillingsEnum.SMARTBILL} integration to perform this action`,
+      })
+    }
   }
 
   private static getAuthorization(settings: IOContext['settings']) {
