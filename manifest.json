@@ -72,16 +72,6 @@
     "title": "Order Processing",
     "type": "object",
     "properties": {
-      "vtex_appKey": {
-        "title": "VTEX App Key",
-        "description": "",
-        "type": "string"
-      },
-      "vtex_appToken": {
-        "title": "VTEX App Token",
-        "description": "",
-        "type": "string"
-      },
       "general__titleSettings": {
         "title": "General Settings",
         "description": "",

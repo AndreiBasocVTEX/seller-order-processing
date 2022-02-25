@@ -1,5 +1,4 @@
 import type { CarrierValues } from '../../shared/enums/carriers.enum'
-import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
@@ -15,15 +14,7 @@ export async function updateTrackingStatusHandler(ctx: Context) {
 
   const settings = await getVtexAppSettings(ctx)
 
-  const vtexAuthData: VtexAuthData = {
-    vtex_appKey: settings.vtex_appKey,
-    vtex_appToken: settings.vtex_appToken,
-  }
-
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-    vtexAuthData,
-    orderId
-  )
+  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
 
   const {
     courier: carrierName,
@@ -50,7 +41,6 @@ export async function updateTrackingStatusHandler(ctx: Context) {
   }
 
   await vtexOrderClient.updateTrackingStatus({
-    authData: vtexAuthData,
     payload: trackingStatus,
     orderId,
     invoiceNumber,
