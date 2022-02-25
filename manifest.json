@@ -237,7 +237,7 @@
         "title": "Shipping Cost Product Name",
         "description": "Name of the shipping cost product that will appear on the invoice",
         "type": "string",
-        "default": "Shipping"
+        "default": "Transport"
       },
       "smartbill__invoiceShippingProductCode": {
         "title": "Shipping Cost Product Code",
