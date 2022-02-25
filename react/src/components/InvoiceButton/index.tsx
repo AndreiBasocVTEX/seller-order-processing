@@ -8,6 +8,7 @@ import { useIntl } from 'react-intl'
 import { SMARTBILL } from '../../utils/constants'
 import type { InvoiceButtonProps } from '../../types/common'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
+import { parseErrorResponse } from '../../utils/errorParser'
 
 const InvoiceButton: FC<InvoiceButtonProps> = ({
   orderId,
@@ -61,31 +62,11 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
           return
         }
 
-        const response = error.response
-
-        const errorResponse = await new Promise<{
-          message: string
-          details: string
-        }>((resolve) => {
-          const fileReader = new FileReader()
-
-          fileReader.readAsText(response.data)
-          fileReader.onload = () => {
-            const errorJSON = JSON.parse(fileReader.result as string) as {
-              message: string
-              stack: string
-            }
-
-            resolve({
-              message: errorJSON.message,
-              details: errorJSON.stack,
-            })
-          }
-        })
+        const response = await parseErrorResponse(error.response)
 
         const errorData = {
-          message: errorResponse.message,
-          details: errorResponse.details,
+          message: response.message,
+          details: response.details,
         }
 
         setAxiosError({

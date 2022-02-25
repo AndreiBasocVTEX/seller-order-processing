@@ -43,7 +43,7 @@ export const courierIcons: { [key: string]: string } = {
   dpd: download,
 }
 
-export const courierData = [
+export const courierListData = [
   {
     src: 'cargus',
     label: 'Cargus',
@@ -69,4 +69,31 @@ export const courierData = [
     service: 'manual',
   },
 ]
+
+export const invoiceListData = [
+  {
+    src: 'facturis',
+    label: 'Facturis',
+    service: 'facturis',
+  },
+  {
+    src: 'smartbill',
+    label: 'Smartbill',
+    service: 'smartbill',
+  },
+  {
+    src: 'download',
+    service: 'manual',
+  },
+]
 export const disabledCouriers = ['DHL', 'TNT', 'GLS', 'DPD']
+
+export const couriersDropDownList = [
+  { value: 'fancourier', label: 'FanCourier' },
+  { value: 'cargus', label: 'Cargus' },
+  { value: 'sameDay', label: 'SameDay' },
+  { value: 'tnt', label: 'TNT' },
+  { value: 'dhl', label: 'DHL' },
+  { value: 'gls', label: 'GLS' },
+  { value: 'dpd', label: 'DPD' },
+]

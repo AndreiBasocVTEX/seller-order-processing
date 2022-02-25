@@ -18,21 +18,21 @@ import { useIntl } from 'react-intl'
 
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { createAwbShipping, getOrderDataById } from '../../utils/api'
-import { normalizeOrderData } from '../../utils/normalizeData/orderDetails'
+import { createAwbShipping } from '../../utils/api'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
 import {
-  courierData,
   courierIcons,
+  courierListData,
+  couriersDropDownList,
   disabledCouriers,
+  invoiceListData,
 } from '../../utils/constants'
+import { parseErrorResponse } from '../../utils/errorParser'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
-  setOrderAwb,
   updateAwbData,
   order,
   onAwbUpdate,
-  resetOrdersData,
   refreshOrderDetails,
 }) => {
   const [service, setService] = useState('')
@@ -41,7 +41,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [invoiceUrl, setInvoiceUrl] = useState('')
   const [weight, setWeight] = useState(1)
   const [packageType, setPackageType] = useState('')
-  const [newAwbGenerated, setNewAwbGenerated] = useState(false)
   const [invoiceNum, setInvoiceNum] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [manualAwb, setManualAwb] = useState('')
@@ -86,7 +85,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     })
   }
 
-  const dropDownOptions = courierData.map((_courier) => {
+  const dropDownOptions = courierListData.map((_courier) => {
     return {
       label: (
         <>
@@ -112,50 +111,9 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     setModalOpen(!modalOpen)
   }
 
-  const getOrderDetails = async (reset?: boolean) => {
-    const rawData = await getOrderDataById(order.orderId)
-    const normalizedData = normalizeOrderData(rawData)
-
-    if (reset) {
-      refreshOrderDetails?.()
-
-      if (normalizedData.packageAttachment?.packages && resetOrdersData) {
-        const {
-          invoiceKey,
-          invoiceNumber,
-          invoiceUrl: invUrl,
-          courier: _courier,
-        } = normalizedData?.packageAttachment?.packages
-
-        if (invoiceKey && invoiceNumber) {
-          resetOrdersData(
-            normalizedData.orderId,
-            invoiceKey,
-            invoiceNumber,
-            invUrl
-          )
-        }
-
-        setOrderAwb?.((prevState) =>
-          prevState.map((el) => {
-            if (el.orderId === normalizedData.orderId) {
-              el.orderValue = String(invUrl)
-              el.courier = _courier
-              el.invoiceNumber = invoiceNumber
-            }
-
-            return el
-          })
-        )
-      }
-    }
-
-    setOrderData(normalizedData)
-    setIsLoading(false)
-  }
-
   const getOrderData = async (orderId: string) => {
-    createAwbShipping(
+    setIsLoading(true)
+    createAwbShipping({
       orderId,
       service,
       weight,
@@ -165,25 +123,24 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
       manualUrl,
       courier,
       packageType,
-      orderData?.value,
-      invoiceDate.toString(),
-      invoiceNum.toString(),
-      invoiceUrl
-    )
+      invoiceValue: orderData?.value,
+      issuanceDate: invoiceDate.toString(),
+      invoiceNumber: invoiceNum.toString(),
+      invoiceUrl,
+    })
       .then((data) => {
         if (!data) {
           return
         }
 
         updateAwbData?.(data)
-        setNewAwbGenerated(true)
-
-        getOrderDetails(true)
+        refreshOrderDetails?.()
+        onAwbUpdate(true)
       })
       .catch((error) => {
         if (error.status === 504) {
-          getOrderDetails(true)
           onAwbUpdate(true)
+          refreshOrderDetails?.()
 
           return
         }
@@ -195,6 +152,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           errorDetails: error.details,
         })
       })
+      .finally(() => setIsLoading(false))
   }
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
@@ -223,31 +181,11 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             return
           }
 
-          const response = error.response
-
-          const errorResponse = await new Promise<{
-            message: string
-            details: string
-          }>((resolve) => {
-            const fileReader = new FileReader()
-
-            fileReader.readAsText(response.data)
-            fileReader.onload = () => {
-              const errorJSON = JSON.parse(fileReader.result as string) as {
-                message: string
-                stack: string
-              }
-
-              resolve({
-                message: errorJSON.message,
-                details: errorJSON.stack,
-              })
-            }
-          })
+          const response = await parseErrorResponse(error.response)
 
           const errorData = {
-            message: errorResponse.message,
-            details: errorResponse.details,
+            message: response.message,
+            details: response.details,
           }
 
           setAxiosError({
@@ -274,10 +212,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     setOrderData(order)
     setIsLoading(false)
   }, [])
-
-  useEffect(() => {
-    if (newAwbGenerated) getOrderData(order.orderId)
-  }, [newAwbGenerated])
 
   const awbButton = () =>
     orderData?.packageAttachment.packages && (
@@ -466,15 +400,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                   </p>
                   <Dropdown
                     required
-                    options={[
-                      { value: 'fancourier', label: 'FanCourier' },
-                      { value: 'cargus', label: 'Cargus' },
-                      { value: 'sameDay', label: 'SameDay' },
-                      { value: 'tnt', label: 'TNT' },
-                      { value: 'dhl', label: 'DHL' },
-                      { value: 'gls', label: 'GLS' },
-                      { value: 'dpd', label: 'DPD' },
-                    ]}
+                    options={couriersDropDownList}
                     value={courierSetManually}
                     onChange={(_: unknown, v: SetStateAction<string>) =>
                       setCourierManually(v)
@@ -523,59 +449,29 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                     })
                   }
                   zIndex={999999}
-                  options={[
-                    {
-                      disabled: true,
+                  options={invoiceListData.map((invoice) => {
+                    return {
+                      ...(invoice.service === 'facturis' && { disabled: true }),
                       label: (
                         <>
                           <img
                             alt="logo"
                             style={{ width: '20px', paddingRight: '6px' }}
-                            src={courierIcons.facturis}
-                          />{' '}
-                          Facturis
-                        </>
-                      ),
-                      onClick: () => {
-                        setCourier('facturis')
-                      },
-                    },
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={courierIcons.smartbill}
-                          />{' '}
-                          Smartbill
-                        </>
-                      ),
-                      disabled: false,
-                      onClick: () => {
-                        setCourier('smartbill')
-                      },
-                    },
-                    {
-                      label: (
-                        <>
-                          <img
-                            alt="logo"
-                            style={{ width: '20px', paddingRight: '6px' }}
-                            src={courierIcons.download}
+                            src={courierIcons[invoice.src]}
                           />
-                          {intl.formatMessage({
-                            id:
-                              'awb-shipping-modal.modal-invoice.list.manual-option',
-                          })}
+                          {invoice.service === 'manual'
+                            ? intl.formatMessage({
+                                id:
+                                  'awb-shipping-modal.modal-invoice.list.manual-option',
+                              })
+                            : invoice.label}
                         </>
                       ),
-                      disabled: false,
                       onClick: () => {
-                        setCourier('manual')
+                        setCourier(invoice.service)
                       },
-                    },
-                  ]}
+                    }
+                  })}
                 />
               </div>
 

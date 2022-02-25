@@ -3,7 +3,7 @@ import axios from 'axios'
 
 import type { IOrder } from '../../typings/order'
 import type { OrderAwbStatus } from '../../typings/OrderAwbStatus'
-import type { ICreateAwbResult } from '../../types/api'
+import type { ICreateAwbProps, ICreateAwbResult } from '../../types/api'
 import type { OrderStats } from '../../typings/orderStats'
 import type { GetOrderStatsParams } from '../../types/common'
 
@@ -45,21 +45,21 @@ export const getOrderAwbStatus = async (
       return null
     })
 
-export const createAwbShipping = (
-  orderId: string,
-  service: string,
-  weight: number,
-  courierSetManually: string,
-  packageAmount: number,
-  manualAwb: string,
-  manualUrl: string,
-  courier: string,
-  packageType: string,
-  invoiceValue: number | undefined,
-  issuanceDate: string,
-  invoiceNumber: string,
-  invoiceUrl: string
-): Promise<ICreateAwbResult> => {
+export const createAwbShipping = ({
+  orderId,
+  invoiceUrl,
+  invoiceNumber,
+  invoiceValue,
+  manualAwb,
+  manualUrl,
+  courierSetManually,
+  service,
+  issuanceDate,
+  packageAmount,
+  packageType,
+  weight,
+  courier,
+}: ICreateAwbProps): Promise<ICreateAwbResult> => {
   return axios
     .post(
       `/opa/orders/${orderId}/track-and-invoice`,
