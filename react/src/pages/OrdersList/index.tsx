@@ -25,6 +25,7 @@ import InvoiceButton from '../../components/InvoiceButton'
 import type { StatsOrderData } from '../../typings/orderStats'
 import TablePagination from '../../components/OrderList/TablePagination'
 import TableFilters from '../../components/OrderList/TableFilters'
+import '../../public/style.css'
 
 const OrdersList: FC = () => {
   const [totalizerData, setTotalizerData] = useState<TableTotalizerData>({
