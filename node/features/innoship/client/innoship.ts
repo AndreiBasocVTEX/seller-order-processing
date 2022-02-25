@@ -13,9 +13,15 @@ import type {
 } from '../dto/innoship-awb.dto'
 import { createOrderPayload } from '../helpers/innoship-create-payload.helper'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
-import { UnhandledError } from '../../core/helpers/error.helper'
+import {
+  UnhandledError,
+  ValidationError,
+} from '../../core/helpers/error.helper'
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class InnoshipClient extends CarrierClient {
+  protected static ENABLED_SETTING_NAME = 'innoship__isEnabled'
+
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('http://api.innoship.io/api', ctx, {
       ...options,
@@ -26,6 +32,18 @@ export default class InnoshipClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
+  }
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return !!settings[InnoshipClient.ENABLED_SETTING_NAME]
+  }
+
+  public throwIfDisabled(settings: ObjectLiteral): void | never {
+    if (!this.isActive(settings)) {
+      throw new ValidationError({
+        message: `You need to enable ${CarriersEnum.INNOSHIP} integration to perform this action`,
+      })
+    }
   }
 
   public async trackingLabel({

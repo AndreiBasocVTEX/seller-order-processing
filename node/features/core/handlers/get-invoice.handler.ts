@@ -10,12 +10,16 @@ export async function getInvoiceHandler(ctx: Context) {
     clients: { vtexOrder: vtexOrderClient, smartbill },
   } = ctx
 
-  const orderId = params.orderId as string
   const settings = await getVtexAppSettings(ctx)
+
+  smartbill.throwIfDisabled(settings)
+
   const vtexAuthData: VtexAuthData = {
     vtex_appKey: settings.vtex_appKey,
     vtex_appToken: settings.vtex_appToken,
   }
+
+  const orderId = params.orderId as string
 
   const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
     vtexAuthData,

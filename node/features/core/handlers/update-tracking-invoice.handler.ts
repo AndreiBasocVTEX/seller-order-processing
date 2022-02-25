@@ -36,6 +36,8 @@ export async function updateTrackingStatusHandler(ctx: Context) {
     carrierName.toLowerCase() as CarrierValues
   )
 
+  carrier.throwIfDisabled(settings)
+
   const trackingStatus = await carrier.getTrackingStatus({
     settings,
     invoiceNumber,

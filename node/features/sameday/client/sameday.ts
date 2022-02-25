@@ -15,10 +15,16 @@ import type {
 import type { IAuthDataSameday } from '../models/sameday-auth.model'
 import { createOrderPayload } from '../helpers/sameday-create-payload.helper'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
-import { UnhandledError } from '../../core/helpers/error.helper'
+import {
+  UnhandledError,
+  ValidationError,
+} from '../../core/helpers/error.helper'
 import findAllObjectPropsByKey from '../../core/utils/findAllObjectPropsByKey'
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class SamedayClient extends CarrierClient {
+  protected static ENABLED_SETTING_NAME = 'sameday__isEnabled'
+
   constructor(ctx: IOContext, options?: InstanceOptions) {
     // URL for demo environment
     super('https://sameday-api.demo.zitec.com', ctx, {
@@ -30,6 +36,18 @@ export default class SamedayClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
+  }
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return !!settings[SamedayClient.ENABLED_SETTING_NAME]
+  }
+
+  public throwIfDisabled(settings: ObjectLiteral): void | never {
+    if (!this.isActive(settings)) {
+      throw new ValidationError({
+        message: `You need to enable ${CarriersEnum.SAMEDAY} integration to perform this action`,
+      })
+    }
   }
 
   private async getAuthToken(

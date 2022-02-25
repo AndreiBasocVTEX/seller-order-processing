@@ -8,6 +8,7 @@ import type { TrackAndInvoiceRequestDTO } from '../dto/order-api.dto'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import { OrderStatus } from '../../vtex/enums/order-status.enum'
+import { ValidationError } from '../helpers/error.helper'
 
 export async function trackAndInvoiceHandler(ctx: Context) {
   const {
@@ -36,9 +37,10 @@ export async function trackAndInvoiceHandler(ctx: Context) {
   )
 
   if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
-    throw new Error(
-      'You need to wait until the window-to-cancel period ends to generate AWB'
-    )
+    throw new ValidationError({
+      message:
+        'You need to wait until the window-to-cancel period ends to generate AWB',
+    })
   }
 
   let trackingInfoPayload: TrackingInfoDTO
@@ -48,6 +50,12 @@ export async function trackAndInvoiceHandler(ctx: Context) {
       ctx,
       tracking.provider as CarrierValues
     )
+
+    if (!settings[`${tracking.provider}__isEnabled`]) {
+      throw new ValidationError({
+        message: `You need to enable ${tracking.provider} integration to perform this action`,
+      })
+    }
 
     trackingInfoPayload = await carrier.createTracking({
       settings,
@@ -61,12 +69,21 @@ export async function trackAndInvoiceHandler(ctx: Context) {
       trackingUrl: tracking.params.trackingUrl ?? '',
     }
   } else {
-    throw new Error('Tracking number is required for manual input')
+    throw new ValidationError({
+      message: 'Tracking number is required for manual input',
+    })
   }
 
   let notifyInvoiceRequest: NotifyInvoicePayload
 
   if (invoice.provider.toLowerCase() === 'smartbill') {
+    if (!settings.smartbill__isEnabled) {
+      throw new ValidationError({
+        message:
+          'You need to enable Smartbill integration to perform this action',
+      })
+    }
+
     const smartbillInvoice = await smartbill.generateInvoice({
       settings,
       order,

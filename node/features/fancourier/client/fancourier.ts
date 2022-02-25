@@ -17,11 +17,29 @@ import {
   transformResponseToText,
 } from '../../core/helpers/body-parser.helper'
 import type { FormDataPayload } from '../../core/models/form-data.model'
-import { UnhandledError } from '../../core/helpers/error.helper'
+import {
+  UnhandledError,
+  ValidationError,
+} from '../../core/helpers/error.helper'
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class FancourierClient extends CarrierClient {
+  protected static ENABLED_SETTING_NAME = 'fancourier__isEnabled'
+
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super('', ctx, options)
+  }
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return !!settings[FancourierClient.ENABLED_SETTING_NAME]
+  }
+
+  public throwIfDisabled(settings: ObjectLiteral): void | never {
+    if (!this.isActive(settings)) {
+      throw new ValidationError({
+        message: `You need to enable ${CarriersEnum.FANCOURIER} integration to perform this action`,
+      })
+    }
   }
 
   protected async requestAWB({
@@ -103,11 +121,11 @@ export default class FancourierClient extends CarrierClient {
         'Fancourier validation failed, please check if the sent fileData was right.',
         JSON.stringify(fileData, null, 2)
       )
-      throw new Error(
-        `Fancourier validation failed, please check if the sent fileData was right. ${JSON.stringify(
+      throw new ValidationError({
+        message: `Fancourier validation failed, please check if the sent fileData was right. ${JSON.stringify(
           fileData
-        )}`
-      )
+        )}`,
+      })
     }
 
     const [lineNumber, resStatus, trackingNumber, rate] = res?.split(',') ?? []
@@ -115,7 +133,7 @@ export default class FancourierClient extends CarrierClient {
     if (resStatus === '0') {
       // If there is an error, then on the third position of the response array (trackingNumber)
       // will be an error message
-      throw new Error(`${trackingNumber}`)
+      throw new ValidationError({ message: `${trackingNumber}` })
     }
 
     return {
@@ -205,7 +223,7 @@ export default class FancourierClient extends CarrierClient {
     options: { responseType: 'text' | 'blob' }
   ) {
     if (!url) {
-      throw new Error('URL is required')
+      throw new ValidationError({ message: 'URL is required' })
     }
 
     const form = payloadToFormData(payload)

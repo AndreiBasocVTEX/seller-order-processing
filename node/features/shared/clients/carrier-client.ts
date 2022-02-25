@@ -1,6 +1,7 @@
 import type { IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
+import type { ObjectLiteral } from '../../core/models/object-literal.model'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type { PaperSize } from '../enums/paper-size.enum'
@@ -42,6 +43,8 @@ export interface TrackingInfoDTO {
 }
 
 export abstract class CarrierClient extends ExternalClient {
+  protected static ENABLED_SETTING_NAME: string
+
   protected abstract requestAWB(
     request: CreateTrackingRequest
   ): Promise<unknown>
@@ -55,4 +58,6 @@ export abstract class CarrierClient extends ExternalClient {
   ): Promise<TrackingInfoDTO>
 
   abstract trackingLabel(request: GetTrackingLabelRequest): unknown
+  abstract isActive(settings: ObjectLiteral): boolean
+  abstract throwIfDisabled(settings: ObjectLiteral): never | void
 }

@@ -2,6 +2,7 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
+import { getActiveProvidersHandler } from './features/core/handlers/get-active-providers.handler'
 import { getInvoiceHandler } from './features/core/handlers/get-invoice.handler'
 import { getTrackingLabelHandler } from './features/core/handlers/get-tracking-label.handler'
 import { trackAndInvoiceHandler } from './features/core/handlers/track-and-invoice.handler'
@@ -58,6 +59,9 @@ export default new Service({
     }),
     getInvoice: method({
       GET: [errorHandleMiddleware(getInvoiceHandler)],
+    }),
+    getAvailableProviders: method({
+      GET: [errorHandleMiddleware(getActiveProvidersHandler)],
     }),
   },
 })
