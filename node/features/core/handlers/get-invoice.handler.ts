@@ -1,4 +1,3 @@
-import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 
@@ -14,17 +13,9 @@ export async function getInvoiceHandler(ctx: Context) {
 
   smartbill.throwIfDisabled(settings)
 
-  const vtexAuthData: VtexAuthData = {
-    vtex_appKey: settings.vtex_appKey,
-    vtex_appToken: settings.vtex_appToken,
-  }
-
   const orderId = params.orderId as string
 
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-    vtexAuthData,
-    orderId
-  )
+  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
 
   const { invoiceNumber } = order?.packageAttachment?.packages.pop()
 

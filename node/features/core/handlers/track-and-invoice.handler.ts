@@ -6,7 +6,6 @@ import type { CarrierValues } from '../../shared/enums/carriers.enum'
 import type { TrackingInfoDTO } from '../../shared/clients/carrier-client'
 import type { TrackAndInvoiceRequestDTO } from '../dto/order-api.dto'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
-import type { VtexAuthData } from '../../vtex/dto/auth.dto'
 import { OrderStatus } from '../../vtex/enums/order-status.enum'
 import { ValidationError } from '../helpers/error.helper'
 
@@ -26,15 +25,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
   const settings = await getVtexAppSettings(ctx)
 
-  const vtexAuthData: VtexAuthData = {
-    vtex_appKey: settings.vtex_appKey,
-    vtex_appToken: settings.vtex_appToken,
-  }
-
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(
-    vtexAuthData,
-    orderId
-  )
+  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
 
   if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
     throw new ValidationError({
@@ -107,14 +98,12 @@ export async function trackAndInvoiceHandler(ctx: Context) {
   }
 
   await vtexOrderClient.trackAndInvoice({
-    authData: vtexAuthData,
     orderId,
     payload: notifyInvoiceRequest,
   })
 
   if (order.status === OrderStatus.READY_FOR_HANDLING) {
     await vtexOrderClient.setOrderStatusToInvoiced({
-      authData: vtexAuthData,
       orderId,
     })
   }
