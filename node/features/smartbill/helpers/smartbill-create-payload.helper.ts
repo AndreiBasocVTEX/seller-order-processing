@@ -12,12 +12,11 @@ export default function createSmartbillOrderPayload({
   const issueDate = new Date().toISOString().slice(0, 10) // '2022-02-01'
   const {
     clientProfileData: client,
-    shippingData: { address },
+    invoiceData: { address },
   } = order
 
   const clientData: SmartbillInvoiceRequestDTO = {
     country: 'Romania',
-    email: client.email,
     name: `${client.lastName} ${client.firstName}`,
     address: `${address.street} ${address.number}`,
     city: `${address.city}`,

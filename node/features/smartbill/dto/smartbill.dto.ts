@@ -4,7 +4,7 @@ import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export interface SmartbillInvoiceRequestDTO {
   country: string
-  email: string
+  email?: string
   name: string
   address: string
   city: string
