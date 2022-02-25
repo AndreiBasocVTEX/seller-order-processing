@@ -82,6 +82,16 @@
         "description": "",
         "type": "string"
       },
+      "general__titleSettings": {
+        "title": "General Settings",
+        "description": "",
+        "type": "object"
+      },
+      "general_shippingVAT": {
+        "title": "Shipping VAT Percentage",
+        "type": "number",
+        "default": 19
+      },
       "fancourier__titleSettings": {
         "title": "Fancourier Settings",
         "description": "",
@@ -253,11 +263,6 @@
       "smartbill__defaultVATPercentage": {
         "title": "Smartbill Default VAT Percentage",
         "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
-        "type": "number",
-        "default": 19
-      },
-      "smartbill_shippingVAT": {
-        "title": "Smartbill Shipping VAT Percentage",
         "type": "number",
         "default": 19
       }

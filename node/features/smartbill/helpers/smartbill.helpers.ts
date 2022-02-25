@@ -67,7 +67,7 @@ export default function getProducts({
       price: shippingTotal.value / priceMultiplier,
       quantity: 1,
       taxName,
-      taxPercentage: settings.smartbill_shippingVAT,
+      taxPercentage: settings.general_shippingVAT,
       isService: true,
     })
   }
