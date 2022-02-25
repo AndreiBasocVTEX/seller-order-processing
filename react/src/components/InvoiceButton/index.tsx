@@ -105,7 +105,8 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
       block
       isLoading={isLoading}
       disabled={orderStatus === 'canceled' || invoiceAvailable === 'noUrl'}
-      onClick={() => {
+      onClick={(e: Event) => {
+        e.stopPropagation()
         invoiceAvailable && invoiceAvailable !== SMARTBILL
           ? window.open(`https://${invoiceAvailable}`)
           : printInvoice(orderId)

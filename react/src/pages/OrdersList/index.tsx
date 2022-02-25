@@ -254,7 +254,21 @@ const OrdersList: FC = () => {
         }),
         width: 200,
         cellRenderer: ({ rowData }: { rowData: OrderDetailsData }) => {
-          return <RequestAwbModal order={rowData} onAwbUpdate={setAwbUpdated} />
+          return (
+            <div
+              tabIndex={0}
+              role="button"
+              className="w-100"
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.stopPropagation()
+              }}
+            >
+              <RequestAwbModal order={rowData} onAwbUpdate={setAwbUpdated} />
+            </div>
+          )
         },
       },
       invoiceData: {
@@ -377,6 +391,10 @@ const OrdersList: FC = () => {
     setFilterParams({ ...filterParams, search: searchValue })
   }
 
+  const onRowClick = ({ rowData }: { rowData: { orderId: string } }) => {
+    window.parent.location.href = `/admin/order-details/${rowData.orderId}`
+  }
+
   return (
     <div className="f6">
       <TableFilters
@@ -391,6 +409,7 @@ const OrdersList: FC = () => {
         handlePaginationParams={setPaginationParams}
       />
       <Table
+        onRowClick={onRowClick}
         fullWidth
         loading={tableLoading}
         schema={tableOrdersSchema}
