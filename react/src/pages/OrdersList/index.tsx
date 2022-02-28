@@ -137,7 +137,7 @@ const OrdersList: FC = () => {
             >
               <div className="center">
                 <Link
-                  href={`/admin/app/order-details/${rowData.orderId}`}
+                  href={`/admin/order-details/${rowData.orderId}`}
                   target="_parent"
                 >
                   {cellData}
@@ -164,7 +164,7 @@ const OrdersList: FC = () => {
               })} ${cellData}`}
             >
               <div className="center">
-                <Link href={`/admin/app/order-details/${rowData.orderId}`}>
+                <Link href={`/admin/order-details/${rowData.orderId}`}>
                   {cellData}
                 </Link>
               </div>
@@ -190,12 +190,16 @@ const OrdersList: FC = () => {
         }),
         cellRenderer: ({
           cellData,
+          rowData,
         }: {
           cellData: ClientProfileData
+          rowData: OrderDetailsData
         }): JSX.Element => {
           return (
             <span>
-              {cellData.firstName} {cellData.lastName}
+              {cellData.isCorporate
+                ? cellData.corporateName
+                : rowData.shippingData.address.receiverName}
             </span>
           )
         },
