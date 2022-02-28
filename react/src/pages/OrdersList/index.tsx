@@ -1,7 +1,6 @@
 import type { FC } from 'react'
 import React, { useEffect, useState } from 'react'
 import { Link, Table, Tag, Tooltip } from 'vtex.styleguide'
-import { FormattedCurrency } from 'vtex.format-currency'
 import { useIntl } from 'react-intl'
 
 import type {
@@ -237,7 +236,7 @@ const OrdersList: FC = () => {
         }: {
           cellData: OrderDetailsData['value']
         }) => {
-          return <FormattedCurrency value={cellData / 100} />
+          return <span>{cellData / 100} Lei</span>
         },
       },
       openTextField: {
