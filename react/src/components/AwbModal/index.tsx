@@ -260,7 +260,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     <>
       {orderData?.packageAttachment.packages &&
         (!disabledCouriers.includes(
-          orderData?.packageAttachment.packages.courier
+          orderData?.packageAttachment.packages.courier.toUpperCase()
         ) ? (
           <Tooltip
             label={`${intl.formatMessage({
