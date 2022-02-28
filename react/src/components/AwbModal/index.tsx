@@ -222,7 +222,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           isLoading ||
           orderData?.status === 'canceled' ||
           disabledCouriers.includes(
-            orderData?.packageAttachment.packages.courier
+            orderData?.packageAttachment.packages.courier.toUpperCase()
           )
         }
         isLoading={isLoading}
