@@ -222,7 +222,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           isLoading ||
           orderData?.status === 'canceled' ||
           disabledCouriers.includes(
-            orderData?.packageAttachment.packages.courier.toUpperCase()
+            orderData?.packageAttachment.packages.courier?.toUpperCase()
           )
         }
         isLoading={isLoading}
@@ -260,7 +260,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     <>
       {orderData?.packageAttachment.packages &&
         (!disabledCouriers.includes(
-          orderData?.packageAttachment.packages.courier.toUpperCase()
+          orderData?.packageAttachment.packages.courier?.toUpperCase()
         ) ? (
           <Tooltip
             label={`${intl.formatMessage({
