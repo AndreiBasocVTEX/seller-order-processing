@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import type { FC } from 'react'
 import { Button, IconDownload, Tooltip } from 'vtex.styleguide'
-import type { AxiosError } from 'axios'
-import axios from 'axios'
 import { useIntl } from 'react-intl'
 
 import { SMARTBILL } from '../../utils/constants'
 import type { InvoiceButtonProps } from '../../types/common'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { parseErrorResponse } from '../../utils/errorParser'
+import { downloadInvoice } from '../../utils/api'
 
 const InvoiceButton: FC<InvoiceButtonProps> = ({
   orderId,
@@ -47,44 +45,16 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
 
   const printInvoice = async (_orderId: string) => {
     setIsLoading(true)
-    const data = await axios
-      .get(`/opa/orders/${_orderId}/get-invoice`, {
-        params: {
-          paperSize: 'A4',
-        },
-        responseType: 'blob',
-      })
-      .then((res) => {
-        return res.data
-      })
-      .catch(async (error: AxiosError<Blob>) => {
-        if (!error.response) {
-          return
-        }
-
-        const response = await parseErrorResponse(error.response)
-
-        const errorData = {
-          message: response.message,
-          details: response.details,
-        }
-
+    downloadInvoice(_orderId)
+      .catch((e) => {
         setAxiosError({
           ...axiosError,
           isError: true,
-          errorDetails: errorData.details,
-          errorMessage: String(errorData.message),
+          errorDetails: e.details,
+          errorMessage: String(e.message),
         })
       })
-
-    if (data && !axiosError.isError) {
-      const blob = new Blob([data], { type: 'application/pdf' })
-      const blobURL = URL.createObjectURL(blob)
-
-      window.open(blobURL)
-    }
-
-    setIsLoading(false)
+      .finally(() => setIsLoading(false))
   }
 
   const removeAxiosError = () => {

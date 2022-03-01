@@ -42,7 +42,7 @@ const OrderDetails: FC = () => {
         fullWidth
         pageHeader={
           <OrderHeader
-            orderId={order?.marketPlaceOrderId ?? 'Lipsa ID'}
+            orderId={order?.orderId ?? 'Lipsa ID'}
             orderStatus={order?.formattedOrderStatus}
           />
         }
