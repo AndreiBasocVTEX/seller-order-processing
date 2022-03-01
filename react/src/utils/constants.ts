@@ -72,11 +72,6 @@ export const courierListData = [
 
 export const invoiceListData = [
   {
-    src: 'facturis',
-    label: 'Facturis',
-    service: 'facturis',
-  },
-  {
     src: 'smartbill',
     label: 'Smartbill',
     service: 'smartbill',

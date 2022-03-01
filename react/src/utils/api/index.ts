@@ -162,3 +162,11 @@ export const downloadAwb = async (orderId: string, trackingNumber: string) => {
       await errorHandler(error, () => error.response?.status === 504)
     })
 }
+
+export const getActiveProviders = () =>
+  axios
+    .get(`/opa/get-active-providers`)
+    .then((response) => response.data)
+    .catch(() => {
+      return null
+    })

@@ -16,8 +16,13 @@ import { useIntl } from 'react-intl'
 
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { createAwbShipping, downloadAwb } from '../../utils/api'
+import {
+  createAwbShipping,
+  downloadAwb,
+  getActiveProviders,
+} from '../../utils/api'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
+import type { Providers } from '../../typings/Providers'
 import {
   courierIcons,
   courierListData,
@@ -32,6 +37,21 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   onAwbUpdate,
   refreshOrderDetails,
 }) => {
+  const [availableProviders, setAvailableProviders] = useState<Providers>({
+    awbServices: [
+      {
+        src: 'download',
+        service: 'manual',
+      },
+    ],
+    invoiceServices: [
+      {
+        src: 'download',
+        service: 'manual',
+      },
+    ],
+  })
+
   const [service, setService] = useState('')
   const [courier, setCourier] = useState('')
   const [packageAmount, setPackageAmount] = useState(1)
@@ -82,7 +102,32 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     })
   }
 
-  const dropDownOptions = courierListData.map((_courier) => {
+  const retrieveActiveProviders = async () => {
+    const allActiveProviders = await getActiveProviders()
+
+    const activeAwbCouriers = courierListData.filter(
+      (el) => !!allActiveProviders[el.service]
+    )
+
+    const activeInvoiceCouriers = invoiceListData.filter(
+      (el) => !!allActiveProviders[el.service]
+    )
+
+    setAvailableProviders({
+      ...availableProviders,
+      awbServices: [...activeAwbCouriers, ...availableProviders.awbServices],
+      invoiceServices: [
+        ...activeInvoiceCouriers,
+        ...availableProviders.invoiceServices,
+      ],
+    })
+  }
+
+  useEffect(() => {
+    retrieveActiveProviders()
+  }, [])
+
+  const dropDownOptions = availableProviders.awbServices.map((_courier) => {
     return {
       label: (
         <>
@@ -419,9 +464,8 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                     })
                   }
                   zIndex={999999}
-                  options={invoiceListData.map((invoice) => {
+                  options={availableProviders.invoiceServices.map((invoice) => {
                     return {
-                      ...(invoice.service === 'facturis' && { disabled: true }),
                       label: (
                         <>
                           <img
