@@ -5,7 +5,7 @@ export async function getActiveProvidersHandler(ctx: Context) {
   const settings = await getVtexAppSettings(ctx)
 
   return {
-    ...ctx.clients.carrier.getActiveCarriers(ctx),
+    ...(await ctx.clients.carrier.getActiveCarriers(ctx)),
     [BillingsEnum.SMARTBILL]: ctx.clients[BillingsEnum.SMARTBILL].isActive(
       settings
     ),
