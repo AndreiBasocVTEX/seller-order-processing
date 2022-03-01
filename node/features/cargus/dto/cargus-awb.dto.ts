@@ -82,7 +82,7 @@ export interface ParcelCode {
   Length: number
   Width: number
   Height: number
-  // ParcelContent?: string
+  ParcelContent?: string
 }
 
 export interface Sender {
@@ -195,4 +195,11 @@ export interface ICargusTrackAwbEvent {
   EventId: number
   Description: string
   LocalityName: string
+}
+
+export interface CargusFormattedPackageAttachments {
+  numberOfParcels: number
+  numberOfEnvelopes: number
+  totalWeight: number
+  packages: ParcelCode[]
 }

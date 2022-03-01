@@ -1,6 +1,5 @@
 import {
   shipmentPaymentMethod,
-  defaultEnvelopeCount,
   pickup,
   defaultCountryCode,
   awbContent,
@@ -8,7 +7,6 @@ import {
   pickupServiceId,
 } from './fancourier-constants.helper'
 import {
-  getTotalWeight,
   getTotalDiscount,
   getPaymentMethod,
 } from '../../core/helpers/order-dto.helper'
@@ -17,6 +15,7 @@ import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
+import formatPackageAttachments from './fancourier-format-package-attachment.helper'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
@@ -26,10 +25,6 @@ export function createFancourierOrderPayload(
   warehouseId: string,
   trackingParams: CreateTrackingRequestParams
 ): IFancourierAwbPayload {
-  const totalWeight = trackingParams.weight
-    ? trackingParams.weight
-    : getTotalWeight(order)
-
   const totalDiscount = getTotalDiscount(order)
   const { address } = order.shippingData
   const { courierId } = order?.shippingData?.logisticsInfo?.[0].deliveryIds?.[0]
@@ -46,31 +41,12 @@ export function createFancourierOrderPayload(
       ? 0
       : value / priceMultiplier
 
-  const numberOfParcels = trackingParams.numberOfParcels
-    ? trackingParams.numberOfParcels
-    : 1
-
-  const parcels = []
-
-  if (numberOfParcels > 1) {
-    for (let i = 1; i <= numberOfParcels; i++) {
-      parcels.push({
-        sequenceNo: i,
-        weight: 1,
-        type: 2,
-        reference1: `Parcel ${i}`,
-        size: { width: 1, height: 1, length: 1 },
-      })
-    }
-  } else {
-    parcels.push({
-      sequenceNo: 1,
-      weight: totalWeight,
-      type: 2,
-      reference1: `Parcel 1`,
-      size: { width: 1, height: 1, length: 1 },
-    })
-  }
+  const {
+    numberOfParcels,
+    numberOfEnvelopes,
+    totalWeight,
+    packages,
+  } = formatPackageAttachments(order, trackingParams)
 
   const orderPayload: IFancourierAwbPayload = {
     service: 'Standard',
@@ -95,11 +71,11 @@ export function createFancourierOrderPayload(
     },
     payment: shipmentPaymentMethod,
     content: {
-      envelopeCount: defaultEnvelopeCount,
+      envelopeCount: numberOfEnvelopes,
       parcelsCount: numberOfParcels,
       totalWeight,
       contents: awbContent,
-      parcels,
+      parcels: packages,
     },
     externalClientLocation: warehouseId,
     externalOrderId: order.orderId,

@@ -78,7 +78,7 @@ interface Content {
   contents: string
   package?: string
   oversizedPackage?: boolean
-  parcels?: Parcel[]
+  parcels?: InnoshipParcel[]
 }
 
 interface Address {
@@ -93,7 +93,7 @@ interface Address {
   email?: string
 }
 
-interface Parcel {
+export interface InnoshipParcel {
   sequenceNo: number
   size: Size
   weight: number
@@ -112,4 +112,11 @@ interface Parameters {
   getParcelsBarcodes?: boolean
   includeCourierResponse?: boolean
   includePriceBreakdown?: boolean
+}
+
+export interface InnoshipFormattedPackageAttachments {
+  packages: InnoshipParcel[]
+  totalWeight: number
+  numberOfEnvelopes: number
+  numberOfParcels: number
 }

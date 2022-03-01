@@ -1,5 +1,4 @@
 import {
-  getTotalWeight,
   getTotalDiscount,
   getPaymentMethod,
 } from '../../core/helpers/order-dto.helper'
@@ -13,16 +12,13 @@ import {
   pickupServiceId,
   pickup,
 } from './sameday-constants.helper'
+import formatPackageAttachments from './sameday-format-package-attachment.helper'
 
 export function createOrderPayload(
   order: IVtexOrder,
   countyId: number,
   trackingParams: CreateTrackingRequestParams
 ): ISamedayAwbPayload {
-  const totalWeight = trackingParams.weight
-    ? trackingParams.weight
-    : getTotalWeight(order)
-
   const totalOrderDiscount = getTotalDiscount(order)
   let { value } = order
 
@@ -30,31 +26,11 @@ export function createOrderPayload(
   // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   value += totalOrderDiscount
 
-  const numberOfParcels = trackingParams.numberOfParcels
-    ? trackingParams.numberOfParcels
-    : 1
-
-  const parcels = []
-
-  if (numberOfParcels > 1) {
-    for (let i = 1; i <= numberOfParcels; i++) {
-      parcels.push({
-        sequenceNo: i,
-        weight: 1,
-        type: 2,
-        reference1: `Parcel ${i}`,
-        size: { width: 1, height: 1, length: 1 },
-      })
-    }
-  } else {
-    parcels.push({
-      sequenceNo: 1,
-      weight: totalWeight,
-      type: 2,
-      reference1: `Parcel 1`,
-      size: { width: 1, height: 1, length: 1 },
-    })
-  }
+  const {
+    totalWeight,
+    packages,
+    samedayPackageType,
+  } = formatPackageAttachments(order, trackingParams)
 
   const { address } = order.shippingData
   const addressText = [
@@ -90,9 +66,10 @@ export function createOrderPayload(
     geniusOrder: 0,
     insuredValue: value,
     observation: order.orderId,
-    packageType: 1,
-    packageWeight: 1,
-    parcels,
+    packageType: samedayPackageType,
+    packageNumber: trackingParams.numberOfPackages,
+    packageWeight: totalWeight,
+    parcels: packages,
     // TODO or not TODO add selectePickup function
     pickupPoint: selectedPickup,
     // TODO or not TODO selectService functions
