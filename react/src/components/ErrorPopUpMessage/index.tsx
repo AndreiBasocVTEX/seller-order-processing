@@ -11,7 +11,8 @@ const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(true)
   const [isCollapseOpen, setIsCollapseOpen] = useState(false)
-  const onCLoseModal = () => {
+  const onCLoseModal = (e: Event) => {
+    e.stopPropagation()
     setIsModalOpen(false)
     resetError?.()
   }

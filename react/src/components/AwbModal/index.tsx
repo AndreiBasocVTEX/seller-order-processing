@@ -11,14 +11,12 @@ import {
   NumericStepper,
   Tooltip,
 } from 'vtex.styleguide'
-import type { AxiosError } from 'axios'
-import axios from 'axios'
 import type { FC, SetStateAction } from 'react'
 import { useIntl } from 'react-intl'
 
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import { createAwbShipping } from '../../utils/api'
+import { createAwbShipping, downloadAwb } from '../../utils/api'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
 import {
   courierIcons,
@@ -27,7 +25,6 @@ import {
   disabledCouriers,
   invoiceListData,
 } from '../../utils/constants'
-import { parseErrorResponse } from '../../utils/errorParser'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
   updateAwbData,
@@ -164,48 +161,16 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const printAwb = async (_orderData: OrderDetailsData) => {
     setIsLoading(true)
-    try {
-      const data = await axios
-        .get(`/opa/orders/${_orderData?.orderId}/tracking-label`, {
-          params: {
-            awbTrackingNumber: _orderData?.value.toString(),
-            paperSize: 'A4',
-          },
-          responseType: 'blob',
+    downloadAwb(_orderData?.orderId, _orderData?.value.toString())
+      .catch((e) => {
+        setAxiosError({
+          ...axiosError,
+          isError: true,
+          errorDetails: e.details,
+          errorMessage: String(e.message),
         })
-        .then((res) => {
-          return res.data
-        })
-        .catch(async (error: AxiosError<Blob>) => {
-          if (!error.response || error.response.status === 504) {
-            return
-          }
-
-          const response = await parseErrorResponse(error.response)
-
-          const errorData = {
-            message: response.message,
-            details: response.details,
-          }
-
-          setAxiosError({
-            ...axiosError,
-            isError: true,
-            errorDetails: errorData.details,
-            errorMessage: String(errorData.message),
-          })
-        })
-
-      if (data) {
-        const blob = new Blob([data], { type: 'application/pdf' })
-
-        const blobURL = URL.createObjectURL(blob)
-
-        window.open(blobURL)
-      }
-    } finally {
-      setIsLoading(false)
-    }
+      })
+      .finally(() => setIsLoading(false))
   }
 
   useEffect(() => {
@@ -231,9 +196,14 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         }}
       >
         <div className="flex w-100">
-          <span>
-            <IconDownload />
-          </span>
+          {!disabledCouriers.includes(
+            orderData?.packageAttachment.packages.courier?.toUpperCase()
+          ) && (
+            <span>
+              <IconDownload />
+            </span>
+          )}
+
           <div className="w-100 truncate">
             <span className="mh3">
               {orderData?.packageAttachment.packages.courier && (
