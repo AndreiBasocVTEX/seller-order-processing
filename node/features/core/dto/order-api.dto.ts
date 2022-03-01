@@ -7,8 +7,9 @@ export interface TrackingRequestDTO {
   provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
   generate: boolean
   params: {
+    packageType: 'envelope' | 'parcel'
     weight?: number
-    numberOfParcels?: number
+    numberOfPackages: number
     trackingNumber?: string
     trackingUrl?: string
   }

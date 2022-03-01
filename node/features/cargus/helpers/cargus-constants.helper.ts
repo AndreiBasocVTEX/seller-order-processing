@@ -1,2 +1,6 @@
 export const shipmentPaymentMethod = 1
-export const defaultEnvelopeCount = 0
+export const envelopesWeight = 1
+export const cargusTypeOfPackage = {
+  envelope: 0,
+  parcel: 1,
+}

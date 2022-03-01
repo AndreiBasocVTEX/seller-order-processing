@@ -6,8 +6,9 @@ export interface ISamedayAwbPayload {
   insuredValue: number
   observation: string
   packageType: number
+  packageNumber?: number
   packageWeight: number
-  parcels: Parcel[]
+  parcels: SamedayParcel[]
   pickupPoint: number
   service: number
   thirdPartyPickup: number
@@ -21,18 +22,12 @@ export interface ISamedayCountyData {
   code: string
 }
 
-interface Parcel {
-  sequenceNo: number
+export interface SamedayParcel {
   weight: number
-  type: number
-  reference1: string
-  size: Size
-}
-
-interface Size {
-  width: number
-  height: number
-  length: number
+  width?: number
+  height?: number
+  length?: number
+  awbParcelNumber?: string
 }
 
 interface AwbRecipient {
@@ -117,4 +112,10 @@ interface ISamedayAwbEvent {
   county: string
   reason: string
   transitLocation: string
+}
+
+export interface SamedayFormattedPackageAttachments {
+  totalWeight: number
+  samedayPackageType: number
+  packages: SamedayParcel[]
 }

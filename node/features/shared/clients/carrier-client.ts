@@ -17,7 +17,8 @@ export interface CreateTrackingRequest extends CarrierClientRequest {
 
 export interface CreateTrackingRequestParams {
   weight?: number
-  numberOfParcels?: number
+  numberOfPackages: number
+  packageType: 'envelope' | 'parcel'
 }
 
 export interface GetTrackingStatusRequest extends CarrierClientRequest {

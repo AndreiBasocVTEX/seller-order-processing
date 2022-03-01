@@ -26,17 +26,7 @@ export interface IFancourierAwbPayload {
     parcelsCount: number
     totalWeight: number
     contents: string
-    parcels: Array<{
-      sequenceNo: number
-      weight: number
-      type: number
-      reference1: string
-      size: {
-        width: number
-        height: number
-        length: number
-      }
-    }>
+    parcels: Parcel[]
   }
   externalClientLocation: string
   externalOrderId: string
@@ -48,4 +38,23 @@ export interface IFancourierAwbPayload {
     declaredValue: number
     bankRepaymentAmount: number
   }
+}
+
+export interface Parcel {
+  sequenceNo: number
+  weight: number
+  type: number
+  reference1: string
+  size: {
+    width: number
+    height: number
+    length: number
+  }
+}
+
+export interface FancourierFormattedPackageAttachments {
+  numberOfParcels: number
+  numberOfEnvelopes: number
+  totalWeight: number
+  packages: Parcel[]
 }
