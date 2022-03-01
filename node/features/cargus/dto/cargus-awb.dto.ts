@@ -63,7 +63,7 @@ export interface ICargusAwbPayload {
   Transit2DepositFinger?: string
 }
 
-export interface ShippingCost {
+interface ShippingCost {
   BaseCost: number
   ExtraKmCost: number
   WeightCost: number
@@ -85,7 +85,7 @@ export interface ParcelCode {
   ParcelContent?: string
 }
 
-export interface Sender {
+interface Sender {
   LocationId: number | string | null
   Name?: string
   CountyId?: number
@@ -104,7 +104,7 @@ export interface Sender {
   CountryId?: number
 }
 
-export interface Recipient {
+interface Recipient {
   LocationId?: number
   Name: string
   CountyId?: number
@@ -190,7 +190,7 @@ export interface ICargusTrackAwbResponse {
   Event: ICargusTrackAwbEvent[]
 }
 
-export interface ICargusTrackAwbEvent {
+interface ICargusTrackAwbEvent {
   Date: string
   EventId: number
   Description: string

@@ -14,7 +14,7 @@ export interface NotifyInvoicePayload {
   invoiceKey?: string
 }
 
-export interface InvoiceItem {
+interface InvoiceItem {
   id: string
   quantity: number
   price: number

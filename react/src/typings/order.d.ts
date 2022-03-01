@@ -1,4 +1,4 @@
-export interface AddressData {
+interface AddressData {
   city: string
   postalCode: string
   receiverName: string
@@ -7,7 +7,7 @@ export interface AddressData {
   street: string
 }
 
-export interface ClientData {
+interface ClientData {
   id?: string
   email: string
   firstName: string
@@ -25,13 +25,13 @@ export interface ClientData {
   customerClass?: string | null
 }
 
-export interface OrderTotals {
+interface OrderTotals {
   id: string
   name: string
   value: number
 }
 
-export interface InvoiceData {
+interface InvoiceData {
   address: {
     city: string
     country: string
@@ -42,7 +42,7 @@ export interface InvoiceData {
   }
 }
 
-export interface Item {
+interface Item {
   freightCommission: number
   name: string
   id: string
@@ -56,12 +56,12 @@ export interface Item {
   taxCode: string
 }
 
-export interface LogisticsInfo {
+interface LogisticsInfo {
   price: number
   shippingEstimateDate: string
 }
 
-export interface PackageData {
+interface PackageData {
   courier: string
   courierStatus?: {
     data: [
@@ -86,11 +86,11 @@ export interface PackageData {
   invoiceKey?: string
 }
 
-export interface PackageAttachment {
+interface PackageAttachment {
   packages: [PackageData]
 }
 
-export interface ShippingData {
+interface ShippingData {
   address: AddressData
   logisticsInfo: [LogisticsInfo]
 }

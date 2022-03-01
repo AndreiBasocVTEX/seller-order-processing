@@ -1,4 +1,4 @@
-export interface OrderTrackingEvents {
+interface OrderTrackingEvents {
   date: string
   description: string
 }

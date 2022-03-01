@@ -31,7 +31,7 @@ export interface GetTrackingLabelRequest extends CarrierClientRequest {
   paperSize: PaperSize
 }
 
-export interface TrackingStatusDTO {
+interface TrackingStatusDTO {
   isDelivered: boolean
   deliveredDate?: string
   events?: VtexTrackingEvent[]

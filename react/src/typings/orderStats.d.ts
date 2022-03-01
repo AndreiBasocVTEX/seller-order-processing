@@ -1,4 +1,4 @@
-export interface OrderStatsPaging {
+interface OrderStatsPaging {
   total: number
   pages: number
   currentPage: number
@@ -9,7 +9,7 @@ export interface StatsOrderData {
   orderId: string
 }
 
-export interface StatsTotal {
+interface StatsTotal {
   Count: number
   Max: number
   Mean: number

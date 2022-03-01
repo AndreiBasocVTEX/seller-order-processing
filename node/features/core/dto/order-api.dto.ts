@@ -3,7 +3,7 @@ export interface TrackAndInvoiceRequestDTO {
   tracking: TrackingRequestDTO
 }
 
-export interface TrackingRequestDTO {
+interface TrackingRequestDTO {
   provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
   generate: boolean
   params: {
@@ -15,7 +15,7 @@ export interface TrackingRequestDTO {
   }
 }
 
-export interface InvoiceRequestDTO {
+interface InvoiceRequestDTO {
   provider: 'smartbill' | 'manual'
   params: {
     issuanceDate: string
