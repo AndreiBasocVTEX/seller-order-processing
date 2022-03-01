@@ -1,6 +1,7 @@
 {
-  "admin-example.navigation.seller-dashboard": "Tabloul de bord al vânzătorului",
-  "admin-example.navigation.search.kws": "order, invoice, AWB, seller",
+  "admin.navigation.orderProcessing": "Procesarea comenzilor",
+  "admin.navigation.order-processing": "Procesarea comenzilor",
+  "admin.navigation.search.kws": "order, invoice, AWB, seller",
   "seller-dashboard.common.all": "Toate",
   "order-detail.common.name": "Nume",
   "order-detail.common.address": "Adresă",
