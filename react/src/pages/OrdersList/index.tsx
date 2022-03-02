@@ -374,14 +374,6 @@ const OrdersList: FC = () => {
     if (search || status || date) {
       setTableLoading(false)
     }
-
-    if (tableItems?.length < paginationParams.perPage) {
-      setPaginationParams({
-        ...paginationParams,
-        page: 1,
-        itemsFrom: 1,
-      })
-    }
   }, [tableItems])
 
   useEffect(() => {
