@@ -387,11 +387,24 @@ const OrdersList: FC = () => {
     setTableLoading(true)
     setFilterParams({ ...filterParams, search: '' })
     setSearchValue('')
+    setPaginationParams({
+      ...paginationParams,
+      page: 1,
+      perPage: 15,
+      itemsFrom: 1,
+      itemsTo: 15,
+    })
   }
 
   const handleSearchInputSubmit = () => {
     setTableLoading(true)
     setFilterParams({ ...filterParams, search: searchValue })
+    setPaginationParams({
+      ...paginationParams,
+      page: 1,
+      perPage: 15,
+      itemsFrom: 1,
+    })
   }
 
   const onRowClick = ({ rowData }: { rowData: { orderId: string } }) => {
