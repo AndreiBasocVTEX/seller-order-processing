@@ -125,8 +125,7 @@ export default class CargusClient extends CarrierClient {
     return {
       trackingNumber,
       courier: CarriersEnum.CARGUS,
-      // TODO: Can't find tracking number
-      // trackingUrl: `https://www.cargus.ro/find-shipment-romanian/?trackingReference=${trackingNumber}`,
+      trackingUrl: `https://app.urgentcargus.ro/Private/Tracking.aspx?CodBara=${trackingNumber}`,
     }
   }
 
