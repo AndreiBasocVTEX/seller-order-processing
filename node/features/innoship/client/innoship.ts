@@ -3,6 +3,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  DeleteTrackingRequest,
   GetTrackingLabelRequest,
   GetTrackingStatusRequest,
 } from '../../shared/clients/carrier-client'
@@ -157,5 +158,21 @@ export default class InnoshipClient extends CarrierClient {
       isDelivered,
       events: trackingEvents,
     }
+  }
+
+  public async deleteAWB({ settings, trackingNumber }: DeleteTrackingRequest) {
+    const [courierId, awbTrackingNumber] = trackingNumber.split(':')
+
+    return this.http
+      .delete<boolean>(`api/Order/${courierId}/awb/${awbTrackingNumber}`, {
+        headers: {
+          'api-version': '1.0',
+          'X-Api-Key': settings.innoship__apiToken,
+        },
+      })
+      .then(({ data }) => data)
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 }

@@ -3,6 +3,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  DeleteTrackingRequest,
   GetTrackingLabelRequest,
   GetTrackingStatusRequest,
 } from '../../shared/clients/carrier-client'
@@ -171,5 +172,21 @@ export default class CargusClient extends CarrierClient {
       isDelivered,
       events: trackingEvents,
     }
+  }
+
+  public async deleteAWB({ settings, trackingNumber }: DeleteTrackingRequest) {
+    const token = await this.getBearerToken(settings)
+
+    return this.http
+      .delete<boolean>(`/Awbs?barCode=${trackingNumber}`, {
+        headers: {
+          'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then(({ data }) => data)
+      .catch((error) => {
+        throw new UnhandledError({ message: error?.response?.data })
+      })
   }
 }

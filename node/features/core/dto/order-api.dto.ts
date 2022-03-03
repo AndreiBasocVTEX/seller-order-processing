@@ -1,31 +1,3 @@
-export interface TrackAndInvoiceRequestDTO {
-  invoice: InvoiceRequestDTO
-  tracking: TrackingRequestDTO
-}
-
-export interface TrackingRequestDTO {
-  provider: 'innoship' | 'cargus' | 'fancourier' | 'sameday'
-  generate: boolean
-  params: {
-    packageType: 'envelope' | 'parcel'
-    weight?: number
-    numberOfPackages: number
-    trackingNumber?: string
-    trackingUrl?: string
-  }
-}
-
-export interface InvoiceRequestDTO {
-  provider: 'smartbill' | 'manual'
-  params: {
-    issuanceDate: string
-    invoiceNumber: string
-    invoiceValue: number
-    invoiceUrl?: string
-    type: string
-  }
-}
-
 export interface ITrackAwbInfoResponse {
   date: string
   orderId: string

@@ -4,6 +4,7 @@ import ObjectsToCsv from 'objects-to-csv'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  DeleteTrackingRequest,
   GetTrackingLabelRequest,
   GetTrackingStatusRequest,
 } from '../../shared/clients/carrier-client'
@@ -215,6 +216,27 @@ export default class FancourierClient extends CarrierClient {
       isDelivered,
       events: trackingEvents,
     }
+  }
+
+  public async deleteAWB({ settings, trackingNumber }: DeleteTrackingRequest) {
+    const res = await this.requestToFanCourier(
+      'delete_awb_integrat.php',
+      {
+        client_id: settings.fancourier__clientId,
+        user_pass: settings.fancourier__password,
+        username: settings.fancourier__username,
+        AWB: trackingNumber,
+      },
+      { responseType: 'text' }
+    )
+
+    if (typeof res === 'string' && res.includes('DELETED')) {
+      return true
+    }
+
+    throw new ValidationError({
+      message: `Fancourier validation failed, please check if the sent fileData was right.`,
+    })
   }
 
   private requestToFanCourier(
