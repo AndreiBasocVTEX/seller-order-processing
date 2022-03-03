@@ -2,7 +2,7 @@ import { ExternalClient } from '@vtex/api'
 import type { InstanceOptions, IOContext } from '@vtex/api'
 
 import type { ITrackAwbInfoResponse } from '../../core/dto/order-api.dto'
-import type { NotifyInvoiceRequestDTO } from '../dto/invoice.dto'
+import type { NotifyInvoiceRequestDTO } from '../dto/track-and-invoice.dto'
 import type { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
 import type { IVtexOrder } from '../dto/order.dto'
 import type { SetOrderStatusToInvoicedReq } from '../dto/common.dto'

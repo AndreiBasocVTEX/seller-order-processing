@@ -3,6 +3,7 @@ import { ExternalClient } from '@vtex/api'
 
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
+import type { TrackingInfoDTO } from '../../vtex/dto/track-and-invoice.dto'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type { PaperSize } from '../enums/paper-size.enum'
 
@@ -31,16 +32,14 @@ export interface GetTrackingLabelRequest extends CarrierClientRequest {
   paperSize: PaperSize
 }
 
+export interface DeleteTrackingRequest extends CarrierClientRequest {
+  trackingNumber: string
+}
+
 export interface TrackingStatusDTO {
   isDelivered: boolean
   deliveredDate?: string
   events?: VtexTrackingEvent[]
-}
-
-export interface TrackingInfoDTO {
-  trackingNumber: string
-  courier: string
-  trackingUrl?: string
 }
 
 export abstract class CarrierClient extends ExternalClient {
@@ -57,6 +56,8 @@ export abstract class CarrierClient extends ExternalClient {
   abstract createTracking(
     request: CreateTrackingRequest
   ): Promise<TrackingInfoDTO>
+
+  abstract deleteAWB(request: DeleteTrackingRequest): Promise<boolean>
 
   abstract trackingLabel(request: GetTrackingLabelRequest): unknown
   abstract isActive(settings: ObjectLiteral): boolean
