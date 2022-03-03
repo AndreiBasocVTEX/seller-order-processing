@@ -3,7 +3,7 @@ import type { FC } from 'react'
 import { Button, IconDownload, Tooltip } from 'vtex.styleguide'
 import { useIntl } from 'react-intl'
 
-import { SMARTBILL } from '../../utils/constants'
+import { deliveryStatus, SMARTBILL } from '../../utils/constants'
 import type { InvoiceButtonProps } from '../../types/common'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
 import { downloadInvoice } from '../../utils/api'
@@ -74,12 +74,14 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
       variation="secondary"
       block
       isLoading={isLoading}
-      disabled={orderStatus === 'canceled' || invoiceAvailable === 'noUrl'}
+      disabled={
+        orderStatus === deliveryStatus.CANCELED ||
+        invoiceAvailable === 'noUrl' ||
+        (invoiceAvailable && invoiceAvailable !== SMARTBILL)
+      }
       onClick={(e: Event) => {
         e.stopPropagation()
-        invoiceAvailable && invoiceAvailable !== SMARTBILL
-          ? window.open(`https://${invoiceAvailable}`)
-          : printInvoice(orderId)
+        invoiceAvailable === SMARTBILL && printInvoice(orderId)
       }}
     >
       <div className="tl">
@@ -95,17 +97,11 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
   return (
     <>
       {invoiceAvailable ? (
-        invoiceAvailable !== 'noUrl' ? (
+        invoiceAvailable !== 'noUrl' && invoiceAvailable === SMARTBILL ? (
           <Tooltip
-            label={
-              invoiceKey === 'smartbill'
-                ? ` ${intl.formatMessage({
-                    id: 'seller-dashboard.table-column.download-invoice',
-                  })} ${invoiceKey} ${invoiceNumber}`
-                : `${intl.formatMessage({
-                    id: 'seller-dashboard.table-column.download-invoice',
-                  })} ${invoiceNumber}`
-            }
+            label={` ${intl.formatMessage({
+              id: 'seller-dashboard.table-column.download-invoice',
+            })} ${invoiceKey} ${invoiceNumber}`}
           >
             {invoiceButton()}
           </Tooltip>
