@@ -83,7 +83,6 @@ interface PackageData {
   issuanceDate: string
   trackingNumber: string
   trackingUrl: string | null
-  invoiceKey?: string
 }
 
 interface PackageAttachment {

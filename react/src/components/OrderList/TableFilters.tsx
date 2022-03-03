@@ -5,15 +5,23 @@ import { useIntl } from 'react-intl'
 
 import type {
   IDatePickerProp,
+  IFilterDate,
   IStatement,
-  TableFiltersProps,
+  IFilterItemsStatus,
+  TableFilterParams,
 } from '../../types/common'
 import StatusFilter from './StatusFilter'
 import DateFilter from './DateFilter'
 
-const TableFilters: FC<TableFiltersProps> = ({
+const TableFilters: FC<{
+  filterParams: TableFilterParams
+  setFilterParams: (o: TableFilterParams) => void
+}> = ({
   filterParams,
   setFilterParams,
+}: {
+  filterParams: TableFilterParams
+  setFilterParams: (o: TableFilterParams) => void
 }) => {
   const intl = useIntl()
   const [filterStatus, setFilterStatus] = useState<IStatement[]>([])
@@ -48,9 +56,13 @@ const TableFilters: FC<TableFiltersProps> = ({
           }
         }
 
-        if (subject === 'creationdate') {
-          const from = object.from?.toISOString?.() ?? new Date().toISOString()
-          const to = object.to?.toISOString?.() ?? new Date().toISOString()
+        if (subject === 'creationDate') {
+          const dateObject = object as IFilterDate
+
+          const from =
+            dateObject.from?.toISOString?.() ?? new Date().toISOString()
+
+          const to = dateObject.to?.toISOString?.() ?? new Date().toISOString()
 
           return {
             ..._changes,
@@ -72,12 +84,12 @@ const TableFilters: FC<TableFiltersProps> = ({
 
   return (
     <FilterBar
-      alwaysVisibleFilters={['status', 'creationdate']}
+      alwaysVisibleFilters={['status', 'creationDate']}
       statements={filterStatus}
       clearAllFiltersButtonLabel="Clear Filters"
       onChangeStatements={handleFiltersChange}
       options={{
-        creationdate: {
+        creationDate: {
           label: intl.formatMessage({
             id: 'seller-dashboard.filter-bar.creation-date',
           }),
@@ -88,9 +100,11 @@ const TableFilters: FC<TableFiltersProps> = ({
               })
             }
 
+            const dateObject = statement.object as IFilterDate
+
             return `${
               statement.verb === 'between'
-                ? `between ${statement.object.from} and ${statement.object.to}`
+                ? `between ${dateObject.from} and ${dateObject.to}`
                 : `is ${statement.object}`
             }`
           },
@@ -112,16 +126,21 @@ const TableFilters: FC<TableFiltersProps> = ({
               })
             }
 
-            const keys = statement.object ? Object.keys(statement.object) : []
+            const statementObject = statement.object as IFilterItemsStatus
+
+            const keys = Object.keys(statementObject)
+
             const isAllTrue = !keys.some(
-              (key: string) => !statement.object[key]
+              (key: string) => !statementObject[key as keyof IFilterItemsStatus]
             )
 
             const isAllFalse = !keys.some(
-              (key: string) => statement.object[key]
+              (key: string) => statementObject[key as keyof IFilterItemsStatus]
             )
 
-            const trueKeys = keys.filter((key: string) => statement.object[key])
+            const trueKeys = keys.filter(
+              (key: string) => statementObject[key as keyof IFilterItemsStatus]
+            )
 
             let trueKeysLabel = ''
 

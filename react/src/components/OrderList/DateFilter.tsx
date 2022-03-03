@@ -1,11 +1,42 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { DatePicker } from 'vtex.styleguide'
 import { useIntl } from 'react-intl'
 
 import type { IDatePickerProp } from '../../types/common'
 
+function startOfDay(date: Date): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0,
+    0,
+    0,
+    0
+  )
+}
+
+function endOfDay(date: Date): Date {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59,
+    999
+  )
+}
+
 const DateFilter = ({ value, onChange }: IDatePickerProp) => {
   const intl = useIntl()
+
+  useEffect(() => {
+    onChange({
+      from: startOfDay(new Date()),
+      to: endOfDay(new Date()),
+    })
+  }, [])
 
   return (
     <div className="flex flex-column w-100">

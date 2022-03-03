@@ -33,7 +33,7 @@ const InvoiceButton: FC<InvoiceButtonProps> = ({
     }
 
     if (invoiceNumber) {
-      return invoiceUrl || 'noUrl'
+      return invoiceUrl ?? 'noUrl'
     }
 
     if (invoiceUrl) {

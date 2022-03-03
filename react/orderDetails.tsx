@@ -24,12 +24,10 @@ const OrderDetails: FC = () => {
 
       setOrder(normalizedData)
     }
-
-    setIsLoading(false)
   }
 
   useEffect(() => {
-    getOrderData()
+    getOrderData().finally(() => setIsLoading(false))
   }, [])
 
   return isLoading ? (

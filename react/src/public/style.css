@@ -2,18 +2,6 @@ html {
   top: 0 !important;
 }
 
-body {
-  background-color: red;
-}
-.pagination .pt5 {
-  padding-top: 0;
-  background-color: red;
-}
-
-.pagination {
-  background-color: blue;
-}
-
-.c-muted-2.t-small {
+.c-muted-2 {
   margin-left: 6px;
 }
