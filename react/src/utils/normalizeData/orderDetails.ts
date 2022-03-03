@@ -7,7 +7,7 @@ import type {
 import { deliveryStatus } from '../constants'
 
 const getElefantOrderId = (orderNote: string): string | null =>
-  orderNote.match(/(?<!ID:)\s?\d+/g)?.toString() ?? null
+  orderNote.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ?? null
 
 const getPaymentMethod = (paymentData: string): string | null => {
   if (!paymentData) return null
