@@ -43,7 +43,7 @@ const OrderHeader: FC<IOrderHeaderProps> = ({ orderId, orderStatus }) => {
             </Tag>
             <span className="ml5 underline">
               <Link
-                href={`/admin/checkout/#/orders/GCB-${orderId}`}
+                href={`/admin/checkout/#/orders/${orderId}`}
                 target="_blank"
               >
                 {intl.formatMessage({
