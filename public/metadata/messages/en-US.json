@@ -1,0 +1,14 @@
+{
+  "name": "Seller Order Processing",
+  "headline": "The day-to-day interface the marketplace seller has to use for processing and delivering the client orders",
+  "overview": "This interface allows the marketplace seller to generate invoices and AWBs for the client orders to be delivered",
+  "features": [
+    "Integrates your VTEX store with your external invoicing platform, such as SmartBill",
+    "Integrates your VTEX store with your courier platform, such as Innoship, Cargus, FAN Courier etc."
+  ],
+  "additionalInformation": "This app requires valid accounts in the external invoicing and courier platforms",
+  "websiteURL": "",
+  "support": {
+    "url": "https://support.vtex.com/hc/requests"
+  }
+}
