@@ -3,6 +3,7 @@ import type { InstanceOptions, IOContext } from '@vtex/api'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type {
   CreateTrackingRequest,
+  DeleteTrackingRequest,
   GetTrackingLabelRequest,
   GetTrackingStatusRequest,
 } from '../../shared/clients/carrier-client'
@@ -194,5 +195,23 @@ export default class SamedayClient extends CarrierClient {
       isDelivered,
       events: trackingEvents,
     }
+  }
+
+  public async deleteAWB({
+    settings,
+    trackingNumber,
+  }: DeleteTrackingRequest): Promise<boolean> {
+    const { token } = await this.getAuthToken(settings)
+
+    return this.http
+      .delete(`/api/awb/${trackingNumber}`, {
+        headers: {
+          'X-AUTH-TOKEN': token,
+        },
+      })
+      .then(({ status }) => status === 204)
+      .catch((error) => {
+        throw UnhandledError.fromError(error)
+      })
   }
 }
