@@ -1,8 +1,8 @@
 {
-  "vendor": "vtex",
-  "name": "admin-example",
+  "vendor": "elefant",
+  "name": "seller-order-processing",
   "version": "0.0.13",
-  "title": "Order Processing",
+  "title": "Seller Order Processing",
   "description": "",
   "builders": {
     "react": "3.x",
