@@ -340,7 +340,9 @@ const OrderDetail: FC<IOrderDetailProps> = ({
               <div className="flex w-25 mt5">
                 <InvoiceButton
                   orderId={orderData.orderId}
-                  invoiceKey={orderData.packageAttachment.packages?.invoiceKey}
+                  invoiceKey={
+                    orderData.packageAttachment.packages?.invoiceKey ?? null
+                  }
                   invoiceNumber={
                     orderData.packageAttachment.packages?.invoiceNumber
                   }

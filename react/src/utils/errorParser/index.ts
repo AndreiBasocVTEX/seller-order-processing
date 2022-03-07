@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios'
 
 export const parseErrorResponse = async (response: AxiosResponse<Blob>) => {
-  const errorResponse = await new Promise<{
+  return new Promise<{
     message: string
     details: string
   }>((resolve) => {
@@ -21,6 +21,4 @@ export const parseErrorResponse = async (response: AxiosResponse<Blob>) => {
 
     fileReader.readAsText(response.data)
   })
-
-  return errorResponse
 }

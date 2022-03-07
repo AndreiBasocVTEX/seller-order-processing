@@ -13,9 +13,7 @@ const OrderDetails: FC = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   const getOrderData = async (): Promise<void> => {
-    const orderId = window.location.pathname
-      .match(/GCB-[0-9]+-[0-9]+/g)
-      ?.toString()
+    const orderId = window.location.pathname.match(/GCB-\d+-\d+/g)?.toString()
 
     const data = orderId && (await getOrderDataById(orderId))
 
@@ -24,12 +22,10 @@ const OrderDetails: FC = () => {
 
       setOrder(normalizedData)
     }
-
-    setIsLoading(false)
   }
 
   useEffect(() => {
-    getOrderData()
+    getOrderData().finally(() => setIsLoading(false))
   }, [])
 
   return isLoading ? (

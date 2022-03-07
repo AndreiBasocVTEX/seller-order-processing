@@ -49,8 +49,8 @@ export function createCargusOrderPayload({
       ? 0
       : value / priceMultiplier
 
-  let county = ''
-  let locality = ''
+  let county: string
+  let locality: string
 
   if (
     address.state === 'Bucureşti' ||
