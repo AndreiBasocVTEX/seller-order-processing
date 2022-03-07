@@ -18,6 +18,7 @@ export async function createCargusOrderPayload({
   senderLocationId,
   priceTableId,
   trackingParams,
+  serviceId,
 }: CargusDataToCreateAwb): Promise<ICargusAwbPayload> {
   const totalOrderDiscount = getTotalDiscount(order)
   let { value } = order
@@ -88,7 +89,7 @@ export async function createCargusOrderPayload({
     },
     Parcels: numberOfParcels,
     PriceTableId: priceTableId,
-    ServiceId: null,
+    ServiceId: serviceId,
     // Max num of envelopes — 9
     Envelopes: numberOfEnvelopes,
     TotalWeight: totalWeight,
