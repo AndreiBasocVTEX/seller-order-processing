@@ -1,7 +1,9 @@
+import localitiesMapper from '../../../../libs/localities-mapper'
 import {
   getTotalDiscount,
   getPaymentMethod,
 } from '../../core/helpers/order-dto.helper'
+import { isNumber, isString } from '../../core/utils/type-guards'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
@@ -14,11 +16,10 @@ import {
 } from './sameday-constants.helper'
 import formatPackageAttachments from './sameday-format-package-attachment.helper'
 
-export function createOrderPayload(
+export async function createOrderPayload(
   order: IVtexOrder,
-  countyId: number,
   trackingParams: CreateTrackingRequestParams
-): ISamedayAwbPayload {
+): Promise<ISamedayAwbPayload> {
   const totalOrderDiscount = getTotalDiscount(order)
   let { value } = order
 
@@ -43,6 +44,14 @@ export function createOrderPayload(
     .filter(Boolean)
     .join(', ')
 
+  const { county, locality } = await localitiesMapper(
+    'sameday',
+    address.state,
+    address.city
+  )
+
+  console.log('LOCALITY & COUNTY', { locality, county })
+
   const typeOfPayment = getPaymentMethod(order.openTextField?.value)
 
   const payment =
@@ -54,8 +63,8 @@ export function createOrderPayload(
     awbPayment: 1,
     awbRecipient: {
       address: addressText,
-      cityString: address.city,
-      county: countyId,
+      cityString: isString(locality) ? locality : address.city,
+      county: isNumber(county),
       email: order.clientProfileData.email,
       name: address.receiverName,
       personType: 0,

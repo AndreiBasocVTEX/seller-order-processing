@@ -1,4 +1,6 @@
+import localitiesMapper from '../../../../libs/localities-mapper'
 import { getPaymentMethod } from '../../core/helpers/order-dto.helper'
+import { isString } from '../../core/utils/type-guards'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
@@ -11,11 +13,11 @@ import {
 } from './innoship-constants.helper'
 import formatPackageAttachments from './innoship-format-package-attachment.helper'
 
-export function createOrderPayload(
+export async function createOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
   trackingParams: CreateTrackingRequestParams
-): InnoshipAwbPayload {
+): Promise<InnoshipAwbPayload> {
   const typeOfPayment = getPaymentMethod(order.openTextField?.value)
 
   const payment =
@@ -24,6 +26,12 @@ export function createOrderPayload(
       : order.value / priceMultiplier
 
   const { address } = order.shippingData
+
+  const { county, locality } = await localitiesMapper(
+    'innoship',
+    address.state,
+    address.city
+  )
 
   const {
     packages,
@@ -42,8 +50,8 @@ export function createOrderPayload(
         : address.receiverName,
       contactPerson: address.receiverName,
       country: defaultCountryCode,
-      countyName: address.state,
-      localityName: address.city,
+      countyName: isString(county),
+      localityName: isString(locality),
       addressText: `${address.street} ${address.number} ${
         address.neighborhood || ''
       } ${address.complement || ''} ${address.reference || ''}`,

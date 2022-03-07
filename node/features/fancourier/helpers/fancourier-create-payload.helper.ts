@@ -16,18 +16,26 @@ import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-c
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import formatPackageAttachments from './fancourier-format-package-attachment.helper'
+import localitiesMapper from '../../../../libs/localities-mapper'
+import { isString } from '../../core/utils/type-guards'
 
 /**
  * @TODO: Refactor in favor of requestAWB ( this method should not exist or return direct whats required for formdata )
  */
-export function createFancourierOrderPayload(
+export async function createFancourierOrderPayload(
   order: IVtexOrder,
   warehouseId: string,
   trackingParams: CreateTrackingRequestParams
-): IFancourierAwbPayload {
+): Promise<IFancourierAwbPayload> {
   const totalDiscount = getTotalDiscount(order)
   const { address } = order.shippingData
   const { courierId } = order?.shippingData?.logisticsInfo?.[0].deliveryIds?.[0]
+
+  const { county, locality } = await localitiesMapper(
+    'fancourier',
+    address.state,
+    address.city
+  )
 
   let value: number = order?.value
 
@@ -58,8 +66,8 @@ export function createFancourierOrderPayload(
         : address.receiverName,
       contactPerson: address.receiverName,
       country: defaultCountryCode,
-      countyName: address.state,
-      localityName: address.city,
+      countyName: isString(county),
+      localityName: isString(locality),
       street: address.street,
       number: address.number,
       neighborhood: address.neighborhood,
@@ -96,10 +104,6 @@ export function createFancourierOrderPayload(
       order.shippingData.address.addressId
 
     orderPayload.addressTo.localityId = order.shippingData.address.neighborhood
-    orderPayload.addressTo.countyName = order.shippingData.address.state
-    orderPayload.addressTo.localityName = order.shippingData.address.city
-    orderPayload.addressTo.addressText = order.shippingData.address.street
-    orderPayload.addressTo.postalCode = order.shippingData.address.postalCode
   }
 
   return orderPayload

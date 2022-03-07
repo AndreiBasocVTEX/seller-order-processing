@@ -14,14 +14,6 @@ export interface ISamedayAwbPayload {
   thirdPartyPickup: number
 }
 
-export interface ISamedayCountyData {
-  countryId: number
-  country: string
-  id: number
-  name: string
-  code: string
-}
-
 export interface SamedayParcel {
   weight: number
   width?: number
