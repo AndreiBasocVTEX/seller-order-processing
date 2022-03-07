@@ -19,7 +19,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     vtex: {
       route: { params },
     },
-    clients: { vtexOrder: vtexOrderClient },
+    clients: { orderApi },
   } = ctx
 
   const orderId = params.orderId as string
@@ -28,7 +28,15 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
   const { invoice, tracking } = invoiceData
 
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
+  const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
+
+  console.log('BEFORE CHANGE ORDER STATUS', order.status)
+
+  if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
+    await orderApi.setOrderStatusToReadyForHandling(orderId)
+  }
+
+  console.log('AFTER CHANGE ORDER STATUS', order.status)
 
   const trackingInfo = await generateAWB(ctx, tracking, order)
 
@@ -37,7 +45,10 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
     const notifyInvoiceRequest = { ...trackingInfo, ...invoiceInfo }
 
+    console.log('BEFORE NOTIFY REQUEST', order.status)
+
     await notifyVtex(ctx, order, notifyInvoiceRequest)
+    console.log('AFTER NOTIFY REQUEST', order.status)
   } catch (error) {
     await deleteAWB(ctx, {
       trackingNumber: trackingInfo.trackingNumber,
@@ -137,26 +148,17 @@ async function notifyVtex(
   order: IVtexOrder,
   notifyInvoiceRequest: NotifyTrackAndInvoicePayload
 ) {
-  const { vtexOrder: vtexOrderClient } = ctx.clients
+  const { orderApi } = ctx.clients
 
   const { orderId } = order
 
-  if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
-    throw new ValidationError({
-      message:
-        'You need to wait until the window-to-cancel period ends to generate AWB',
-    })
-  }
-
-  await vtexOrderClient.trackAndInvoice({
+  await orderApi.trackAndInvoice({
     orderId,
     payload: notifyInvoiceRequest,
   })
 
   if (order.status === OrderStatus.READY_FOR_HANDLING) {
-    await vtexOrderClient.setOrderStatusToInvoiced({
-      orderId,
-    })
+    await orderApi.setOrderStatusToInvoiced(orderId)
   }
 
   return notifyInvoiceRequest

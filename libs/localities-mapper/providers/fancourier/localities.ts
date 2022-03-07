@@ -3575,7 +3575,12 @@ export default <LocalityMappingData>{
     Zizin: 'Zizin',
   },
   B: {
-    Bucuresti: 'Bucuresti',
+    'Sector 1': 'Bucuresti',
+    'Sector 2': 'Bucuresti',
+    'Sector 3': 'Bucuresti',
+    'Sector 4': 'Bucuresti',
+    'Sector 5': 'Bucuresti',
+    'Sector 6': 'Bucuresti',
   },
   BZ: {
     Albesti: 'Albesti',
@@ -11073,7 +11078,7 @@ export default <LocalityMappingData>{
     'Zauan-Bai': 'Zauan-Bai',
     Zimbor: 'Zimbor',
   },
-  undefined: {
+  SM: {
     Acas: 'Acas',
     Aciua: 'Aciua',
     Adrian: 'Adrian',

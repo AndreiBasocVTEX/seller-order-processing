@@ -50,8 +50,6 @@ export async function createOrderPayload(
     address.city
   )
 
-  console.log('LOCALITY & COUNTY', { locality, county })
-
   const typeOfPayment = getPaymentMethod(order.openTextField?.value)
 
   const payment =

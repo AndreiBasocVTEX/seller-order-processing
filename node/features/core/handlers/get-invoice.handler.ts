@@ -6,7 +6,7 @@ export async function getInvoiceHandler(ctx: Context) {
     vtex: {
       route: { params },
     },
-    clients: { vtexOrder: vtexOrderClient, smartbill },
+    clients: { orderApi, smartbill },
   } = ctx
 
   const settings = await getVtexAppSettings(ctx)
@@ -15,7 +15,7 @@ export async function getInvoiceHandler(ctx: Context) {
 
   const orderId = params.orderId as string
 
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
+  const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
 
   const { invoiceNumber } = order?.packageAttachment?.packages.pop()
 

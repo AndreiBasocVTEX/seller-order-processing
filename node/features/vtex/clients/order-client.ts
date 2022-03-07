@@ -5,7 +5,6 @@ import type { ITrackAwbInfoResponse } from '../../core/dto/order-api.dto'
 import type { NotifyInvoiceRequestDTO } from '../dto/track-and-invoice.dto'
 import type { UpdateTrackingStatusRequestDTO } from '../dto/tracking.dto'
 import type { IVtexOrder } from '../dto/order.dto'
-import type { SetOrderStatusToInvoicedReq } from '../dto/common.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
@@ -45,9 +44,16 @@ export default class OrderClient extends ExternalClient {
     )
   }
 
-  public async setOrderStatusToInvoiced({
-    orderId,
-  }: SetOrderStatusToInvoicedReq): Promise<void> {
+  public async setOrderStatusToInvoiced(orderId: string): Promise<void> {
     return this.http.post(`/api/oms/pvt/orders/${orderId}/start-handling`, {})
+  }
+
+  public async setOrderStatusToReadyForHandling(
+    orderId: string
+  ): Promise<void> {
+    return this.http.post(
+      `/api/oms/pvt/orders/${orderId}/changestate/ready-for-handling`,
+      {}
+    )
   }
 }

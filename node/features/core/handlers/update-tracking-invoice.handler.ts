@@ -7,14 +7,14 @@ export async function updateTrackingStatusHandler(ctx: Context) {
     vtex: {
       route: { params },
     },
-    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
+    clients: { orderApi, carrier: carrierClient },
   } = ctx
 
   const orderId = params.orderId as string
 
   const settings = await getVtexAppSettings(ctx)
 
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
+  const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
 
   const {
     courier: carrierName,
@@ -40,7 +40,7 @@ export async function updateTrackingStatusHandler(ctx: Context) {
     trackingStatus.events = undefined
   }
 
-  await vtexOrderClient.updateTrackingStatus({
+  await orderApi.updateTrackingStatus({
     payload: trackingStatus,
     orderId,
     invoiceNumber,
