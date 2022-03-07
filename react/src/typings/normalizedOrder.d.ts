@@ -1,4 +1,4 @@
-export interface ShippingAddressData {
+interface ShippingAddressData {
   city: string
   postalCode: string
   phone: string
@@ -47,7 +47,7 @@ export interface ClientProfileData {
   customerClass?: string | null
 }
 
-export interface InvoiceDataAddress {
+interface InvoiceDataAddress {
   city: string
   complement?: string | null
   country: string
@@ -82,12 +82,12 @@ export interface FormattedOrderStatus {
   shortText?: string
 }
 
-export interface LogisticsInfo {
+interface LogisticsInfo {
   price: number
   shippingEstimateDate: string
 }
 
-export interface ShippingData {
+interface ShippingData {
   address: ShippingAddressData
   logisticsInfo: [LogisticsInfo]
 }

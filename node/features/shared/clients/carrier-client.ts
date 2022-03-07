@@ -36,7 +36,7 @@ export interface DeleteTrackingRequest extends CarrierClientRequest {
   trackingNumber: string
 }
 
-export interface TrackingStatusDTO {
+interface TrackingStatusDTO {
   isDelivered: boolean
   deliveredDate?: string
   events?: VtexTrackingEvent[]

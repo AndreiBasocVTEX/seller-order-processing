@@ -7,7 +7,7 @@ import type {
 import { deliveryStatus } from '../constants'
 
 const getElefantOrderId = (orderNote: string): string | null =>
-  orderNote.match(/(?<!ID:)\s?\d+/g)?.toString() ?? null
+  orderNote.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ?? null
 
 const getPaymentMethod = (paymentData: string): string | null => {
   if (!paymentData) return null
@@ -30,7 +30,7 @@ const getOrderTotals = (orderData: IOrder) => {
 const getInvoicedEntityType = (isCorporate: boolean) =>
   isCorporate ? 'Persoana juridica' : 'Persoana fizica'
 
-export const getOrderStatus = (
+const getOrderStatus = (
   status: string | undefined
 ): FormattedOrderStatus | undefined => {
   switch (status) {
@@ -155,7 +155,7 @@ const formatOrderState = (state: string | undefined) => {
   return state ? states[state] : null
 }
 
-export const formatDate = (
+const formatDate = (
   date: string | undefined,
   config: {
     year: 'numeric' | 'short' | '2-digit' | undefined

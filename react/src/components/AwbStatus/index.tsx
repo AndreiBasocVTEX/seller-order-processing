@@ -1,13 +1,13 @@
-import type {FC} from 'react'
-import React, {useEffect, useState} from 'react'
-import {Button, Spinner, Tooltip} from 'vtex.styleguide'
-import {useIntl} from 'react-intl'
+import type { FC } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Button, Spinner, Tooltip } from 'vtex.styleguide'
+import { useIntl } from 'react-intl'
 
-import type {IAwbStatusProps} from '../../types/awbStatus'
-import {getOrderAwbStatus} from '../../utils/api'
-import type {AttachmentPackages} from '../../typings/normalizedOrder'
+import type { IAwbStatusProps } from '../../types/awbStatus'
+import { getOrderAwbStatus } from '../../utils/api'
+import type { AttachmentPackages } from '../../typings/normalizedOrder'
 
-const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
+const AwbStatus: FC<IAwbStatusProps> = ({ orderId, initialData, size }) => {
   const [awbStatus, setAwbStatus] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const intl = useIntl()
@@ -27,6 +27,7 @@ const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
   }
 
   const updateStatus = async () => {
+    setIsLoading(true)
     const data = await getOrderAwbStatus(orderId)
 
     const lastEvent = data?.events?.length && data?.events[0]
@@ -55,18 +56,15 @@ const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
           break
       }
     }
-
-    setIsLoading(false)
   }
 
   const handleUpdateStatus = () => {
-    setIsLoading(true)
-    updateStatus()
+    updateStatus().finally(() => setIsLoading(false))
   }
 
   useEffect(() => {
     if (!initialData) {
-      updateStatus()
+      updateStatus().finally(() => setIsLoading(false))
     } else {
       setInitialStatus(initialData)
     }
@@ -75,11 +73,9 @@ const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
   switch (size) {
     case 'small':
       return (
-        <div
-          className="flex justify-center items-center pr1 w-100"
-        >
+        <div className="flex justify-center items-center pr1 w-100">
           {isLoading ? (
-            <Spinner size={20}/>
+            <Spinner size={20} />
           ) : awbStatus ? (
             <Tooltip label={awbStatus}>
               <div className="br-pill bg-muted-2 tc white-90 truncate fw4 ph4 pv2 f7 w-100">
@@ -110,9 +106,9 @@ const AwbStatus: FC<IAwbStatusProps> = ({orderId, initialData, size}) => {
               {isLoading ? (
                 <div
                   className="flex justify-center"
-                  style={{minWidth: '12rem'}}
+                  style={{ minWidth: '12rem' }}
                 >
-                  <Spinner size={20}/>
+                  <Spinner size={20} />
                 </div>
               ) : awbStatus ? (
                 <Tooltip label={awbStatus}>

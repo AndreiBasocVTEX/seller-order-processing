@@ -22,12 +22,10 @@ const errorHandler = async (error: AxiosError<Blob>, status?: () => void) => {
 
   const response = await parseErrorResponse(error.response)
 
-  const errorData = {
+  throw {
     message: response.message,
     details: response.details,
   }
-
-  throw errorData
 }
 
 export const getOrderDataById = (orderId: string): Promise<IOrder> =>

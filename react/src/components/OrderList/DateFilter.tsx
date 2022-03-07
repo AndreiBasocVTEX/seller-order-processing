@@ -1,11 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { DatePicker } from 'vtex.styleguide'
 import { useIntl } from 'react-intl'
 
 import type { IDatePickerProp } from '../../types/common'
+import { endOfDay, startOfDay } from '../../utils/date.util'
 
 const DateFilter = ({ value, onChange }: IDatePickerProp) => {
   const intl = useIntl()
+
+  useEffect(() => {
+    onChange({
+      from: startOfDay(new Date()),
+      to: endOfDay(new Date()),
+    })
+  }, [])
 
   return (
     <div className="flex flex-column w-100">

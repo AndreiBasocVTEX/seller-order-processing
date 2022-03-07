@@ -1,4 +1,4 @@
-export interface VtexRequest<T> {
+interface VtexRequest<T> {
   payload: T
 }
 

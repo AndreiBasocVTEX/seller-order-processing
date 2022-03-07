@@ -206,16 +206,17 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const printAwb = async (_orderData: OrderDetailsData) => {
     setIsLoading(true)
-    downloadAwb(_orderData?.orderId, _orderData?.value.toString())
-      .catch((e) => {
+
+    return downloadAwb(_orderData?.orderId, _orderData?.value.toString()).catch(
+      (e) => {
         setAxiosError({
           ...axiosError,
           isError: true,
           errorDetails: e.details,
           errorMessage: String(e.message),
         })
-      })
-      .finally(() => setIsLoading(false))
+      }
+    )
   }
 
   useEffect(() => {
@@ -236,9 +237,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           )
         }
         isLoading={isLoading}
-        onClick={() => {
-          printAwb(orderData)
-        }}
+        onClick={() => printAwb(orderData).finally(() => setIsLoading(false))}
       >
         <div className="flex w-100">
           {!disabledCouriers.includes(
@@ -359,9 +358,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                     required
                     options={packageTypeOptions}
                     value={packageType}
-                    onChange={(_: any, v: React.SetStateAction<string>) =>
-                      setPackageType(v)
-                    }
+                    onChange={(_: unknown, v: string) => setPackageType(v)}
                   />
                   <p>
                     {intl.formatMessage({
@@ -398,7 +395,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
                     maxValue={30}
                     value={weight}
                     defaultValue={1}
-                    onChange={(event: React.SetStateAction<any>) =>
+                    onChange={(event: { value: number }) =>
                       setWeight(event.value)
                     }
                   />

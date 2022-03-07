@@ -41,7 +41,7 @@
   "seller-dashboard.table-column.download-awb": "Download AWB",
   "seller-dashboard.table-column.update-status": "Update delivery status",
   "awb-shipping-modal.button-label": "AWB & Invoice",
-  "awb-shipping-modal.button-tooltip": "Generate AWB & Factură",
+  "awb-shipping-modal.button-tooltip": "Generate AWB & Invoice",
   "awb-shipping-modal.modal-awb.title": "AWB Generation",
   "awb-shipping-modal.modal-awb.button.choose-service": "Choose service",
   "awb-shipping-modal.modal-invoice.button.choose-service": "Choose modality",

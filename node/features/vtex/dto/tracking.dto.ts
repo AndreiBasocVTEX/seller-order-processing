@@ -4,7 +4,7 @@ import type { OrderAwareVtexRequest } from './common.dto'
 export interface UpdateTrackingStatusRequestDTO
   extends OrderAwareVtexRequest<UpdateTrackingStatusPayload> {}
 
-export interface UpdateTrackingStatusPayload {
+interface UpdateTrackingStatusPayload {
   isDelivered: boolean
   deliveredDate?: string
   events?: VtexTrackingEvent[]

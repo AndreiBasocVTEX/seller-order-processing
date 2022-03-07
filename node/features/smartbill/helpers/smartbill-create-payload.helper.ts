@@ -30,13 +30,11 @@ export default function createSmartbillOrderPayload({
 
   const products = getProducts({ settings, order, productTaxNames })
 
-  const smartBillPayload = {
+  return {
     client: clientData,
     companyVatCode: settings.smartbill__vatCode,
     issueDate,
     products,
     seriesName: settings.smartbill__seriesName,
   }
-
-  return smartBillPayload
 }

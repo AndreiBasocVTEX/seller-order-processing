@@ -283,7 +283,9 @@ const OrdersList: FC = () => {
           return (
             <InvoiceButton
               orderId={rowData.orderId}
-              invoiceKey={rowData.packageAttachment.packages?.invoiceKey}
+              invoiceKey={
+                rowData.packageAttachment.packages?.invoiceKey ?? null
+              }
               invoiceNumber={rowData.packageAttachment.packages?.invoiceNumber}
               invoiceUrl={rowData.packageAttachment.packages?.invoiceUrl}
               orderStatus={rowData.status}
@@ -321,23 +323,23 @@ const OrdersList: FC = () => {
 
     const data = await getOrderStats({ page, perPage, search, status, date })
 
-    if (data) {
-      const {
-        list,
-        stats: {
-          stats: { totalValue },
-        },
-      } = data
-
-      updateTotalizerData(
-        totalValue.Count,
-        Math.round(totalValue.Mean) / 100,
-        totalValue.Sum / 100
-      )
-      await getOrdersDetails(list)
+    if (!data) {
+      return
     }
 
-    setAwbUpdated(false)
+    const {
+      list,
+      stats: {
+        stats: { totalValue },
+      },
+    } = data
+
+    updateTotalizerData(
+      totalValue.Count,
+      Math.round(totalValue.Mean) / 100,
+      totalValue.Sum / 100
+    )
+    await getOrdersDetails(list)
   }
 
   const updateURL = () => {
@@ -350,13 +352,13 @@ const OrdersList: FC = () => {
   }
 
   useEffect(() => {
-    fetchOrders()
+    fetchOrders().finally(() => setAwbUpdated(false))
   }, [paginationParams, filterParams, awbUpdated])
 
   useEffect(() => {
     if (awbUpdated) {
       setTableLoading(true)
-      fetchOrders()
+      fetchOrders().finally(() => setAwbUpdated(false))
     }
   }, [awbUpdated])
 
