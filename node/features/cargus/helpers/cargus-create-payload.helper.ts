@@ -10,13 +10,15 @@ import {
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import formatPackageAttachments from './cargus-format-package-attachment.helper'
+import localitiesMapper from '../../../../libs/localities-mapper'
+import { isString } from '../../core/utils/type-guards'
 
-export function createCargusOrderPayload({
+export async function createCargusOrderPayload({
   order,
   senderLocationId,
   priceTableId,
   trackingParams,
-}: CargusDataToCreateAwb): ICargusAwbPayload {
+}: CargusDataToCreateAwb): Promise<ICargusAwbPayload> {
   const totalOrderDiscount = getTotalDiscount(order)
   let { value } = order
 
@@ -49,19 +51,19 @@ export function createCargusOrderPayload({
       ? 0
       : value / priceMultiplier
 
-  let county: string
-  let locality: string
+  const { county, locality } = await localitiesMapper(
+    'cargus',
+    address.state,
+    address.city
+  )
 
   if (
     address.state === 'Bucureşti' ||
     address.state === 'BUCUREŞTI' ||
     address.state === 'B'
   ) {
-    county = 'Bucuresti'
-    locality = 'Bucuresti'
-  } else {
-    county = address.state
-    locality = address.city
+    address.state = 'Bucuresti'
+    address.city = 'Bucuresti'
   }
 
   return {
@@ -77,8 +79,8 @@ export function createCargusOrderPayload({
         ? order.clientProfileData.corporateName
         : address.receiverName,
       ContactPerson: address.receiverName,
-      CountyName: county,
-      LocalityName: locality,
+      CountyName: isString(county),
+      LocalityName: isString(locality),
       AddressText: addressText,
       PostalCode: address.postalCode,
       PhoneNumber: order.clientProfileData.phone,

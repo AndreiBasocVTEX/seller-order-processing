@@ -53,7 +53,7 @@ export default class FancourierClient extends CarrierClient {
     rate: string
     trackingNumber: string
   }> {
-    const fancourierOrderPayload = createFancourierOrderPayload(
+    const fancourierOrderPayload = await createFancourierOrderPayload(
       order,
       settings.fancourier__warehouseId,
       params

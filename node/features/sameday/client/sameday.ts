@@ -9,7 +9,6 @@ import type {
 } from '../../shared/clients/carrier-client'
 import { CarrierClient } from '../../shared/clients/carrier-client'
 import type {
-  ISamedayCountyData,
   ISamedayAwbResponse,
   ISamedayTrackAWBResponse,
 } from '../dto/sameday-awb.dto'
@@ -66,38 +65,14 @@ export default class SamedayClient extends CarrierClient {
     )
   }
 
-  private async getCountyId(
-    token: string,
-    countyCode: string
-  ): Promise<number> {
-    const { data } = await this.http.get('/api/geolocation/county', {
-      headers: {
-        'X-AUTH-TOKEN': token,
-      },
-    })
-
-    // Resolve issue with wrong countyCode
-    if (countyCode === 'VN') {
-      countyCode = 'VR'
-    }
-
-    const county = data.find((el: ISamedayCountyData) => countyCode === el.code)
-
-    return county.id
-  }
-
   protected async requestAWB({
     settings,
     order,
     params,
   }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
-    const countyId = await this.getCountyId(
-      token,
-      order.shippingData.address.state
-    )
 
-    const body = createOrderPayload(order, countyId, params)
+    const body = await createOrderPayload(order, params)
 
     return (this.http
       .post('/api/awb', body, {

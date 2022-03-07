@@ -79,7 +79,7 @@ export default class InnoshipClient extends CarrierClient {
   }: CreateTrackingRequest) {
     const warehouseId = settings.innoship__warehouseId
 
-    const body = createOrderPayload(order, warehouseId, params)
+    const body = await createOrderPayload(order, warehouseId, params)
 
     return (this.http
       .post('/Order?api-version=1.0', body, {
