@@ -59,10 +59,9 @@ const TableFilters: FC<{
         if (subject === 'creationDate') {
           const dateObject = object as IFilterDate
 
-          const from =
-            dateObject.from?.toISOString?.() ?? new Date().toISOString()
+          const from = (dateObject.from ?? new Date()).toISOString()
 
-          const to = dateObject.to?.toISOString?.() ?? new Date().toISOString()
+          const to = (dateObject.to ?? new Date()).toISOString()
 
           return {
             ..._changes,

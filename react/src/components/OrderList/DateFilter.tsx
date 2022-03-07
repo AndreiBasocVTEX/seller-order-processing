@@ -3,30 +3,7 @@ import { DatePicker } from 'vtex.styleguide'
 import { useIntl } from 'react-intl'
 
 import type { IDatePickerProp } from '../../types/common'
-
-function startOfDay(date: Date): Date {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0,
-    0,
-    0,
-    0
-  )
-}
-
-function endOfDay(date: Date): Date {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    23,
-    59,
-    59,
-    999
-  )
-}
+import { endOfDay, startOfDay } from '../../utils/date.util'
 
 const DateFilter = ({ value, onChange }: IDatePickerProp) => {
   const intl = useIntl()
