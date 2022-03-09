@@ -9,7 +9,7 @@ import { OrderClient } from '../features/vtex'
 import { SmartbillClient } from '../features/smartbill'
 
 export class Clients extends IOClients {
-  public get vtexOrder() {
+  public get orderApi() {
     return this.getOrSet('orderApi', OrderClient)
   }
 

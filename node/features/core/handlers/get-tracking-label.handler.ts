@@ -8,13 +8,13 @@ export async function getTrackingLabelHandler(ctx: Context) {
       route: { params },
     },
     query: { paperSize },
-    clients: { vtexOrder: vtexOrderClient, carrier: carrierClient },
+    clients: { orderApi, carrier: carrierClient },
   } = ctx
 
   const settings = await getVtexAppSettings(ctx)
 
   const orderId = params.orderId as string
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
+  const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
 
   const {
     courier: carrierName,

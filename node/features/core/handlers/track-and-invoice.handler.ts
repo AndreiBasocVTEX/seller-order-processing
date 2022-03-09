@@ -19,7 +19,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     vtex: {
       route: { params },
     },
-    clients: { vtexOrder: vtexOrderClient },
+    clients: { orderApi },
   } = ctx
 
   const orderId = params.orderId as string
@@ -28,13 +28,19 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
   const { invoice, tracking } = invoiceData
 
-  const order: IVtexOrder = await vtexOrderClient.getVtexOrderData(orderId)
+  const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
+
+  if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
+    throw new ValidationError({
+      message:
+        'You need to wait until the window-to-cancel period ends to generate AWB',
+    })
+  }
 
   const trackingInfo = await generateAWB(ctx, tracking, order)
 
   try {
     const invoiceInfo = await generateInvoice(ctx, invoice, order)
-
     const notifyInvoiceRequest = { ...trackingInfo, ...invoiceInfo }
 
     await notifyVtex(ctx, order, notifyInvoiceRequest)
@@ -43,6 +49,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
       trackingNumber: trackingInfo.trackingNumber,
       courier: trackingInfo.courier,
     })
+
     throw new ValidationError({
       message: 'Smartbill invoice generation failed. AWB has been deleted',
     })
@@ -137,26 +144,17 @@ async function notifyVtex(
   order: IVtexOrder,
   notifyInvoiceRequest: NotifyTrackAndInvoicePayload
 ) {
-  const { vtexOrder: vtexOrderClient } = ctx.clients
+  const { orderApi } = ctx.clients
 
   const { orderId } = order
 
-  if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
-    throw new ValidationError({
-      message:
-        'You need to wait until the window-to-cancel period ends to generate AWB',
-    })
-  }
-
-  await vtexOrderClient.trackAndInvoice({
+  await orderApi.trackAndInvoice({
     orderId,
     payload: notifyInvoiceRequest,
   })
 
   if (order.status === OrderStatus.READY_FOR_HANDLING) {
-    await vtexOrderClient.setOrderStatusToInvoiced({
-      orderId,
-    })
+    await orderApi.setOrderStatusToInvoiced(orderId)
   }
 
   return notifyInvoiceRequest
