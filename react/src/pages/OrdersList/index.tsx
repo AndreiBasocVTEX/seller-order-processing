@@ -232,6 +232,7 @@ const OrdersList: FC = () => {
         title: intl.formatMessage({
           id: 'seller-dashboard.table-column.total-value',
         }),
+        width: 80,
         cellRenderer: ({
           cellData,
         }: {

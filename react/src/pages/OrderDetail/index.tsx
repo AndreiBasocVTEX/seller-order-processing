@@ -9,6 +9,7 @@ import { OrderTable } from '../../components/OrderDetail'
 import type { IOrderDetailProps } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import InvoiceButton from '../../components/InvoiceButton'
+import { deliveryStatus } from '../../utils/constants'
 
 const OrderDetail: FC<IOrderDetailProps> = ({
   orderData,
@@ -229,14 +230,15 @@ const OrderDetail: FC<IOrderDetailProps> = ({
                 </>
               )}
               <div className="flex w-25 mt5">
-                {orderData.orderId && (
-                  <RequestAwbModal
-                    updateAwbData={updateAwbData}
-                    order={orderData}
-                    onAwbUpdate={setAwbUpdated}
-                    refreshOrderDetails={refreshOrderData}
-                  />
-                )}
+                {orderData.orderId &&
+                  orderData.status !== deliveryStatus.WINDOW_TO_CANCEL && (
+                    <RequestAwbModal
+                      updateAwbData={updateAwbData}
+                      order={orderData}
+                      onAwbUpdate={setAwbUpdated}
+                      refreshOrderDetails={refreshOrderData}
+                    />
+                  )}
               </div>
             </div>
           </Box>
