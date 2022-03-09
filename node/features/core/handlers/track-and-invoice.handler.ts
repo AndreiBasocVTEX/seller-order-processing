@@ -30,30 +30,26 @@ export async function trackAndInvoiceHandler(ctx: Context) {
 
   const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
 
-  console.log('BEFORE CHANGE ORDER STATUS', order.status)
-
   if (order.status === OrderStatus.WINDOW_TO_CANCEL) {
-    await orderApi.setOrderStatusToReadyForHandling(orderId)
+    throw new ValidationError({
+      message:
+        'You need to wait until the window-to-cancel period ends to generate AWB',
+    })
   }
-
-  console.log('AFTER CHANGE ORDER STATUS', order.status)
 
   const trackingInfo = await generateAWB(ctx, tracking, order)
 
   try {
     const invoiceInfo = await generateInvoice(ctx, invoice, order)
-
     const notifyInvoiceRequest = { ...trackingInfo, ...invoiceInfo }
 
-    console.log('BEFORE NOTIFY REQUEST', order.status)
-
     await notifyVtex(ctx, order, notifyInvoiceRequest)
-    console.log('AFTER NOTIFY REQUEST', order.status)
   } catch (error) {
     await deleteAWB(ctx, {
       trackingNumber: trackingInfo.trackingNumber,
       courier: trackingInfo.courier,
     })
+
     throw new ValidationError({
       message: 'Smartbill invoice generation failed. AWB has been deleted',
     })
