@@ -80,6 +80,7 @@ export default class CargusClient extends CarrierClient {
       senderLocationId: settings.cargus__locationId,
       priceTableId: settings.cargus__priceTableId,
       trackingParams: params,
+      serviceId: settings.cargus__serviceId,
     })
 
     return (this.http

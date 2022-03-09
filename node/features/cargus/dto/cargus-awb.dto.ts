@@ -5,6 +5,7 @@ export interface CargusDataToCreateAwb {
   order: IVtexOrder
   senderLocationId: string
   priceTableId: number
+  serviceId: number
   trackingParams: CreateTrackingRequestParams
 }
 
