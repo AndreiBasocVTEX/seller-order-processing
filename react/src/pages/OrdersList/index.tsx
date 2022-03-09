@@ -25,6 +25,7 @@ import type { StatsOrderData } from '../../typings/orderStats'
 import TablePagination from '../../components/OrderList/TablePagination'
 import TableFilters from '../../components/OrderList/TableFilters'
 import '../../public/style.css'
+import { deliveryStatus } from '../../utils/constants'
 
 const OrdersList: FC = () => {
   const [totalizerData, setTotalizerData] = useState<TableTotalizerData>({
@@ -257,7 +258,7 @@ const OrdersList: FC = () => {
         }),
         width: 200,
         cellRenderer: ({ rowData }: { rowData: OrderDetailsData }) => {
-          return (
+          return rowData.status === deliveryStatus.WINDOW_TO_CANCEL ? null : (
             <div
               tabIndex={0}
               role="button"
