@@ -1,5 +1,5 @@
 {
-  "vendor": "elefant",
+  "vendor": "vtex",
   "name": "seller-order-processing",
   "version": "0.0.1",
   "title": "Seller Order Processing",
@@ -16,19 +16,14 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": ["smartcheckout"],
+  "registries": [
+    "smartcheckout"
+  ],
   "policies": [
     {
       "name": "outbound-access",
       "attrs": {
         "host": "urgentcargus.azure-api.net",
-        "path": "/*"
-      }
-    },
-    {
-      "name": "outbound-access",
-      "attrs": {
-        "host": "sameday-api.demo.zitec.com",
         "path": "/*"
       }
     },
