@@ -1,7 +1,7 @@
 {
   "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "0.0.13",
+  "version": "0.0.1",
   "title": "Seller Order Processing",
   "description": "",
   "builders": {
