@@ -261,6 +261,9 @@
   },
   "billingOptions": {
     "type": "free",
+    "support": {
+      "url": "https://marketplace.elefant.ro/"
+    },
     "availableCountries": [
       "*"
     ]
