@@ -1,7 +1,7 @@
 {
-  "vendor": "vtex",
+  "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "0.2.1",
+  "version": "0.0.2",
   "title": "Seller Order Processing",
   "description": "",
   "builders": {
@@ -63,6 +63,17 @@
       }
     }
   ],
+  "billingOptions": {
+    "termsURL": "https://compliance.vtex.com/gdpr/policies/vtex-privacy-policy",
+    "support": {
+      "url": "https://support.vtex.com/hc/requests"
+    },
+    "free": true,
+    "type": "free",
+    "availableCountries": [
+      "*"
+    ]
+  },
   "settingsSchema": {
     "title": "Order Processing",
     "type": "object",
