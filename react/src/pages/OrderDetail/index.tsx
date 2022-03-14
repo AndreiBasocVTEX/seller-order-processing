@@ -47,7 +47,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({
                 {intl.formatMessage({
                   id: 'order-detail.order.market-place',
                 })}
-                : {orderData.elefantOrderId}
+                : {orderData.vendorOrderId}
               </div>
               <div className="mt2">
                 {intl.formatMessage({

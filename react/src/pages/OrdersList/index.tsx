@@ -117,7 +117,7 @@ const OrdersList: FC = () => {
           )
         },
       },
-      elefantOrderId: {
+      vendorOrderId: {
         title: intl.formatMessage({
           id: 'seller-dashboard.table-column.market-place',
         }),
