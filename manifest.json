@@ -3,7 +3,7 @@
   "name": "seller-order-processing",
   "version": "1.0.2",
   "title": "Seller Order Processing",
-  "description": "",
+  "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
     "react": "3.x",
     "messages": "1.x",
