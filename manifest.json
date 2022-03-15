@@ -101,7 +101,8 @@
       "fancourier__password": {
         "title": "FanCourier Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "fancourier__clientId": {
         "title": "FanCourier Client ID",
@@ -132,7 +133,8 @@
       "cargus__password": {
         "title": "Cargus Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "cargus__primaryKey": {
         "title": "Cargus Primary Key",
@@ -169,7 +171,8 @@
       "innoship__apiToken": {
         "title": "Innoship API Token",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "innoship__warehouseId": {
         "title": "Innoship Warehouse ID",
@@ -195,7 +198,8 @@
       "sameday__password": {
         "title": "Sameday Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "sameday__sandbox": {
         "title": "Sandbox Mode",
@@ -221,7 +225,8 @@
       "smartbill__apiToken": {
         "title": "SmartBill Api Token",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "smartbill__vatCode": {
         "title": "SmartBill Vat Code",
