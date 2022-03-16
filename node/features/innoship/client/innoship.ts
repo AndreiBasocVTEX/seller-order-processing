@@ -24,10 +24,11 @@ export default class InnoshipClient extends CarrierClient {
   protected static ENABLED_SETTING_NAME = 'innoship__isEnabled'
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('http://api.innoship.io/api', ctx, {
+    super(ctx, {
       ...options,
       headers: {
         ...options?.headers,
+        baseURL: 'http://api.innoship.io/api',
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'X-Vtex-Use-Https': 'true',

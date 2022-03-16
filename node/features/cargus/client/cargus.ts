@@ -26,8 +26,9 @@ export default class CargusClient extends CarrierClient {
   protected static ENABLED_SETTING_NAME = 'cargus__isEnabled'
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('http://urgentcargus.azure-api.net/api', ctx, {
+    super(ctx, {
       ...options,
+      baseURL: 'http://urgentcargus.azure-api.net/api',
       headers: {
         ...options?.headers,
         Accept: 'application/json',

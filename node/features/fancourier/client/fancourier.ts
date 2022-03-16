@@ -1,4 +1,3 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
 import ObjectsToCsv from 'objects-to-csv'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
@@ -26,10 +25,6 @@ import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class FancourierClient extends CarrierClient {
   protected static ENABLED_SETTING_NAME = 'fancourier__isEnabled'
-
-  constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('', ctx, options)
-  }
 
   public isActive(settings: ObjectLiteral): boolean {
     return !!settings[FancourierClient.ENABLED_SETTING_NAME]

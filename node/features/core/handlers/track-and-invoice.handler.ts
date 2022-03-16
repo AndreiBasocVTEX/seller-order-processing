@@ -51,7 +51,7 @@ export async function trackAndInvoiceHandler(ctx: Context) {
     })
 
     throw new ValidationError({
-      message: 'Smartbill invoice generation failed. AWB has been deleted',
+      message: 'SmartBill invoice generation failed. AWB has been deleted',
     })
   }
 }
@@ -112,7 +112,7 @@ async function generateInvoice(
     if (!settings.smartbill__isEnabled) {
       throw new ValidationError({
         message:
-          'You need to enable Smartbill integration to perform this action',
+          'You need to enable SmartBill integration to perform this action',
       })
     }
 

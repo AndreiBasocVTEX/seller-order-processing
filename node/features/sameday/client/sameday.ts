@@ -27,10 +27,11 @@ export default class SamedayClient extends CarrierClient {
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
     // URL for demo environment
-    super('https://sameday-api.demo.zitec.com', ctx, {
+    super(ctx, {
       ...options,
       headers: {
         ...options?.headers,
+        baseURL: 'https://sameday-api.demo.zitec.com',
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'X-Vtex-Use-Https': 'true',
