@@ -1,5 +1,5 @@
 import type { IOContext } from '@vtex/api'
-import { ExternalClient } from '@vtex/api'
+import { JanusClient } from '@vtex/api'
 
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
@@ -42,7 +42,7 @@ interface TrackingStatusDTO {
   events?: VtexTrackingEvent[]
 }
 
-export abstract class CarrierClient extends ExternalClient {
+export abstract class CarrierClient extends JanusClient {
   protected static ENABLED_SETTING_NAME: string
 
   protected abstract requestAWB(

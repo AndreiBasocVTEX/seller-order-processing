@@ -27,10 +27,6 @@ import type { ObjectLiteral } from '../../core/models/object-literal.model'
 export default class FancourierClient extends CarrierClient {
   protected static ENABLED_SETTING_NAME = 'fancourier__isEnabled'
 
-  constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('', ctx, options)
-  }
-
   public isActive(settings: ObjectLiteral): boolean {
     return !!settings[FancourierClient.ENABLED_SETTING_NAME]
   }
