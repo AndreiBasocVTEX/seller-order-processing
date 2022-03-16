@@ -1,9 +1,9 @@
 {
   "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "0.0.2",
+  "version": "1.0.2",
   "title": "Seller Order Processing",
-  "description": "",
+  "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
     "react": "3.x",
     "messages": "1.x",
@@ -258,6 +258,15 @@
         "default": 19
       }
     }
+  },
+  "billingOptions": {
+    "type": "free",
+    "support": {
+      "url": "https://marketplace.elefant.ro/"
+    },
+    "availableCountries": [
+      "*"
+    ]
   },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }
