@@ -1,9 +1,9 @@
 {
   "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "0.0.1",
+  "version": "1.0.2",
   "title": "Seller Order Processing",
-  "description": "",
+  "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
     "react": "3.x",
     "messages": "1.x",
@@ -16,19 +16,14 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": ["smartcheckout"],
+  "registries": [
+    "smartcheckout"
+  ],
   "policies": [
     {
       "name": "outbound-access",
       "attrs": {
         "host": "urgentcargus.azure-api.net",
-        "path": "/*"
-      }
-    },
-    {
-      "name": "outbound-access",
-      "attrs": {
-        "host": "sameday-api.demo.zitec.com",
         "path": "/*"
       }
     },
@@ -83,29 +78,29 @@
         "default": 19
       },
       "fancourier__titleSettings": {
-        "title": "Fancourier Settings",
+        "title": "FAN Courier Settings",
         "description": "",
         "type": "object"
       },
       "fancourier__isEnabled": {
-        "title": "Enable FanCourier Integration",
+        "title": "Enable FAN Courier Integration",
         "description": "",
         "type": "boolean",
         "default": true
       },
       "fancourier__username": {
-        "title": "FanCourier Username",
+        "title": "FAN Courier Username",
         "description": "",
         "type": "string"
       },
       "fancourier__password": {
-        "title": "FanCourier Password",
+        "title": "FAN Courier Password",
         "description": "",
         "type": "string",
         "format": "password"
       },
       "fancourier__clientId": {
-        "title": "FanCourier Client ID",
+        "title": "FAN Courier Client ID",
         "description": "",
         "type": "string"
       },
@@ -207,12 +202,12 @@
         "type": "boolean"
       },
       "smartbill__titleSettings": {
-        "title": "Smartbill Settings",
+        "title": "SmartBill Settings",
         "description": "",
         "type": "object"
       },
       "smartbill__isEnabled": {
-        "title": "Enable Smartbill Integration",
+        "title": "Enable SmartBill Integration",
         "description": "",
         "type": "boolean",
         "default": true
@@ -262,12 +257,21 @@
         "type": "boolean"
       },
       "smartbill__defaultVATPercentage": {
-        "title": "Smartbill Default VAT Percentage",
+        "title": "SmartBill Default VAT Percentage",
         "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
         "type": "number",
         "default": 19
       }
     }
+  },
+  "billingOptions": {
+    "type": "free",
+    "support": {
+      "url": "https://marketplace.elefant.ro/"
+    },
+    "availableCountries": [
+      "*"
+    ]
   },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }
