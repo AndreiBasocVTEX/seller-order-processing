@@ -1,4 +1,3 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
 import ObjectsToCsv from 'objects-to-csv'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
