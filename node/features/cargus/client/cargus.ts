@@ -23,7 +23,15 @@ import {
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class CargusClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'cargus__isEnabled'
+  protected requiredSettingsFields = [
+    'cargus__isEnabled',
+    'cargus__username',
+    'cargus__password',
+    'cargus__primaryKey',
+    'cargus__locationId',
+    'cargus__priceTableId',
+    'cargus__serviceId',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super(ctx, {
@@ -36,10 +44,6 @@ export default class CargusClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[CargusClient.ENABLED_SETTING_NAME]
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {

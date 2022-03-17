@@ -43,7 +43,7 @@ interface TrackingStatusDTO {
 }
 
 export abstract class CarrierClient extends JanusClient {
-  protected static ENABLED_SETTING_NAME: string
+  protected requiredSettingsFields: string[] = []
 
   protected abstract requestAWB(
     request: CreateTrackingRequest
@@ -60,6 +60,12 @@ export abstract class CarrierClient extends JanusClient {
   abstract deleteAWB(request: DeleteTrackingRequest): Promise<boolean>
 
   abstract trackingLabel(request: GetTrackingLabelRequest): unknown
-  abstract isActive(settings: ObjectLiteral): boolean
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return this.requiredSettingsFields.every((field) => {
+      return settings[field]
+    })
+  }
+
   abstract throwIfDisabled(settings: ObjectLiteral): never | void
 }

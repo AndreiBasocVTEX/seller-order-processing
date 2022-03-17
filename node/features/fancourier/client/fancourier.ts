@@ -24,11 +24,13 @@ import {
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class FancourierClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'fancourier__isEnabled'
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[FancourierClient.ENABLED_SETTING_NAME]
-  }
+  protected requiredSettingsFields = [
+    'fancourier__isEnabled',
+    'fancourier__username',
+    'fancourier__password',
+    'fancourier__clientId',
+    'fancourier__warehouseId',
+  ]
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
     if (!this.isActive(settings)) {
