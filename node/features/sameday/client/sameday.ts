@@ -23,7 +23,11 @@ import findAllObjectPropsByKey from '../../core/utils/findAllObjectPropsByKey'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class SamedayClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'sameday__isEnabled'
+  protected requiredSettingsFields = [
+    'sameday__isEnabled',
+    'sameday__username',
+    'sameday__password',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
     // URL for demo environment
@@ -37,10 +41,6 @@ export default class SamedayClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[SamedayClient.ENABLED_SETTING_NAME]
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {

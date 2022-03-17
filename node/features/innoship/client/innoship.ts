@@ -21,7 +21,11 @@ import {
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class InnoshipClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'innoship__isEnabled'
+  protected requiredSettingsFields = [
+    'innoship__isEnabled',
+    'innoship__apiToken',
+    'innoship__warehouseId',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super(ctx, {
@@ -34,10 +38,6 @@ export default class InnoshipClient extends CarrierClient {
         'X-Vtex-Use-Https': 'true',
       },
     })
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[InnoshipClient.ENABLED_SETTING_NAME]
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {

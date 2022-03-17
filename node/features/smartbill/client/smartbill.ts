@@ -16,7 +16,17 @@ import createSmartbillOrderPayload from '../helpers/smartbill-create-payload.hel
 import type { GetInvoiceRequest } from '../models/smartbill-get-invoice.model'
 
 export default class SmartBillClient extends JanusClient {
-  protected static ENABLED_SETTING_NAME = 'smartbill__isEnabled'
+  private requiredSettingsFields = [
+    'smartbill__isEnabled',
+    'smartbill__username',
+    'smartbill__apiToken',
+    'smartbill__vatCode',
+    'smartbill__seriesName',
+    'smartbill__invoiceShippingCost',
+    'smartbill__invoiceShippingProductName',
+    'smartbill__invoiceShippingProductCode',
+    'smartbill__defaultVATPercentage',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
     super(ctx, {
@@ -32,7 +42,9 @@ export default class SmartBillClient extends JanusClient {
   }
 
   public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[SmartBillClient.ENABLED_SETTING_NAME]
+    return this.requiredSettingsFields.every((field) => {
+      return settings[field]
+    })
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
