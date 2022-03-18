@@ -1,5 +1,5 @@
 import type { FC } from 'react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Divider, Link } from 'vtex.styleguide'
 import '../../public/style.css'
 import { useIntl } from 'react-intl'
@@ -9,7 +9,9 @@ import { OrderTable } from '../../components/OrderDetail'
 import type { IOrderDetailProps } from '../../types/common'
 import AwbStatus from '../../components/AwbStatus'
 import InvoiceButton from '../../components/InvoiceButton'
-import { deliveryStatus } from '../../utils/constants'
+import { alwaysAvailableProviders, deliveryStatus } from '../../utils/constants'
+import type { Providers } from '../../typings/Providers'
+import { retrieveActiveProviders } from '../../utils/providers.util'
 
 const OrderDetail: FC<IOrderDetailProps> = ({
   orderData,
@@ -23,6 +25,25 @@ const OrderDetail: FC<IOrderDetailProps> = ({
     issuanceDate: string
     trackingNumber: string
   }>()
+
+  const [activeProviders, setActiveProviders] = useState<Providers>(
+    alwaysAvailableProviders
+  )
+
+  useEffect(() => {
+    retrieveActiveProviders().then(
+      ({ activeAwbCouriers, activeInvoiceCouriers }) => {
+        setActiveProviders({
+          ...activeProviders,
+          awbServices: [...activeAwbCouriers, ...activeProviders.awbServices],
+          invoiceServices: [
+            ...activeInvoiceCouriers,
+            ...activeProviders.invoiceServices,
+          ],
+        })
+      }
+    )
+  }, [])
 
   const intl = useIntl()
 
@@ -237,6 +258,7 @@ const OrderDetail: FC<IOrderDetailProps> = ({
                       order={orderData}
                       onAwbUpdate={setAwbUpdated}
                       refreshOrderDetails={refreshOrderData}
+                      availableProviders={activeProviders}
                     />
                   )}
               </div>
