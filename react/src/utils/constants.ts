@@ -83,3 +83,18 @@ export const couriersDropDownList = [
   { value: 'gls', label: 'GLS' },
   { value: 'dpd', label: 'DPD' },
 ]
+
+export const alwaysAvailableProviders = {
+  awbServices: [
+    {
+      src: 'download',
+      service: 'manual',
+    },
+  ],
+  invoiceServices: [
+    {
+      src: 'download',
+      service: 'manual',
+    },
+  ],
+}

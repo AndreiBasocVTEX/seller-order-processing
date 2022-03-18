@@ -1,4 +1,5 @@
 import type { OrderDetailsData } from '../typings/normalizedOrder'
+import type { Providers } from '../typings/Providers'
 
 export type IOrderAwbProps = {
   updateAwbData?: (v: {
@@ -11,4 +12,5 @@ export type IOrderAwbProps = {
   order: OrderDetailsData
   onAwbUpdate: (v: boolean) => void
   refreshOrderDetails?: () => void
+  availableProviders: Providers
 }
