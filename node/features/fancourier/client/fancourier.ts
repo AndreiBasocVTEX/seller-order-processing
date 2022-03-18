@@ -1,3 +1,4 @@
+import type { IOContext, InstanceOptions } from '@vtex/api'
 import ObjectsToCsv from 'objects-to-csv'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
@@ -11,16 +12,9 @@ import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
 import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
-import {
-  payloadToFormData,
-  transformResponseToBuffer,
-  transformResponseToText,
-} from '../../core/helpers/body-parser.helper'
+import { payloadToFormData } from '../../core/helpers/body-parser.helper'
 import type { FormDataPayload } from '../../core/models/form-data.model'
-import {
-  UnhandledError,
-  ValidationError,
-} from '../../core/helpers/error.helper'
+import { ValidationError } from '../../core/helpers/error.helper'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class FancourierClient extends CarrierClient {
@@ -31,6 +25,10 @@ export default class FancourierClient extends CarrierClient {
     'fancourier__clientId',
     'fancourier__warehouseId',
   ]
+
+  constructor(ctx: IOContext, options?: InstanceOptions) {
+    super(ctx, 'http://www.selfawb.ro/', options)
+  }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
     if (!this.isActive(settings)) {
@@ -156,7 +154,7 @@ export default class FancourierClient extends CarrierClient {
         nr: trackingNumber,
         page: paperSize,
       },
-      { responseType: 'blob' }
+      { responseType: 'arraybuffer' }
     )
   }
 
@@ -239,28 +237,27 @@ export default class FancourierClient extends CarrierClient {
   private requestToFanCourier(
     url: string,
     payload: FormDataPayload,
-    options: { responseType: 'text' | 'blob' }
+    options: { responseType: 'text' | 'arraybuffer' }
   ) {
     if (!url) {
       throw new ValidationError({ message: 'URL is required' })
     }
 
+    const acceptTypeByResponse = {
+      text: 'text/html',
+      arraybuffer: 'application/pdf',
+    }
+
     const form = payloadToFormData(payload)
+    const formBody = form.getBuffer().toString()
+    const formBoundary = form.getBoundary()
 
-    return new Promise((resolve, reject) => {
-      form.submit(`https://www.selfawb.ro/${url}`, (error, response) => {
-        if (options.responseType === 'blob') {
-          return transformResponseToBuffer(error, response)
-            .then(resolve)
-            .catch(reject)
-        }
-
-        return transformResponseToText(error, response)
-          .then(resolve)
-          .catch(reject)
-      })
-    }).catch((error) => {
-      throw UnhandledError.fromError(error)
+    return this.http.post<string | Buffer>(url, formBody, {
+      ...options,
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formBoundary}`,
+        'Accept-Type': acceptTypeByResponse[options.responseType],
+      },
     })
   }
 }

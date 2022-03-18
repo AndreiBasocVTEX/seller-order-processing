@@ -28,16 +28,7 @@ export default class InnoshipClient extends CarrierClient {
   ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(ctx, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        baseURL: 'http://api.innoship.io/api',
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Vtex-Use-Https': 'true',
-      },
-    })
+    super(ctx, 'http://api.innoship.io/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {

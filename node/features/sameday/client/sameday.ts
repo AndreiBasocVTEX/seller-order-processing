@@ -30,17 +30,7 @@ export default class SamedayClient extends CarrierClient {
   ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    // URL for demo environment
-    super(ctx, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        baseURL: 'https://sameday-api.demo.zitec.com',
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Vtex-Use-Https': 'true',
-      },
-    })
+    super(ctx, 'http://api.sameday.ro/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
@@ -55,7 +45,7 @@ export default class SamedayClient extends CarrierClient {
     settings: IOContext['settings']
   ): Promise<IAuthDataSameday> {
     return this.http.post(
-      '/api/authenticate?remember_me=1',
+      '/authenticate?remember_me=1',
       {},
       {
         headers: {
@@ -76,7 +66,7 @@ export default class SamedayClient extends CarrierClient {
     const body = await createOrderPayload(order, params)
 
     return (this.http
-      .post('/api/awb', body, {
+      .post('/awb', body, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
@@ -105,7 +95,7 @@ export default class SamedayClient extends CarrierClient {
     const { token } = await this.getAuthToken(settings)
 
     return this.http
-      .getStream(`/api/awb/download/${trackingNumber}/${paperSize}`, {
+      .getStream(`/awb/download/${trackingNumber}/${paperSize}`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
@@ -133,7 +123,7 @@ export default class SamedayClient extends CarrierClient {
     const { token } = await this.getAuthToken(settings)
 
     const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http
-      .get(`/api/client/awb/${trackingNumber}/status`, {
+      .get(`/client/awb/${trackingNumber}/status`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
@@ -180,7 +170,7 @@ export default class SamedayClient extends CarrierClient {
     const { token } = await this.getAuthToken(settings)
 
     return this.http
-      .delete(`/api/awb/${trackingNumber}`, {
+      .delete(`/awb/${trackingNumber}`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },

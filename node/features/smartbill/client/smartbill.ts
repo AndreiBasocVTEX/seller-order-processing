@@ -1,5 +1,5 @@
 import type { IOContext, InstanceOptions } from '@vtex/api'
-import { JanusClient } from '@vtex/api'
+import { ExternalClient } from '@vtex/api'
 
 import {
   UnhandledError,
@@ -15,7 +15,7 @@ import type {
 import createSmartbillOrderPayload from '../helpers/smartbill-create-payload.helper'
 import type { GetInvoiceRequest } from '../models/smartbill-get-invoice.model'
 
-export default class SmartBillClient extends JanusClient {
+export default class SmartBillClient extends ExternalClient {
   private requiredSettingsFields = [
     'smartbill__isEnabled',
     'smartbill__username',
@@ -29,11 +29,10 @@ export default class SmartBillClient extends JanusClient {
   ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(ctx, {
+    super('http://ws.smartbill.ro/SBORO/api', ctx, {
       ...options,
       headers: {
         ...options?.headers,
-        baseURL: 'https://ws.smartbill.ro/SBORO/api',
         Accept: 'application/json',
         'Content-Type': 'application/json',
         'X-Vtex-Use-Https': 'true',
