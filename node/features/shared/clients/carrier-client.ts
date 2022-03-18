@@ -1,5 +1,5 @@
-import type { IOContext } from '@vtex/api'
-import { JanusClient } from '@vtex/api'
+import type { IOContext, InstanceOptions } from '@vtex/api'
+import { ExternalClient } from '@vtex/api'
 
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
@@ -42,8 +42,20 @@ interface TrackingStatusDTO {
   events?: VtexTrackingEvent[]
 }
 
-export abstract class CarrierClient extends JanusClient {
+export abstract class CarrierClient extends ExternalClient {
   protected requiredSettingsFields: string[] = []
+
+  constructor(ctx: IOContext, baseURL: string, options?: InstanceOptions) {
+    super(baseURL, ctx, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Vtex-Use-Https': 'true',
+      },
+    })
+  }
 
   protected abstract requestAWB(
     request: CreateTrackingRequest

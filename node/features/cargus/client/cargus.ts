@@ -34,16 +34,7 @@ export default class CargusClient extends CarrierClient {
   ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(ctx, {
-      ...options,
-      baseURL: 'http://urgentcargus.azure-api.net/api',
-      headers: {
-        ...options?.headers,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Vtex-Use-Https': 'true',
-      },
-    })
+    super(ctx, 'http://urgentcargus.azure-api.net/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
