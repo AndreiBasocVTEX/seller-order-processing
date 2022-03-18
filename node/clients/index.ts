@@ -1,5 +1,7 @@
 import { IOClients } from '@vtex/api'
+import { OMS } from '@vtex/clients'
 
+import EmailClient from './email-client'
 import CarrierClientFactory from './carrier-client.factory'
 import { CargusClient } from '../features/cargus'
 import { FancourierClient } from '../features/fancourier'
@@ -7,10 +9,23 @@ import { InnoshipClient } from '../features/innoship'
 import { SamedayClient } from '../features/sameday'
 import { OrderClient } from '../features/vtex'
 import { SmartbillClient } from '../features/smartbill'
+import TemplateClient from './template-client'
 
 export class Clients extends IOClients {
   public get orderApi() {
     return this.getOrSet('orderApi', OrderClient)
+  }
+
+  public get emailApi() {
+    return this.getOrSet('emailApi', EmailClient)
+  }
+
+  public get oms() {
+    return this.getOrSet('oms', OMS)
+  }
+
+  public get templateApi() {
+    return this.getOrSet('templateApi', TemplateClient)
   }
 
   public get fancourier() {

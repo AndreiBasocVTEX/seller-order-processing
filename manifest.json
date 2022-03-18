@@ -19,6 +19,12 @@
   "registries": ["smartcheckout"],
   "policies": [
     {
+      "name": "template-criar"
+    },
+    {
+      "name": "template-editar"
+    },
+    {
       "name": "outbound-access",
       "attrs": {
         "host": "urgentcargus.azure-api.net",
@@ -42,7 +48,14 @@
     {
       "name": "outbound-access",
       "attrs": {
-        "host": "{{account}}.vtexcommercestable.com.br",
+        "host": "{{account}}.myvtex.com",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
         "path": "/api/*"
       }
     },
@@ -59,6 +72,23 @@
         "host": "ws.smartbill.ro",
         "path": "/SBORO/*"
       }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "OMSViewer"
     }
   ],
   "settingsSchema": {
@@ -74,6 +104,26 @@
         "title": "Shipping VAT Percentage",
         "type": "number",
         "default": 19
+      },
+      "notifications__title": {
+        "title": "Notification Settings",
+        "description": "",
+        "type": "object"
+      },
+      "notifications__isEnabled": {
+        "title": "Enable notifications for new orders",
+        "description": "",
+        "type": "boolean"
+      },
+      "notifications__emailList": {
+        "title": "Add recipients email addresses",
+        "description": "",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "format": "email"
+        }
       },
       "fancourier__titleSettings": {
         "title": "FAN Courier Settings",
