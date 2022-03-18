@@ -26,5 +26,11 @@
       "path": "/opa/get-active-providers",
       "public": true
     }
+  },
+  "events": {
+    "newOrder": {
+      "sender": "vtex.orders-broadcast",
+      "topics": ["order-created"]
+    }
   }
 }
