@@ -1,7 +1,7 @@
 {
   "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "title": "Seller Order Processing",
   "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
