@@ -30,7 +30,7 @@
   "events": {
     "newOrder": {
       "sender": "vtex.orders-broadcast",
-      "topics": ["order-created"]
+      "topics": ["window-to-cancel"]
     }
   }
 }
