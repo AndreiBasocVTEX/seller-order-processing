@@ -36,13 +36,23 @@ export async function newOrderBroadcastMiddleware(
   const paymentMethod =
     orderData.openTextField.value.match(/\b(\w+)$/g)?.toString() ?? ''
 
-  const itemsNormalized = orderData.items.map(({ name, quantity, price }) => {
-    return {
+  const itemsNormalized = orderData.items.map(
+    ({
       name,
       quantity,
-      price: new Intl.NumberFormat('fr-FR').format(price / 100),
+      price,
+    }: {
+      name: string
+      quantity: number
+      price: number
+    }) => {
+      return {
+        name,
+        quantity,
+        price: new Intl.NumberFormat('fr-FR').format(price / 100),
+      }
     }
-  })
+  )
 
   const options = {
     year: 'numeric',
