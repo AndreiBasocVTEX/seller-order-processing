@@ -21,7 +21,10 @@ export async function newOrderBroadcastMiddleware(
   }
 
   const templateName = 'order-processing-new-order'
-  const isTemplateAvailable = await templateApi.getTemplate(templateName)
+  const isTemplateAvailable = await templateApi.getTemplate(
+    templateName,
+    newOrderTemplate
+  )
 
   if (!isTemplateAvailable) {
     await templateApi.createTemplate(templateName, newOrderTemplate)
@@ -97,7 +100,7 @@ export async function newOrderBroadcastMiddleware(
       to: {
         name: orderData.clientProfileData.lastName,
         email: settings.notifications__emailList,
-        subject: 'New Order',
+        subject: 'New Marketplace Order',
       },
       ...emailJson,
     },
