@@ -10,71 +10,19 @@ const newOrderTemplate = `
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <title>{{_accountInfo.TradingName}}</title>
-        <!--[if gte mso 9]>
-        <xml>
-            <o:OfficeDocumentSettings>
-                <o:AllowPNG/>
-                <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-        </xml>
-        <![endif]-->
-        <style>
-            a[x-apple-data-detectors] {
-                color: inherit !important;
-                text-decoration: none !important;
-                font-size: inherit !important;
-                font-family: inherit !important;
-                font-weight: inherit !important;
-                line-height: inherit !important;
-            }
-        </style>
-        <style>
-            @media (max-width: 600px) {
-                img {
-                    max-width: 100% !important;
-                    height: auto !important;
-                }
-            }
-        </style>
-        <style>
-            @media screen and (min-width: 30em) {
-                .w-50-ns {
-                    width: 50% !important;
-                }
 
-                .pr4-ns {
-                    padding-right: 2rem !important;
-                }
-
-                .ph4-ns {
-                    padding-left: 2rem !important;
-                    padding-right: 2rem !important;
-                }
-
-                .mv1-ns {
-                    margin-top: .25rem !important;
-                    margin-bottom: .25rem !important;
-                }
-
-                .mv4-ns {
-                    margin-top: 2rem !important;
-                    margin-bottom: 2rem !important;
-                }
-            }
-        </style>
     </head>
-    <body style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; box-sizing: border-box; width: 100%; height: 90%; margin: 5px; padding: 2px; background: #f1f1f1 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <body style="-webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; box-sizing: border-box; width: 100%; height: 90%; margin: 5px; background: #f1f1f1 !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
     <table width="100%" border="0" cellpadding="0" cellspacing="0"
            style="box-sizing: border-box; margin: 0; padding: 0; background: #f1f1f1; border-collapse: collapse; border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; width: 100%; height: 100%; line-height: 100% !important;">
         <tr style="box-sizing: border-box !important;">
             <td align="left" valign="top"
-                style="font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                <table class="mv4-ns" width="100%" align="center" border="0" cellpadding="0" cellspacing="0"
-                       style="box-sizing: border-box; max-width: 40rem; width: 100%; background-color: #fff; border-collapse: collapse; border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+                style="font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; ">
+                <table width="100%" align="center" border="0" cellpadding="0" cellspacing="0"
+                       style="margin-top: 2rem !important; margin-bottom: 2rem !important; box-sizing: border-box; max-width: 40rem; width: 100%; background-color: #fff; border-collapse: collapse; border-spacing: 0; mso-table-lspace: 0pt; mso-table-rspace: 0pt !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
                        bgcolor="#fff">
                     <tr style="box-sizing: border-box !important;">
-                        <td class="ph4-ns"
-                            style="font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; border-bottom-style: solid; border-bottom-width: 1px; border-color: #eee; width: 100%; padding-bottom: 2rem; text-align: center !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+                        <td style="padding-left: 2rem; padding-right: 2rem; font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; border-bottom-style: solid; border-bottom-width: 1px; border-color: #eee; width: 100%; padding-bottom: 2rem; text-align: center !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
                             align="center">
                             <h1 style="margin: 2rem 0 10px 0; font-size: 40px; line-height: 48px; box-sizing: border-box !important;">
                                 You have a new order!</h1>
@@ -83,16 +31,15 @@ const newOrderTemplate = `
                         </td>
                     </tr>
                     <tr style="box-sizing: border-box !important;">
-                        <td class="ph4-ns"
-                            style="font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left; width: 100%; padding-bottom: 2rem; padding-top: 1rem !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+                        <td style="padding-left: 2rem; padding-right: 2rem; font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left; width: 100%; padding-bottom: 2rem; padding-top: 1rem !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
                             align="left">
                             <p style="display: inline-block; margin-top: 2rem !important;">
                                 <strong>VTEX ID: {{orderId}}</strong><br/>
                                 <strong>MarketPlace ID: {{ vendorOrderId }}</strong>
                             </p>
                             <a style="display: inline-block; float: right; margin-top: 2rem !important; padding: 0.5rem 1.25rem;
-                        text-decoration: none; font-weight: bold;
-                         background-color: #134cd8; border-color: #134cd8; border-radius: 0.25rem; color: white "
+                                      text-decoration: none; font-weight: bold;
+                                      background-color: #134cd8; border-color: #134cd8; border-radius: 0.25rem; color: white "
                                href="https://{{hostname}}.myvtex.com/admin/order-details/{{orderId}}">
                                 VEZI COMANDA
                             </a>
@@ -122,8 +69,7 @@ const newOrderTemplate = `
                         </td>
                     </tr>
                     <tr style="box-sizing: border-box !important;">
-                        <td class="ph4-ns"
-                            style="font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left; border-top-style: solid; border-top-width: 1px; border-bottom-style: solid; border-bottom-width: 1px; border-color: #eee; border-width: .5rem; width: 100%; padding-top: 2rem; padding-bottom: 2rem !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
+                        <td style=" padding-left: 2rem; padding-right: 2rem;font-size: 14px; line-height: 20px; box-sizing: border-box; border-collapse: collapse; text-align: left; border-top-style: solid; border-top-width: 1px; border-bottom-style: solid; border-bottom-width: 1px; border-color: #eee; border-width: .5rem; width: 100%; padding-top: 2rem; padding-bottom: 2rem !important; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"
                             align="left">
                             <h3 style="font-size: 24px; line-height: 36px; box-sizing: border-box; margin-top: 0 !important;">
                                 Produse</h3>

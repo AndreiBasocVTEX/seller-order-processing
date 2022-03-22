@@ -14,10 +14,17 @@ export default class TemplateClient extends JanusClient {
     })
   }
 
-  public async getTemplate(templateName: string): Promise<boolean> {
+  public async getTemplate(
+    templateName: string,
+    emailTemplate: string
+  ): Promise<boolean> {
     return this.http
       .getRaw(`${this.url}/${templateName}`)
-      .then((res) => res.status === 200)
+      .then(
+        (res) =>
+          res.status === 200 &&
+          res.data.Templates.email.Message === emailTemplate
+      )
       .catch(() => false)
   }
 
