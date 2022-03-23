@@ -36,6 +36,8 @@ const OrdersList: FC = () => {
     ordersTotalValue: 0,
   })
 
+  const [orderAwbModalsOpen, setOrderAwbModalsOpen] = useState('')
+
   const intl = useIntl()
   const paramPage =
     Number(new URL(window.location.href).searchParams.get('page')) || 1
@@ -292,6 +294,8 @@ const OrdersList: FC = () => {
               }}
             >
               <RequestAwbModal
+                modalOpenId={orderAwbModalsOpen}
+                setOpenModalId={setOrderAwbModalsOpen}
                 order={rowData}
                 onAwbUpdate={setAwbUpdated}
                 availableProviders={activeProviders}

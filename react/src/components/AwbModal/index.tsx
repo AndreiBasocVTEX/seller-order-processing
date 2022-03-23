@@ -25,6 +25,8 @@ import {
 } from '../../utils/constants'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
+  modalOpenId,
+  setOpenModalId,
   updateAwbData,
   order,
   onAwbUpdate,
@@ -42,7 +44,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [manualAwb, setManualAwb] = useState('')
   const [manualUrl, setManualUrl] = useState('')
   const [orderData, setOrderData] = useState<OrderDetailsData>()
-  const [modalOpen, setModalOpen] = useState(false)
   const [courierSetManually, setCourierManually] = useState('')
 
   const [invoiceDate, setInvoiceDate] = useState(
@@ -103,10 +104,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     }
   })
 
-  const handlePopUpToggle = () => {
-    setModalOpen(!modalOpen)
-  }
-
   const getOrderData = async (orderId: string) => {
     setIsLoading(true)
     createAwbShipping({
@@ -153,7 +150,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
     e.preventDefault()
-    setModalOpen(!modalOpen)
+    setOpenModalId('')
     setInvoiceNum('')
     orderData?.orderId && getOrderData(orderData?.orderId)
   }
@@ -254,7 +251,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
             disabled={isLoading || orderData?.status === 'canceled'}
             isLoading={isLoading}
             onClick={() => {
-              setModalOpen(!modalOpen)
+              orderData && setOpenModalId(orderData.orderId)
             }}
           >
             <span className="f6 mw-100 truncate">
@@ -266,13 +263,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         </Tooltip>
       )}
       <Modal
-        isOpen={modalOpen}
+        isOpen={modalOpenId === orderData?.orderId}
         responsiveFullScreen
         showCloseIcon
         onClose={() => {
-          handlePopUpToggle()
           setCourier('')
           setService('')
+          setOpenModalId('')
         }}
         closeOnOverlayClick
         closeOnEsc
