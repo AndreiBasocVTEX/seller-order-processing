@@ -30,6 +30,8 @@ const OrderDetail: FC<IOrderDetailProps> = ({
     alwaysAvailableProviders
   )
 
+  const [orderAwbModalsOpen, setOrderAwbModalsOpen] = useState('')
+
   useEffect(() => {
     retrieveActiveProviders().then(
       ({ activeAwbCouriers, activeInvoiceCouriers }) => {
@@ -254,6 +256,8 @@ const OrderDetail: FC<IOrderDetailProps> = ({
                 {orderData.orderId &&
                   orderData.status !== deliveryStatus.WINDOW_TO_CANCEL && (
                     <RequestAwbModal
+                      modalOpenId={orderAwbModalsOpen}
+                      setOpenModalId={setOrderAwbModalsOpen}
                       updateAwbData={updateAwbData}
                       order={orderData}
                       onAwbUpdate={setAwbUpdated}
