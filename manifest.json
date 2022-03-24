@@ -245,6 +245,16 @@
         "type": "string",
         "format": "password"
       },
+      "sameday__pickUpServiceName": {
+        "title": "Sameday Service",
+        "enum": ["2H", "3H", "6H", "24H", "Exclusive"],
+        "default": "24H"
+      },
+      "sameday__pickupPoint": {
+        "title": "Sameday Pickup Location ID",
+        "type": "number",
+        "default": "139"
+      },
       "smartbill__titleSettings": {
         "title": "SmartBill Settings",
         "description": "",
