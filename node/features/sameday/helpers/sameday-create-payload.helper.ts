@@ -1,10 +1,8 @@
 import type { IOContext } from '@vtex/api'
 
 import localitiesMapper from '../../../../libs/localities-mapper'
-import {
-  getTotalDiscount,
-  getPaymentMethod,
-} from '../../core/helpers/order-dto.helper'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
+import { getTotalDiscount } from '../../core/helpers/order-dto.helper'
 import { isNumber, isString } from '../../core/utils/type-guards'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
@@ -66,7 +64,9 @@ export async function createOrderPayload(
     address.city
   )
 
-  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+  const typeOfPayment = getPaymentMethodFromTextField(
+    order.openTextField?.value
+  )
 
   const payment =
     typeOfPayment?.toLowerCase() === TypeOfPayment.CARD

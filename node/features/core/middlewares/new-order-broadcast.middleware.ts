@@ -2,6 +2,10 @@ import type { EventContext } from '@vtex/api'
 
 import type { Clients } from '../../../clients'
 import newOrderTemplate from '../../../templates/new-order.template'
+import {
+  parseStringIntoObject,
+  OpenTextFields,
+} from '../../../../libs/common-utils/object.utils'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 import { formatOrderState } from '../../../../libs/localities-mapper/utils/county-list.util'
 
@@ -34,19 +38,16 @@ export async function newOrderBroadcastMiddleware(
   }
 
   const orderData = await oms.order(ctx.body.orderId)
+  const openFieldData = parseStringIntoObject(orderData.openTextField)
+
+  const vendorId = openFieldData[OpenTextFields.vendorOrderId] ?? ''
+  const paymentMethod = openFieldData[OpenTextFields.paymentMethod] ?? ''
 
   logger?.info({
     middleware: 'newOrderBroadcastMiddleware',
     message: 'Get order data from VTEX system',
     orderData,
   })
-
-  const vendorId =
-    orderData.openTextField.value.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ??
-    ''
-
-  const paymentMethod =
-    orderData.openTextField.value.match(/\b(\w+)$/g)?.toString() ?? ''
 
   const itemsNormalized = orderData.items.map(
     ({

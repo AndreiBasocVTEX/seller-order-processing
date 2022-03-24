@@ -6,15 +6,10 @@ import type {
 } from '../../typings/normalizedOrder'
 import { deliveryStatus } from '../constants'
 import { formatOrderState } from '../../../../libs/localities-mapper/utils/county-list.util'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
 
 const getVendorOrderId = (orderNote: string): string | null =>
   orderNote.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ?? null
-
-const getPaymentMethod = (paymentData: string): string | null => {
-  if (!paymentData) return null
-
-  return paymentData.match(/\b(\w+)$/g)?.toString() ?? null
-}
 
 const getOrderTotals = (orderData: IOrder) => {
   const orderTotals = {}
@@ -224,7 +219,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
     items: orderData.items,
     orderId: orderData?.orderId,
     openTextField: {
-      value: getPaymentMethod(orderData?.openTextField?.value),
+      value: getPaymentMethodFromTextField(orderData?.openTextField?.value),
     },
     orderTotals: getOrderTotals(orderData),
     marketPlaceOrderId: orderData?.marketplaceOrderId,
