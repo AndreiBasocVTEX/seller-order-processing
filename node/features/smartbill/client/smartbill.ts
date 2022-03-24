@@ -1,10 +1,11 @@
-import type { IOContext, InstanceOptions } from '@vtex/api'
+import type { IOContext, InstanceOptions, Logger } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import {
   UnhandledError,
   ValidationError,
 } from '../../core/helpers/error.helper'
+import { formatError } from '../../core/helpers/formatError'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 import { BillingsEnum } from '../../shared/enums/billings.enum'
 import type {
@@ -54,24 +55,35 @@ export default class SmartBillClient extends ExternalClient {
     }
   }
 
-  private static getAuthorization(settings: IOContext['settings']) {
+  private static getAuthorization(
+    settings: IOContext['settings'],
+    logger?: Logger
+  ) {
     // Create buffer object, specifying utf8 as encoding
     const bufferObj = Buffer.from(
       `${settings.smartbill__username}:${settings.smartbill__apiToken}`,
       'utf8'
     )
 
+    logger?.info({
+      function: 'getAuthorization',
+      client: 'Smartbill',
+      message: 'Create buffer object, specifying utf8 as encoding',
+      bufferObj,
+    })
+
     // Encode the Buffer as a base64 string
     return { Authorization: `Basic ${bufferObj.toString('base64')}` }
   }
 
   private async getTaxCodeName(
-    settings: IOContext['settings']
+    settings: IOContext['settings'],
+    logger?: Logger
   ): Promise<SmartbillTaxCodeNamesResponse> {
     return this.http
       .get(`/tax?cif=${settings.smartbill__vatCode}`, {
         headers: {
-          ...SmartBillClient.getAuthorization(settings),
+          ...SmartBillClient.getAuthorization(settings, logger),
         },
       })
       .catch((error) => {
@@ -82,8 +94,16 @@ export default class SmartBillClient extends ExternalClient {
   public async generateInvoice({
     settings,
     order,
+    logger,
   }: CreateInvoiceRequest): Promise<SmartBillGenerateInvoiceRes> {
-    const productTaxNames = await this.getTaxCodeName(settings)
+    const productTaxNames = await this.getTaxCodeName(settings, logger)
+
+    logger?.info({
+      function: 'generateInvoice',
+      client: 'Smartbill',
+      message: 'Get product tax names',
+      productTaxNames,
+    })
 
     const smartbillPayload = createSmartbillOrderPayload({
       settings,
@@ -91,33 +111,56 @@ export default class SmartBillClient extends ExternalClient {
       productTaxNames,
     })
 
-    return (this.http
-      .post('/invoice', smartbillPayload, {
+    logger?.info({
+      function: 'generateInvoice',
+      client: 'Smartbill',
+      message: 'Create Smartbill payload',
+      smartbillPayload,
+    })
+
+    return this.http
+      .post<SmartBillGenerateInvoiceRes>('/invoice', smartbillPayload, {
         headers: {
-          ...SmartBillClient.getAuthorization(settings),
+          ...SmartBillClient.getAuthorization(settings, logger),
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw new UnhandledError({
           message: error?.response?.data?.errorText || error,
         })
-      }) as unknown) as Promise<SmartBillGenerateInvoiceRes>
+      })
   }
 
   public async getInvoice({
     settings,
     invoiceNumber,
+    logger,
   }: GetInvoiceRequest): Promise<unknown> {
+    logger?.info({
+      function: 'getInvoice',
+      client: 'Smartbill',
+      message: 'Get invoice number to generate invoice PDF',
+      invoiceNumber,
+    })
+
     return this.http
       .getStream(
         `/invoice/pdf?cif=${settings.smartbill__vatCode}&seriesname=${settings.smartbill__seriesName}&number=${invoiceNumber}`,
         {
           headers: {
-            ...SmartBillClient.getAuthorization(settings),
+            ...SmartBillClient.getAuthorization(settings, logger),
           },
         }
       )
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }

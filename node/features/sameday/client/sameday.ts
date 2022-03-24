@@ -21,6 +21,7 @@ import {
 } from '../../core/helpers/error.helper'
 import findAllObjectPropsByKey from '../../core/utils/findAllObjectPropsByKey'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
+import { formatError } from '../../core/helpers/formatError'
 
 export default class SamedayClient extends CarrierClient {
   protected requiredSettingsFields = [
@@ -60,18 +61,37 @@ export default class SamedayClient extends CarrierClient {
     settings,
     order,
     params,
+    logger,
   }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
 
+    logger?.info({
+      function: 'Request AWB',
+      carrier: 'Sameday',
+      message: `Data to create payload`,
+      trackingParams: params,
+    })
+
     const body = await createOrderPayload(order, params)
 
-    return (this.http
-      .post('/awb', body, {
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Sameday',
+      message: `Payload to generate AWB for order with ID ${order.orderId}`,
+      body,
+    })
+
+    return this.http
+      .post<ISamedayAwbResponse>('/awb', body, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         const { data: errorData } = error?.response
         const { children } = errorData.errors
 
@@ -84,15 +104,24 @@ export default class SamedayClient extends CarrierClient {
           message: errorData.message,
           errors: errorMessages,
         })
-      }) as unknown) as Promise<ISamedayAwbResponse>
+      })
   }
 
   public async trackingLabel({
     settings,
     trackingNumber,
     paperSize,
+    logger,
   }: GetTrackingLabelRequest): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
+
+    logger?.info({
+      function: 'trackingLabel',
+      carrier: 'sameday',
+      message: `Request to create tracking label`,
+      trackingNumber,
+      paperSize,
+    })
 
     return this.http
       .getStream(`/awb/download/${trackingNumber}/${paperSize}`, {
@@ -101,12 +130,32 @@ export default class SamedayClient extends CarrierClient {
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
+    const { logger } = request
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Sameday',
+      message: 'Request to create tracking',
+      request,
+    })
+
     const { awbNumber: trackingNumber } = await this.requestAWB(request)
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Sameday',
+      message: `Sameday request AWB response`,
+      trackingNumber,
+    })
 
     return {
       trackingNumber,
@@ -119,8 +168,17 @@ export default class SamedayClient extends CarrierClient {
     settings,
     trackingNumber,
     invoiceNumber,
+    logger,
   }: GetTrackingStatusRequest) {
     const { token } = await this.getAuthToken(settings)
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Request to get tracking history`,
+      trackingNumber,
+      invoiceNumber,
+    })
 
     const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http
       .get(`/client/awb/${trackingNumber}/status`, {
@@ -129,6 +187,10 @@ export default class SamedayClient extends CarrierClient {
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
 
@@ -157,6 +219,14 @@ export default class SamedayClient extends CarrierClient {
       isDelivered = expeditionSummary.delivered
     }
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Sameday tracking events and delivery status`,
+      deliveryStatus: isDelivered,
+      trackingEvents,
+    })
+
     return {
       isDelivered,
       events: trackingEvents,
@@ -166,8 +236,16 @@ export default class SamedayClient extends CarrierClient {
   public async deleteAWB({
     settings,
     trackingNumber,
+    logger,
   }: DeleteTrackingRequest): Promise<boolean> {
     const { token } = await this.getAuthToken(settings)
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Sameday tracking number to delete AWB`,
+      trackingNumber,
+    })
 
     return this.http
       .delete(`/awb/${trackingNumber}`, {
@@ -177,6 +255,10 @@ export default class SamedayClient extends CarrierClient {
       })
       .then(({ status }) => status === 204)
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }

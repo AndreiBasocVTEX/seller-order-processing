@@ -1,3 +1,5 @@
+import type { AxiosError } from 'axios'
+
 import type { ObjectLiteral } from '../models/object-literal.model'
 import type { CustomError } from '../models/request.model'
 
@@ -80,11 +82,14 @@ export class UnhandledError extends CustomErrorConstructor {
     super('ValidationError', { message, stack, meta, statusCode: 500, errors })
   }
 
-  public static fromError(err: Error): UnhandledError {
+  public static fromError(err: AxiosError): UnhandledError {
     return new UnhandledError({
       message: err.message ?? err,
       stack: err.stack as string,
-      meta: { raw: JSON.stringify(err, Object.getOwnPropertyNames(err)) },
+      meta: {
+        raw: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+        data: err.response?.data,
+      },
     })
   }
 }

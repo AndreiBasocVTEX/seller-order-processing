@@ -1,6 +1,5 @@
-import type { IOContext } from '@vtex/api'
+import type { CarrierClientRequest } from '../../shared/clients/carrier-client'
 
-export interface GetInvoiceRequest {
-  settings: IOContext['settings']
+export interface GetInvoiceRequest extends CarrierClientRequest {
   invoiceNumber: string
 }
