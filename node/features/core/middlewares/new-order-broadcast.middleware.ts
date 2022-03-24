@@ -11,7 +11,7 @@ import { formatOrderState } from '../../../../libs/localities-mapper/utils/count
 
 export async function newOrderBroadcastMiddleware(
   ctx: EventContext<Clients>,
-  next: () => Promise<never>
+  next: () => Promise<any>
 ) {
   const {
     vtex: { logger },
