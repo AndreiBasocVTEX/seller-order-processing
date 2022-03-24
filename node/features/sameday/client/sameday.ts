@@ -72,7 +72,7 @@ export default class SamedayClient extends CarrierClient {
       trackingParams: params,
     })
 
-    const body = await createOrderPayload(order, params)
+    const body = await createOrderPayload(order, params, settings)
 
     logger?.info({
       function: 'RequestAWB',
