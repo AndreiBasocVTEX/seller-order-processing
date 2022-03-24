@@ -1,4 +1,4 @@
-import type { IOContext, InstanceOptions } from '@vtex/api'
+import type { IOContext, InstanceOptions, Logger } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
@@ -7,8 +7,9 @@ import type { TrackingInfoDTO } from '../../vtex/dto/track-and-invoice.dto'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type { PaperSize } from '../enums/paper-size.enum'
 
-interface CarrierClientRequest {
+export interface CarrierClientRequest {
   settings: IOContext['settings']
+  logger?: Logger
 }
 
 export interface CreateTrackingRequest extends CarrierClientRequest {

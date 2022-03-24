@@ -121,6 +121,7 @@
         "type": "array",
         "uniqueItems": true,
         "items": {
+          "title": "Email",
           "type": "string",
           "format": "email"
         }

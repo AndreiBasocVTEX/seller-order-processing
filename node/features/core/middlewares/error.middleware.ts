@@ -1,4 +1,5 @@
 import { UnhandledError } from '../helpers/error.helper'
+import { formatError } from '../helpers/formatError'
 import type { Handler, Next } from '../models/request.model'
 
 export function errorHandleMiddleware(handler: Handler) {
@@ -6,6 +7,10 @@ export function errorHandleMiddleware(handler: Handler) {
     ctx: Context,
     next: Next
   ): Promise<void> {
+    const {
+      vtex: { logger },
+    } = ctx
+
     try {
       const response = await handler(ctx)
 
@@ -15,6 +20,11 @@ export function errorHandleMiddleware(handler: Handler) {
 
       return next()
     } catch (error) {
+      logger.error({
+        handler: `${handler}`,
+        data: formatError(error),
+      })
+
       const handledError = error.statusCode
         ? error
         : UnhandledError.fromError(error)

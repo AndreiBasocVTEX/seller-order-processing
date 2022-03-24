@@ -1,15 +1,18 @@
+import type { EventContext } from '@vtex/api'
+
 import type { Clients } from '../../../clients'
 import newOrderTemplate from '../../../templates/new-order.template'
 import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 import { formatOrderState } from '../../../../libs/localities-mapper/utils/county-list.util'
 
 export async function newOrderBroadcastMiddleware(
-  ctx: Context,
-  next: () => Promise<any>
+  ctx: EventContext<Clients>,
+  next: () => Promise<never>
 ) {
   const {
+    vtex: { logger },
     clients: { emailApi, templateApi, oms },
-  } = ctx as { clients: Clients }
+  } = ctx
 
   const settings = await getVtexAppSettings(ctx)
 
@@ -31,6 +34,12 @@ export async function newOrderBroadcastMiddleware(
   }
 
   const orderData = await oms.order(ctx.body.orderId)
+
+  logger?.info({
+    middleware: 'newOrderBroadcastMiddleware',
+    message: 'Get order data from VTEX system',
+    orderData,
+  })
 
   const vendorId =
     orderData.openTextField.value.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ??
@@ -57,7 +66,15 @@ export async function newOrderBroadcastMiddleware(
     }
   )
 
-  const options = {
+  logger?.info({
+    middleware: 'newOrderBroadcastMiddleware',
+    message: 'Normalized items, vendor ID and payment method',
+    vendorId,
+    paymentMethod,
+    itemsNormalized,
+  })
+
+  const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -92,7 +109,13 @@ export async function newOrderBroadcastMiddleware(
     county,
   }
 
-  await emailApi.sendMail({
+  logger?.info({
+    middleware: 'newOrderBroadcastMiddleware',
+    message: 'Create email JSON',
+    emailJson,
+  })
+
+  const res = await emailApi.sendMail({
     TemplateName: templateName,
     applicationName: ctx.vtex.userAgent,
     logEvidence: false,
@@ -104,6 +127,12 @@ export async function newOrderBroadcastMiddleware(
       },
       ...emailJson,
     },
+  })
+
+  logger?.info({
+    middleware: 'newOrderBroadcastMiddleware',
+    message: 'Response after send mail',
+    res,
   })
 
   await next()

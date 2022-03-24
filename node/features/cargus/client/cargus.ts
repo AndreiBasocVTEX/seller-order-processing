@@ -21,6 +21,7 @@ import {
   ValidationError,
 } from '../../core/helpers/error.helper'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
+import { formatError } from '../../core/helpers/formatError'
 
 export default class CargusClient extends CarrierClient {
   protected requiredSettingsFields = [
@@ -53,23 +54,34 @@ export default class CargusClient extends CarrierClient {
       Password: settings.cargus__password,
     }
 
-    return (this.http
-      .post('/LoginUser', body, {
+    return this.http
+      .post<string>('/LoginUser', body, {
         headers: {
           'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
         },
       })
       .catch((error) => {
         throw UnhandledError.fromError(error)
-      }) as unknown) as Promise<string>
+      })
   }
 
   protected async requestAWB({
     settings,
     order,
     params,
+    logger,
   }: CreateTrackingRequest) {
     const token = await this.getBearerToken(settings)
+
+    logger?.info({
+      function: 'Request AWB',
+      carrier: 'Cargus',
+      message: `Data to create payload`,
+      senderLocationId: settings.cargus__locationId,
+      priceTableId: settings.cargus__priceTableId,
+      trackingParams: params,
+      serviceId: settings.cargus__serviceId,
+    })
 
     const body = await createCargusOrderPayload({
       order,
@@ -79,26 +91,46 @@ export default class CargusClient extends CarrierClient {
       serviceId: settings.cargus__serviceId,
     })
 
-    return (this.http
-      .post('/Awbs/WithGetAwb', body, {
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Cargus',
+      message: `Payload to generate AWB for order with ID ${order.orderId}`,
+      body,
+    })
+
+    return this.http
+      .post<ICargusAwbResponse[]>('/Awbs/WithGetAwb', body, {
         headers: {
           'Ocp-Apim-Subscription-Key': settings.cargus__primaryKey,
           Authorization: `Bearer ${token}`,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw new UnhandledError({ message: error?.response?.data.pop() })
-      }) as unknown) as Promise<ICargusAwbResponse[]>
+      })
   }
 
   public async trackingLabel({
     settings,
     trackingNumber,
     paperSize,
+    logger,
   }: GetTrackingLabelRequest): Promise<unknown> {
     const token = await this.getBearerToken(settings)
 
     const format = paperSize === PaperSize.A6 ? 1 : 0
+
+    logger?.info({
+      function: 'trackingLabel',
+      carrier: 'Cargus',
+      message: `Request to create tracking label`,
+      trackingNumber,
+      format,
+    })
 
     return this.http
       .getStream(
@@ -110,14 +142,41 @@ export default class CargusClient extends CarrierClient {
         }
       )
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw new UnhandledError({ message: error?.response?.data })
       })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
+    const { logger } = request
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Cargus',
+      message: `Request to create tracking`,
+      request,
+    })
+
     const awbInfo: ICargusAwbResponse[] = await this.requestAWB(request)
 
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Cargus',
+      message: `Cargus request AWB response`,
+      awbInfo,
+    })
+
     const trackingNumber = awbInfo?.[0]?.BarCode
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Cargus',
+      message: `Cargus AWB tracking number`,
+      trackingNumber,
+    })
 
     return {
       trackingNumber,
@@ -130,6 +189,7 @@ export default class CargusClient extends CarrierClient {
     settings,
     trackingNumber,
     invoiceNumber,
+    logger,
   }: GetTrackingStatusRequest) {
     const updatedAwbInfo: ICargusTrackAwbResponse[] = await this.http
       .get(`/NoAuth/GetAwbTrace?barCode=${trackingNumber}`, {
@@ -138,8 +198,19 @@ export default class CargusClient extends CarrierClient {
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Cargus',
+      message: `Cargus tracking history`,
+      AWBHistory: updatedAwbInfo,
+    })
 
     let trackingEvents: VtexTrackingEvent[] | undefined
     let isDelivered = false
@@ -164,14 +235,33 @@ export default class CargusClient extends CarrierClient {
       isDelivered = trackingHistory.some((event) => event.EventId === 21)
     }
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Cargus',
+      message: `Cargus tracking events and delivery status`,
+      deliveryStatus: isDelivered,
+      trackingEvents,
+    })
+
     return {
       isDelivered,
       events: trackingEvents,
     }
   }
 
-  public async deleteAWB({ settings, trackingNumber }: DeleteTrackingRequest) {
+  public async deleteAWB({
+    settings,
+    trackingNumber,
+    logger,
+  }: DeleteTrackingRequest) {
     const token = await this.getBearerToken(settings)
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Cargus',
+      message: `Cargus tracking number to delete AWB`,
+      trackingNumber,
+    })
 
     return this.http
       .delete<boolean>(`/Awbs?barCode=${trackingNumber}`, {
@@ -182,6 +272,10 @@ export default class CargusClient extends CarrierClient {
       })
       .then(({ data }) => data)
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw new UnhandledError({ message: error?.response?.data })
       })
   }

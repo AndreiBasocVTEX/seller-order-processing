@@ -4,6 +4,7 @@ import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 export async function getInvoiceHandler(ctx: Context) {
   const {
     vtex: {
+      logger,
       route: { params },
     },
     clients: { orderApi, smartbill },
@@ -19,5 +20,13 @@ export async function getInvoiceHandler(ctx: Context) {
 
   const { invoiceNumber } = order?.packageAttachment?.packages.pop()
 
-  return smartbill.getInvoice({ settings, invoiceNumber })
+  logger.info({
+    handler: 'getInvoiceHandler',
+    message: 'Get invoice number',
+    order,
+    orderId,
+    invoiceNumber,
+  })
+
+  return smartbill.getInvoice({ settings, invoiceNumber, logger })
 }
