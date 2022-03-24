@@ -75,15 +75,21 @@ const newOrderTemplate = `
                                 Produse</h3>
                             <div style="box-sizing: border-box; border-radius: 2px; max-width: 100%; background-color: #eee; padding: 1rem; margin-bottom: 1rem !important;">
                                 {{#each items}}
-                                    <div style="margin: 15px 0;">
-                                        <p style="display: inline-block; margin: 0; font-size: 12px;  text-transform: uppercase; box-sizing: border-box !important;">
-                                            {{this.name}}
-                                        </p>
-                                        <p style="display: inline-block; float: right; margin: 0; font-size: 12px; text-transform: uppercase; box-sizing: border-box !important;">
-                                            x{{this.quantity}}
-                                        </p>
-                                        <p style="display: block; text-align: right; margin: 0; font-size: 12px; box-sizing: border-box !important;">{{this.price}}
-                                            Lei</p>
+                                    <div style="display:flex; justify-content: space-between;
+                                    margin: 15px 0;">
+                                        <div>
+                                            <p style="display: inline-block; margin: 0; font-size: 12px;  text-transform: uppercase; box-sizing: border-box !important;">
+                                                {{this.name}}
+                                            </p>
+                                        </div>
+                                        <div  style="display:flex; justify-content: space-between; width:12%">
+                                            <p style="display: inline-block; float: right; margin: 0; font-size: 12px; text-transform: uppercase; box-sizing: border-box !important;">
+                                                x{{this.quantity}}
+                                            </p>
+                                            <p style="display: block; text-align: right; margin: 0; font-size: 12px; box-sizing: border-box !important;">{{this.price}}
+                                                Lei</p>
+                                        </div>
+
                                     </div>
                                 {{/each}}
                                 <div style="text-align: right; margin: 0;">
