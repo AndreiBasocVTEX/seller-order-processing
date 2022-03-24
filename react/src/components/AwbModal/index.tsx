@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   ActionMenu,
   Button,
@@ -175,6 +175,15 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     setIsLoading(false)
   }, [])
 
+  const isProvidersListEmpty = useMemo(() => {
+    const allProviders = [
+      ...availableProviders.awbServices,
+      ...availableProviders.invoiceServices,
+    ].filter((provider) => provider.service !== 'manual')
+
+    return allProviders.length === 0
+  }, [availableProviders])
+
   const awbButton = () =>
     orderData?.packageAttachment.packages && (
       <Button
@@ -248,8 +257,12 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           <Button
             block
             variation="primary"
-            disabled={isLoading || orderData?.status === 'canceled'}
-            isLoading={isLoading}
+            disabled={
+              isLoading ||
+              isProvidersListEmpty ||
+              orderData?.status === 'canceled'
+            }
+            isLoading={isLoading || isProvidersListEmpty}
             onClick={() => {
               orderData && setOpenModalId(orderData.orderId)
             }}
