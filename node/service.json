@@ -1,14 +1,36 @@
 {
   "memory": 256,
   "ttl": 10,
-  "timeout": 2,
+  "timeout": 5,
   "minReplicas": 2,
   "maxReplicas": 4,
   "workers": 1,
   "routes": {
-    "status": {
-      "path": "/_v/status/:code",
+    "updateTrackingStatus": {
+      "path": "/opa/orders/:orderId/update-tracking-status",
       "public": true
+    },
+    "trackAndInvoice": {
+      "path": "/opa/orders/:orderId/track-and-invoice",
+      "public": true
+    },
+    "trackingLabel": {
+      "path": "/opa/orders/:orderId/tracking-label",
+      "public": true
+    },
+    "getInvoice": {
+      "path": "/opa/orders/:orderId/get-invoice",
+      "public": true
+    },
+    "getAvailableProviders": {
+      "path": "/opa/get-active-providers",
+      "public": true
+    }
+  },
+  "events": {
+    "newOrder": {
+      "sender": "vtex.orders-broadcast",
+      "topics": ["window-to-cancel"]
     }
   }
 }

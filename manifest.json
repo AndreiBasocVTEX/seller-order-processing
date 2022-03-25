@@ -1,34 +1,329 @@
 {
-  "name": "service-example",
-  "vendor": "vtex",
-  "version": "0.2.0",
-  "title": "Service Example",
-  "description": "Reference app for VTEX IO Services",
-  "mustUpdateAt": "2018-01-04",
-  "categories": [],
-  "dependencies": {},
+  "vendor": "elefant",
+  "name": "seller-order-processing",
+  "version": "1.0.11",
+  "title": "Seller Order Processing",
+  "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
-    "node": "6.x",
-    "docs": "0.x"
+    "react": "3.x",
+    "messages": "1.x",
+    "docs": "0.x",
+    "admin": "0.x",
+    "node": "6.x"
   },
-  "scripts": {
-    "prereleasy": "bash lint.sh"
+  "dependencies": {
+    "vtex.styleguide": "9.x",
+    "vtex.search-graphql": "0.x",
+    "vtex.format-currency": "0.x"
   },
-  "credentialType": "absolute",
+  "registries": ["smartcheckout"],
   "policies": [
+    {
+      "name": "template-criar"
+    },
+    {
+      "name": "template-editar"
+    },
     {
       "name": "outbound-access",
       "attrs": {
-        "host": "httpstat.us",
-        "path": "*"
+        "host": "urgentcargus.azure-api.net",
+        "path": "/*"
       }
     },
     {
-      "name": "colossus-fire-event"
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.innoship.io",
+        "path": "/api/*"
+      }
     },
     {
-      "name": "colossus-write-logs"
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.sameday.ro",
+        "path": "/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.myvtex.com",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "www.selfawb.ro",
+        "path": "/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "ws.smartbill.ro",
+        "path": "/SBORO/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "OMSViewer"
     }
   ],
+  "settingsSchema": {
+    "title": "Order Processing",
+    "type": "object",
+    "properties": {
+      "general__titleSettings": {
+        "title": "General Settings",
+        "description": "",
+        "type": "object"
+      },
+      "general_shippingVAT": {
+        "title": "Shipping VAT Percentage",
+        "type": "number",
+        "default": 19
+      },
+      "notifications__title": {
+        "title": "Notification Settings",
+        "description": "",
+        "type": "object"
+      },
+      "notifications__isEnabled": {
+        "title": "Enable notifications for new orders",
+        "description": "",
+        "type": "boolean"
+      },
+      "notifications__emailList": {
+        "title": "Add recipients email addresses",
+        "description": "",
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "title": "Email",
+          "type": "string",
+          "format": "email"
+        }
+      },
+      "fancourier__titleSettings": {
+        "title": "FAN Courier Settings",
+        "description": "",
+        "type": "object"
+      },
+      "fancourier__isEnabled": {
+        "title": "Enable FAN Courier Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
+      "fancourier__username": {
+        "title": "FAN Courier Username",
+        "description": "",
+        "type": "string"
+      },
+      "fancourier__password": {
+        "title": "FAN Courier Password",
+        "description": "",
+        "type": "string",
+        "format": "password"
+      },
+      "fancourier__clientId": {
+        "title": "FAN Courier Client ID",
+        "description": "",
+        "type": "string"
+      },
+      "fancourier__warehouseId": {
+        "title": "FanCourier Warehouse ID",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__titleSettings": {
+        "title": "Cargus Settings",
+        "description": "",
+        "type": "object"
+      },
+      "cargus__isEnabled": {
+        "title": "Enable Cargus Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
+      "cargus__username": {
+        "title": "Cargus Username",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__password": {
+        "title": "Cargus Password",
+        "description": "",
+        "type": "string",
+        "format": "password"
+      },
+      "cargus__primaryKey": {
+        "title": "Cargus Primary Key",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__locationId": {
+        "title": "Cargus Warehouse ID",
+        "description": "",
+        "type": "string"
+      },
+      "cargus__priceTableId": {
+        "title": "Cargus Price ID",
+        "description": "",
+        "type": "number"
+      },
+      "cargus__serviceId": {
+        "title": "Cargus Service ID",
+        "description": "",
+        "type": "number",
+        "default": 1
+      },
+      "innoship__titleSettings": {
+        "title": "Innoship Settings",
+        "description": "",
+        "type": "object"
+      },
+      "innoship__isEnabled": {
+        "title": "Enable Innoship Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
+      "innoship__apiToken": {
+        "title": "Innoship API Token",
+        "description": "",
+        "type": "string",
+        "format": "password"
+      },
+      "innoship__warehouseId": {
+        "title": "Innoship Warehouse ID",
+        "description": "",
+        "type": "string"
+      },
+      "sameday__titleSettings": {
+        "title": "Sameday Settings",
+        "description": "",
+        "type": "object"
+      },
+      "sameday__isEnabled": {
+        "title": "Enable Sameday Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
+      "sameday__username": {
+        "title": "Sameday Username",
+        "description": "",
+        "type": "string"
+      },
+      "sameday__password": {
+        "title": "Sameday Password",
+        "description": "",
+        "type": "string",
+        "format": "password"
+      },
+      "sameday__pickUpServiceName": {
+        "title": "Sameday Service",
+        "enum": ["2H", "3H", "6H", "24H", "Exclusive"],
+        "default": "24H"
+      },
+      "sameday__pickupPoint": {
+        "title": "Sameday Pickup Location ID",
+        "type": "number",
+        "default": "139"
+      },
+      "smartbill__titleSettings": {
+        "title": "SmartBill Settings",
+        "description": "",
+        "type": "object"
+      },
+      "smartbill__isEnabled": {
+        "title": "Enable SmartBill Integration",
+        "description": "",
+        "type": "boolean",
+        "default": true
+      },
+      "smartbill__username": {
+        "title": "SmartBill Username",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__apiToken": {
+        "title": "SmartBill Api Token",
+        "description": "",
+        "type": "string",
+        "format": "password"
+      },
+      "smartbill__vatCode": {
+        "title": "SmartBill Vat Code",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__seriesName": {
+        "title": "SmartBill Series Name",
+        "description": "",
+        "type": "string"
+      },
+      "smartbill__invoiceShippingCost": {
+        "title": "Invoice Shipping Cost",
+        "description": "Do you want to invoice the shipping cost?",
+        "type": "boolean",
+        "default": true
+      },
+      "smartbill__invoiceShippingProductName": {
+        "title": "Shipping Cost Product Name",
+        "description": "Name of the shipping cost product that will appear on the invoice",
+        "type": "string",
+        "default": "Transport"
+      },
+      "smartbill__invoiceShippingProductCode": {
+        "title": "Shipping Cost Product Code",
+        "description": "Code of the shipping cost product that will appear on the invoice",
+        "type": "string",
+        "default": "shipping-tax"
+      },
+      "smartbill__useVtexProductTaxValue": {
+        "title": "Use VTEX priceTags",
+        "description": "Use VTEX priceTags VAT percentage if available",
+        "type": "boolean"
+      },
+      "smartbill__defaultVATPercentage": {
+        "title": "SmartBill Default VAT Percentage",
+        "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
+        "type": "number",
+        "default": 19
+      }
+    }
+  },
+  "billingOptions": {
+    "type": "free",
+    "support": {
+      "url": "https://marketplace.elefant.ro/"
+    },
+    "availableCountries": ["*"]
+  },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }

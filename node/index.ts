@@ -1,11 +1,16 @@
-import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
+import type { ClientsConfig } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import { status } from './middlewares/status'
-import { validate } from './middlewares/validate'
+import { getActiveProvidersHandler } from './features/core/handlers/get-active-providers.handler'
+import { getInvoiceHandler } from './features/core/handlers/get-invoice.handler'
+import { getTrackingLabelHandler } from './features/core/handlers/get-tracking-label.handler'
+import { trackAndInvoiceHandler } from './features/core/handlers/track-and-invoice.handler'
+import { updateTrackingStatusHandler } from './features/core/handlers/update-tracking-invoice.handler'
+import { errorHandleMiddleware } from './features/core/middlewares/error.middleware'
+import { newOrderBroadcastMiddleware } from './features/core/middlewares/new-order-broadcast.middleware'
 
-const TIMEOUT_MS = 800
+const TIMEOUT_MS = 1000 * 10
 
 // Create a LRU memory cache for the Status client.
 // The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
@@ -30,23 +35,27 @@ const clients: ClientsConfig<Clients> = {
   },
 }
 
-declare global {
-  // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
-  type Context = ServiceContext<Clients, State>
-
-  // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
-  interface State extends RecorderState {
-    code: number
-  }
-}
-
 // Export a service that defines route handlers and client options.
 export default new Service({
   clients,
+  events: {
+    newOrder: newOrderBroadcastMiddleware,
+  },
   routes: {
-    // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
-    status: method({
-      GET: [validate, status],
+    updateTrackingStatus: method({
+      POST: [errorHandleMiddleware(updateTrackingStatusHandler)],
+    }),
+    trackAndInvoice: method({
+      POST: [errorHandleMiddleware(trackAndInvoiceHandler)],
+    }),
+    trackingLabel: method({
+      GET: [errorHandleMiddleware(getTrackingLabelHandler)],
+    }),
+    getInvoice: method({
+      GET: [errorHandleMiddleware(getInvoiceHandler)],
+    }),
+    getAvailableProviders: method({
+      GET: [errorHandleMiddleware(getActiveProvidersHandler)],
     }),
   },
 })

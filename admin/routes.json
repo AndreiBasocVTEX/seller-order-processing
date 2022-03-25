@@ -1,0 +1,10 @@
+{
+  "admin.app.orderProcessing": {
+    "component": "orderProcessing",
+    "path": "/admin/app/order-processing"
+  },
+  "admin.app.orderDetails": {
+    "component": "orderDetails",
+    "path": "/admin/app/order-details/:id"
+  }
+}

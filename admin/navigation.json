@@ -1,0 +1,20 @@
+[
+  {
+    "section": "orders",
+    "subSection": "order-processing",
+    "subSectionItems": [
+      {
+        "id": "order-processing",
+        "labelId": "admin.navigation.order-processing",
+        "path": "/admin/order-processing"
+      }
+    ]
+  },
+  {
+    "id": "order-processing",
+    "section": "orders",
+    "titleId": "admin.navigation.order-processing",
+    "path": "/admin/order-processing",
+    "adminVersion": 4
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "extends": "@vtex/tsconfig",
+  "compilerOptions": {
+    "noEmitOnError": false,
+    "typeRoots": ["node_modules/@types"],
+    "types": ["node", "jest", "graphql"],
+    "lib": ["dom", "es2020"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "target": "es2017",
+    "jsx": "react"
+  },
+  "include": ["src/typings/*.d.ts", "./**/*.tsx", "./**/*.ts"]
+}
