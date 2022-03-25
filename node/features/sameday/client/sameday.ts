@@ -31,7 +31,8 @@ export default class SamedayClient extends CarrierClient {
   ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(ctx, 'http://api.sameday.ro/api', options)
+    // TODO: Use this baseURL for production env: 'http://api.sameday.ro/api'; Remove from manifest policies
+    super(ctx, 'http://sameday-api.demo.zitec.com/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
