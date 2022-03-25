@@ -22,3 +22,9 @@ export interface ICreateAwbProps {
   invoiceNumber: string
   invoiceUrl: string
 }
+
+export interface IErrorDetails {
+  message: string
+  stack: string
+  errors?: Array<{ error: { code: number; message: string } }>
+}

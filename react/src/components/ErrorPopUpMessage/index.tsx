@@ -27,7 +27,7 @@ const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
             <Divider orientation="horizontal" />
           </div>
           {errorDetails && (
-            <div className="flex mb4">
+            <div className="flex flex-column mb4">
               <Collapsible
                 header={<span className="gray mb-4">Details</span>}
                 onClick={() => setIsCollapseOpen(!isCollapseOpen)}
@@ -35,7 +35,9 @@ const ErrorPopUpMessage: FC<IErrorPopUpMessage> = ({
                 caretColor="muted"
               >
                 <div className="bg-muted-5 pa4 mb6 mt4">
-                  <p className="center w-100 mb4">{errorDetails}</p>
+                  <p className="center w-100 mb4 pre overflow-auto">
+                    {errorDetails}
+                  </p>
                 </div>
               </Collapsible>
             </div>
