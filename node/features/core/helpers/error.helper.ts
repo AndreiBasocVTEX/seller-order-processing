@@ -88,8 +88,8 @@ export class UnhandledError extends CustomErrorConstructor {
       stack: err.stack as string,
       meta: {
         raw: JSON.stringify(err, Object.getOwnPropertyNames(err)),
-        data: err.response?.data,
       },
+      errors: [err.response?.data],
     })
   }
 }
