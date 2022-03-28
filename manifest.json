@@ -1,7 +1,7 @@
 {
   "vendor": "elefant",
   "name": "seller-order-processing",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "title": "Seller Order Processing",
   "description": "Order processing app with external carriers and invoicing services integrations",
   "builders": {
@@ -71,13 +71,6 @@
       "attrs": {
         "host": "ws.smartbill.ro",
         "path": "/SBORO/*"
-      }
-    },
-    {
-      "name": "outbound-access",
-      "attrs": {
-        "host": "sameday-api.demo.zitec.com",
-        "path": "/*"
       }
     },
     {
