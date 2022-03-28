@@ -1,5 +1,4 @@
-import type { IOContext } from '@vtex/api'
-
+import type { CarrierClientRequest } from '../../shared/clients/carrier-client'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 
 export interface SmartbillInvoiceRequestDTO {
@@ -25,8 +24,7 @@ export interface SmartBillGenerateInvoiceRes {
   url: string
 }
 
-export interface CreateInvoiceRequest {
-  settings: IOContext['settings']
+export interface CreateInvoiceRequest extends CarrierClientRequest {
   order: IVtexOrder
 }
 

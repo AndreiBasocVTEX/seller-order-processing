@@ -42,7 +42,7 @@ export const courierListData = [
   },
   {
     src: 'sameday',
-    label: 'SameDay',
+    label: 'Sameday',
     service: 'sameday',
   },
   {
@@ -52,7 +52,7 @@ export const courierListData = [
   },
   {
     src: 'fancourier',
-    label: 'Fan Courier',
+    label: 'FAN Courier',
     service: 'fancourier',
   },
   {
@@ -64,7 +64,7 @@ export const courierListData = [
 export const invoiceListData = [
   {
     src: 'smartbill',
-    label: 'Smartbill',
+    label: 'SmartBill',
     service: 'smartbill',
   },
   {
@@ -75,11 +75,26 @@ export const invoiceListData = [
 export const disabledCouriers = ['DHL', 'TNT', 'GLS', 'DPD']
 
 export const couriersDropDownList = [
-  { value: 'fancourier', label: 'FanCourier' },
+  { value: 'fancourier', label: 'FAN Courier' },
   { value: 'cargus', label: 'Cargus' },
-  { value: 'sameDay', label: 'SameDay' },
+  { value: 'sameDay', label: 'Sameday' },
   { value: 'tnt', label: 'TNT' },
   { value: 'dhl', label: 'DHL' },
   { value: 'gls', label: 'GLS' },
   { value: 'dpd', label: 'DPD' },
 ]
+
+export const alwaysAvailableProviders = {
+  awbServices: [
+    {
+      src: 'download',
+      service: 'manual',
+    },
+  ],
+  invoiceServices: [
+    {
+      src: 'download',
+      service: 'manual',
+    },
+  ],
+}

@@ -16,9 +16,7 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": [
-    "smartcheckout"
-  ],
+  "registries": ["smartcheckout"],
   "policies": [
     {
       "name": "outbound-access",
@@ -44,7 +42,14 @@
     {
       "name": "outbound-access",
       "attrs": {
-        "host": "{{account}}.vtexcommercestable.com.br",
+        "host": "{{account}}.myvtex.com",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "api.vtex.com",
         "path": "/api/*"
       }
     },
@@ -70,9 +75,7 @@
     },
     "free": true,
     "type": "free",
-    "availableCountries": [
-      "*"
-    ]
+    "availableCountries": ["*"]
   },
   "settingsSchema": {
     "title": "Order Processing",
@@ -89,28 +92,29 @@
         "default": 19
       },
       "fancourier__titleSettings": {
-        "title": "Fancourier Settings",
+        "title": "FAN Courier Settings",
         "description": "",
         "type": "object"
       },
       "fancourier__isEnabled": {
-        "title": "Enable FanCourier Integration",
+        "title": "Enable FAN Courier Integration",
         "description": "",
         "type": "boolean",
         "default": true
       },
       "fancourier__username": {
-        "title": "FanCourier Username",
+        "title": "FAN Courier Username",
         "description": "",
         "type": "string"
       },
       "fancourier__password": {
-        "title": "FanCourier Password",
+        "title": "FAN Courier Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "fancourier__clientId": {
-        "title": "FanCourier Client ID",
+        "title": "FAN Courier Client ID",
         "description": "",
         "type": "string"
       },
@@ -138,7 +142,8 @@
       "cargus__password": {
         "title": "Cargus Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "cargus__primaryKey": {
         "title": "Cargus Primary Key",
@@ -175,7 +180,8 @@
       "innoship__apiToken": {
         "title": "Innoship API Token",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "innoship__warehouseId": {
         "title": "Innoship Warehouse ID",
@@ -201,20 +207,26 @@
       "sameday__password": {
         "title": "Sameday Password",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
-      "sameday__sandbox": {
-        "title": "Sandbox Mode",
-        "description": "",
-        "type": "boolean"
+      "sameday__pickUpServiceName": {
+        "title": "Sameday Service",
+        "enum": ["2H", "3H", "6H", "24H", "Exclusive"],
+        "default": "24H"
+      },
+      "sameday__pickupPoint": {
+        "title": "Sameday Pickup Location ID",
+        "type": "number",
+        "default": "139"
       },
       "smartbill__titleSettings": {
-        "title": "Smartbill Settings",
+        "title": "SmartBill Settings",
         "description": "",
         "type": "object"
       },
       "smartbill__isEnabled": {
-        "title": "Enable Smartbill Integration",
+        "title": "Enable SmartBill Integration",
         "description": "",
         "type": "boolean",
         "default": true
@@ -227,7 +239,8 @@
       "smartbill__apiToken": {
         "title": "SmartBill Api Token",
         "description": "",
-        "type": "string"
+        "type": "string",
+        "format": "password"
       },
       "smartbill__vatCode": {
         "title": "SmartBill Vat Code",
@@ -263,7 +276,7 @@
         "type": "boolean"
       },
       "smartbill__defaultVATPercentage": {
-        "title": "Smartbill Default VAT Percentage",
+        "title": "SmartBill Default VAT Percentage",
         "description": "Default VAT percentage used if *VTEX priceTags* is not used or not available",
         "type": "number",
         "default": 19

@@ -8,7 +8,7 @@ import type { IVtexOrder } from '../dto/order.dto'
 
 export default class OrderClient extends ExternalClient {
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super(`https://${ctx.account}.vtexcommercestable.com.br`, ctx, {
+    super(`http://${ctx.account}.vtexcommercestable.com.br`, ctx, {
       ...options,
       headers: {
         ...options?.headers,

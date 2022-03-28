@@ -5,16 +5,16 @@ import type {
   LocalityMappingData,
 } from '../models/mapping-data.model'
 
+type ProvidersMap<T> = {
+  [k in ProviderValues]?: () => Promise<{ default: T }>
+}
+
 export class ProviderClient {
-  private static CountiesByProvider = {
-    [ProvidersEnum.FANCOURIER]: () =>
-      import('../providers/fancourier/counties'),
-    [ProvidersEnum.CARGUS]: () => import('../providers/cargus/counties'),
+  private static CountiesByProvider: ProvidersMap<CountyMappingData> = {
     [ProvidersEnum.SAMEDAY]: () => import('../providers/sameday/counties'),
-    [ProvidersEnum.INNOSHIP]: () => import('../providers/innoship/counties'),
   }
 
-  private static LocalitiesByProvider = {
+  private static LocalitiesByProvider: ProvidersMap<LocalityMappingData> = {
     [ProvidersEnum.FANCOURIER]: () =>
       import('../providers/fancourier/localities'),
     [ProvidersEnum.CARGUS]: () => import('../providers/cargus/localities'),
@@ -24,16 +24,16 @@ export class ProviderClient {
 
   private static async loadCountiesForProvider(
     provider: ProviderValues
-  ): Promise<CountyMappingData> {
-    return ProviderClient.CountiesByProvider[provider]().then(
+  ): Promise<CountyMappingData | undefined> {
+    return ProviderClient.CountiesByProvider[provider]?.().then(
       ({ default: counties }) => counties
     )
   }
 
   private static async loadLocalitiesForProvider(
     provider: ProviderValues
-  ): Promise<LocalityMappingData> {
-    return ProviderClient.LocalitiesByProvider[provider]().then(
+  ): Promise<LocalityMappingData | undefined> {
+    return ProviderClient.LocalitiesByProvider[provider]?.().then(
       ({ default: localities }) => localities
     )
   }
@@ -53,7 +53,7 @@ export class ProviderClient {
       this._provider
     )
 
-    const mappedCounty = counties[county]
+    const mappedCounty = counties?.[county] ?? county
 
     if (typeof mappedCounty === 'function') {
       return mappedCounty()
@@ -67,7 +67,7 @@ export class ProviderClient {
       this._provider
     )
 
-    const mappedLocalities = localities[county]?.[locality]
+    const mappedLocalities = localities?.[county]?.[locality] ?? locality
 
     if (typeof mappedLocalities === 'function') {
       return mappedLocalities()

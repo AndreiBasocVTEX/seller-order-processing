@@ -5,6 +5,7 @@ import { getVtexAppSettings } from '../utils/getVtexAppSettings'
 export async function getTrackingLabelHandler(ctx: Context) {
   const {
     vtex: {
+      logger,
       route: { params },
     },
     query: { paperSize },
@@ -16,6 +17,13 @@ export async function getTrackingLabelHandler(ctx: Context) {
   const orderId = params.orderId as string
   const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
 
+  logger.info({
+    handler: 'getTrackingLabelHandler',
+    message: 'Request params for a tracking label',
+    orderId,
+    paperSize,
+  })
+
   const {
     courier: carrierName,
     trackingNumber,
@@ -26,12 +34,31 @@ export async function getTrackingLabelHandler(ctx: Context) {
     carrierName.toLowerCase() as CarrierValues
   )
 
+  logger.info({
+    handler: 'getTrackingLabelHandler',
+    message: 'Tracking info for the label',
+    carrier,
+    trackingNumber,
+    orderId,
+  })
+
   carrier.throwIfDisabled(settings)
 
   const pdfData = await carrier.trackingLabel({
     settings,
     trackingNumber,
     paperSize,
+    logger,
+  })
+
+  logger.info({
+    handler: 'getTrackingLabelHandler',
+    message: 'Get AWB PDF',
+    carrier,
+    trackingNumber,
+    pdf: pdfData
+      ? 'Tracking label request completed successfully'
+      : 'Tracking label request failed',
   })
 
   ctx.res.setHeader('Content-type', 'application/pdf')
