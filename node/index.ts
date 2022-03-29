@@ -8,6 +8,7 @@ import { getTrackingLabelHandler } from './features/core/handlers/get-tracking-l
 import { trackAndInvoiceHandler } from './features/core/handlers/track-and-invoice.handler'
 import { updateTrackingStatusHandler } from './features/core/handlers/update-tracking-invoice.handler'
 import { errorHandleMiddleware } from './features/core/middlewares/error.middleware'
+import { newOrderBroadcastMiddleware } from './features/core/middlewares/new-order-broadcast.middleware'
 
 const TIMEOUT_MS = 1000 * 10
 
@@ -37,6 +38,9 @@ const clients: ClientsConfig<Clients> = {
 // Export a service that defines route handlers and client options.
 export default new Service({
   clients,
+  events: {
+    newOrder: newOrderBroadcastMiddleware,
+  },
   routes: {
     updateTrackingStatus: method({
       POST: [errorHandleMiddleware(updateTrackingStatusHandler)],

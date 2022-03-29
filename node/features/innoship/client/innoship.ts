@@ -19,24 +19,17 @@ import {
   ValidationError,
 } from '../../core/helpers/error.helper'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
+import { formatError } from '../../core/helpers/formatError'
 
 export default class InnoshipClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'innoship__isEnabled'
+  protected requiredSettingsFields = [
+    'innoship__isEnabled',
+    'innoship__apiToken',
+    'innoship__warehouseId',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('http://api.innoship.io/api', ctx, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Vtex-Use-Https': 'true',
-      },
-    })
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[InnoshipClient.ENABLED_SETTING_NAME]
+    super(ctx, 'http://api.innoship.io/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
@@ -51,7 +44,16 @@ export default class InnoshipClient extends CarrierClient {
     settings,
     trackingNumber,
     paperSize,
+    logger,
   }: GetTrackingLabelRequest): Promise<unknown> {
+    logger?.info({
+      function: 'trackingLabel',
+      carrier: 'Innoship',
+      message: `Request to create tracking label`,
+      trackingNumber,
+      paperSize,
+    })
+
     const [courierId, awbTrackingNumber] = trackingNumber.split(':')
 
     return this.http
@@ -68,6 +70,10 @@ export default class InnoshipClient extends CarrierClient {
         return Buffer.from(data.contents, 'base64')
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }
@@ -76,31 +82,76 @@ export default class InnoshipClient extends CarrierClient {
     settings,
     order,
     params,
+    logger,
   }: CreateTrackingRequest) {
     const warehouseId = settings.innoship__warehouseId
 
+    logger?.info({
+      function: 'Request AWB',
+      carrier: 'Innoship',
+      message: `Data to create payload`,
+      warehouseId,
+      trackingParams: params,
+    })
+
     const body = await createOrderPayload(order, warehouseId, params)
 
-    return (this.http
-      .post('/Order?api-version=1.0', body, {
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Innoship',
+      message: `Payload to generate AWB for order with ID ${order.orderId}`,
+      body,
+    })
+
+    return this.http
+      .post<IInnoshipAwbResponse>('/Order?api-version=1.0', body, {
         headers: {
           'api-version': '1.0',
           'X-Api-Key': settings.innoship__apiToken,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
-      }) as unknown) as Promise<IInnoshipAwbResponse>
+      })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
+    const { logger } = request
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Innoship',
+      message: `Request to create tracking`,
+      request,
+    })
+
     const awbInfo: IInnoshipAwbResponse = await this.requestAWB(request)
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Innoship',
+      message: `Innoship request AWB response`,
+      awbInfo,
+    })
 
     const {
       courierShipmentId: trackingNumber,
       trackPageUrl: trackingUrl,
       courier: courierId,
     } = awbInfo
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Innoship',
+      message: `Innoship AWB tracking number`,
+      trackingNumber,
+      trackingUrl,
+      courierId,
+    })
 
     return {
       trackingNumber: `${courierId}:${trackingNumber}`,
@@ -113,8 +164,15 @@ export default class InnoshipClient extends CarrierClient {
     settings,
     trackingNumber: trackingInfo,
     invoiceNumber,
+    logger,
   }: GetTrackingStatusRequest) {
-    // TODO: Change to the first element of an array after we will have only one packageAttachment per order
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Innoship',
+      message: `Request to get tracking history`,
+      trackingInfo,
+      invoiceNumber,
+    })
 
     const [courierId, trackingNumber] = trackingInfo.split(':')
 
@@ -123,16 +181,32 @@ export default class InnoshipClient extends CarrierClient {
       awbList: [trackingNumber],
     }
 
-    const updatedAwbInfo = ((await this.http
-      .post('/Track/by-awb/with-return?api-version=1.0', body, {
-        headers: {
-          'api-version': '1.0',
-          'X-Api-Key': settings.innoship__apiToken,
-        },
-      })
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Innoship',
+      message: `Data to Innoship`,
+      courier: +courierId,
+      awbList: [trackingNumber],
+    })
+
+    const updatedAwbInfo = await this.http
+      .post<IInnoshipTrackAwbResponse[]>(
+        '/Track/by-awb/with-return?api-version=1.0',
+        body,
+        {
+          headers: {
+            'api-version': '1.0',
+            'X-Api-Key': settings.innoship__apiToken,
+          },
+        }
+      )
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
-      })) as unknown) as IInnoshipTrackAwbResponse[]
+      })
 
     let trackingEvents: VtexTrackingEvent[] = []
     let isDelivered = false
@@ -154,14 +228,34 @@ export default class InnoshipClient extends CarrierClient {
       isDelivered = trackingHistory.some((event) => event.isFinalStatus)
     }
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Innoship',
+      message: `Innoship tracking events and delivery status`,
+      deliveryStatus: isDelivered,
+      trackingEvents,
+    })
+
     return {
       isDelivered,
       events: trackingEvents,
     }
   }
 
-  public async deleteAWB({ settings, trackingNumber }: DeleteTrackingRequest) {
+  public async deleteAWB({
+    settings,
+    trackingNumber,
+    logger,
+  }: DeleteTrackingRequest) {
     const [courierId, awbTrackingNumber] = trackingNumber.split(':')
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Innoship',
+      message: `Innoship tracking number to delete AWB`,
+      courierId,
+      awbTrackingNumber,
+    })
 
     return this.http
       .delete<boolean>(`api/Order/${courierId}/awb/${awbTrackingNumber}`, {
@@ -172,6 +266,10 @@ export default class InnoshipClient extends CarrierClient {
       })
       .then(({ data }) => data)
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }

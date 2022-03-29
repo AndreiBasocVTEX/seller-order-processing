@@ -5,15 +5,11 @@ import type {
   FormattedOrderStatus,
 } from '../../typings/normalizedOrder'
 import { deliveryStatus } from '../constants'
+import { formatOrderState } from '../../../../libs/localities-mapper/utils/county-list.util'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
 
-const getElefantOrderId = (orderNote: string): string | null =>
+const getVendorOrderId = (orderNote: string): string | null =>
   orderNote.match(/(?<=ID:(\s.*?))(\d+)/g)?.toString() ?? null
-
-const getPaymentMethod = (paymentData: string): string | null => {
-  if (!paymentData) return null
-
-  return paymentData.match(/\b(\w+)$/g)?.toString() ?? null
-}
 
 const getOrderTotals = (orderData: IOrder) => {
   const orderTotals = {}
@@ -106,55 +102,6 @@ const getOrderStatus = (
   }
 }
 
-const formatOrderState = (state: string | undefined) => {
-  const states: { [key: string]: string } = {
-    AB: 'Alba',
-    AG: 'Argeș',
-    AR: 'Arad',
-    B: 'București',
-    BC: 'Bacău',
-    BH: 'Bihor',
-    BN: 'Bistrița - Năsăud',
-    BR: 'Brăila',
-    BT: 'Botoșani',
-    BV: 'Brașov',
-    BZ: 'Buzău',
-    CJ: 'Cluj',
-    CL: 'Călărași',
-    CS: 'Caraș - Severin',
-    CT: 'Constanța',
-    CV: 'Covasna',
-    DB: 'Dâmbovița',
-    DJ: 'Dolj',
-    GJ: 'Gorj',
-    GL: 'Galați',
-    GR: 'Giurgiu',
-    HD: 'Hunedoara',
-    HR: 'Harghita',
-    IF: 'Ilfov',
-    IL: 'Ialomița',
-    IS: 'Iași',
-    MH: 'Mehedinți',
-    MM: 'Maramureș',
-    MS: 'Mureș',
-    NT: 'Neamț',
-    OT: 'Olt',
-    PH: 'Prahova',
-    SB: 'Sibiu',
-    SJ: 'Sălaj',
-    SM: 'Satu - Mare',
-    SV: 'Suceava',
-    TL: 'Tulcea',
-    TM: 'Timiș',
-    TR: 'Teleorman',
-    VL: 'Vâlcea',
-    VN: 'Vrancea',
-    VS: 'Vaslui',
-  }
-
-  return state ? states[state] : null
-}
-
 const formatDate = (
   date: string | undefined,
   config: {
@@ -172,7 +119,7 @@ const formatDate = (
   // type doesn't include exception 'Invalid Date'
   if (!date || new Date(date) === 'Invalid Date') return null
 
-  return new Intl.DateTimeFormat('en-GB', config).format(new Date(date))
+  return new Intl.DateTimeFormat('ro-RO', config).format(new Date(date))
 }
 
 const getPackageAttachment = (orderData: IOrder): AttachmentPackages | null => {
@@ -254,7 +201,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
       hour12: false,
       timeZone: 'Europe/Bucharest',
     }),
-    elefantOrderId: getElefantOrderId(orderData.openTextField.value),
+    vendorOrderId: getVendorOrderId(orderData.openTextField.value),
     formattedOrderStatus: getOrderStatus(orderData.status),
     invoiceData: {
       address: {
@@ -272,7 +219,7 @@ export const normalizeOrderData = (orderData: IOrder): OrderDetailsData => {
     items: orderData.items,
     orderId: orderData?.orderId,
     openTextField: {
-      value: getPaymentMethod(orderData?.openTextField?.value),
+      value: getPaymentMethodFromTextField(orderData?.openTextField?.value),
     },
     orderTotals: getOrderTotals(orderData),
     marketPlaceOrderId: orderData?.marketplaceOrderId,

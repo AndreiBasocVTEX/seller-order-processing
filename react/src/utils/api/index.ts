@@ -3,7 +3,11 @@ import axios from 'axios'
 
 import type { IOrder } from '../../typings/order'
 import type { OrderAwbStatus } from '../../typings/OrderAwbStatus'
-import type { ICreateAwbProps, ICreateAwbResult } from '../../types/api'
+import type {
+  ICreateAwbProps,
+  ICreateAwbResult,
+  IErrorDetails,
+} from '../../types/api'
 import type { OrderStats } from '../../typings/orderStats'
 import type { GetOrderStatsParams } from '../../types/common'
 import { parseErrorResponse } from '../errorParser'
@@ -117,13 +121,16 @@ export const createAwbShipping = ({
       { timeout: 5000 }
     )
     .then((resp) => resp.data)
-    .catch((e: AxiosError<{ message: string; stack: string }>) => {
-      if (e?.response) {
-        throw {
-          message: e.response.data.message,
-          details: e.response.data.stack,
-          ...(e.response.status === 504 && { status: e.response.status }),
-        }
+    .catch((e: AxiosError<IErrorDetails>) => {
+      if (!e.response) return
+
+      const { response } = e
+      const errorDetails = response.data.errors?.map((el) => el.error.message)
+
+      throw {
+        message: response.data.message,
+        details: errorDetails ? errorDetails.join('\n') : response.data.stack,
+        ...(response.status === 504 && { status: response.status }),
       }
     })
 }

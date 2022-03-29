@@ -21,25 +21,17 @@ import {
 } from '../../core/helpers/error.helper'
 import findAllObjectPropsByKey from '../../core/utils/findAllObjectPropsByKey'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
+import { formatError } from '../../core/helpers/formatError'
 
 export default class SamedayClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'sameday__isEnabled'
+  protected requiredSettingsFields = [
+    'sameday__isEnabled',
+    'sameday__username',
+    'sameday__password',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    // URL for demo environment
-    super('https://sameday-api.demo.zitec.com', ctx, {
-      ...options,
-      headers: {
-        ...options?.headers,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        'X-Vtex-Use-Https': 'true',
-      },
-    })
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[SamedayClient.ENABLED_SETTING_NAME]
+    super(ctx, 'http://api.sameday.ro/api', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
@@ -54,7 +46,7 @@ export default class SamedayClient extends CarrierClient {
     settings: IOContext['settings']
   ): Promise<IAuthDataSameday> {
     return this.http.post(
-      '/api/authenticate?remember_me=1',
+      '/authenticate?remember_me=1',
       {},
       {
         headers: {
@@ -69,18 +61,37 @@ export default class SamedayClient extends CarrierClient {
     settings,
     order,
     params,
+    logger,
   }: CreateTrackingRequest): Promise<ISamedayAwbResponse> {
     const { token } = await this.getAuthToken(settings)
 
-    const body = await createOrderPayload(order, params)
+    logger?.info({
+      function: 'Request AWB',
+      carrier: 'Sameday',
+      message: `Data to create payload`,
+      trackingParams: params,
+    })
 
-    return (this.http
-      .post('/api/awb', body, {
+    const body = await createOrderPayload(order, params, settings)
+
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Sameday',
+      message: `Payload to generate AWB for order with ID ${order.orderId}`,
+      body,
+    })
+
+    return this.http
+      .post<ISamedayAwbResponse>('/awb', body, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         const { data: errorData } = error?.response
         const { children } = errorData.errors
 
@@ -93,29 +104,58 @@ export default class SamedayClient extends CarrierClient {
           message: errorData.message,
           errors: errorMessages,
         })
-      }) as unknown) as Promise<ISamedayAwbResponse>
+      })
   }
 
   public async trackingLabel({
     settings,
     trackingNumber,
     paperSize,
+    logger,
   }: GetTrackingLabelRequest): Promise<unknown> {
     const { token } = await this.getAuthToken(settings)
 
+    logger?.info({
+      function: 'trackingLabel',
+      carrier: 'sameday',
+      message: `Request to create tracking label`,
+      trackingNumber,
+      paperSize,
+    })
+
     return this.http
-      .getStream(`/api/awb/download/${trackingNumber}/${paperSize}`, {
+      .getStream(`/awb/download/${trackingNumber}/${paperSize}`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }
 
   public async createTracking(request: CreateTrackingRequest) {
+    const { logger } = request
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Sameday',
+      message: 'Request to create tracking',
+      request,
+    })
+
     const { awbNumber: trackingNumber } = await this.requestAWB(request)
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Sameday',
+      message: `Sameday request AWB response`,
+      trackingNumber,
+    })
 
     return {
       trackingNumber,
@@ -128,16 +168,29 @@ export default class SamedayClient extends CarrierClient {
     settings,
     trackingNumber,
     invoiceNumber,
+    logger,
   }: GetTrackingStatusRequest) {
     const { token } = await this.getAuthToken(settings)
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Request to get tracking history`,
+      trackingNumber,
+      invoiceNumber,
+    })
+
     const updatedAwbInfo: ISamedayTrackAWBResponse = await this.http
-      .get(`/api/client/awb/${trackingNumber}/status`, {
+      .get(`/client/awb/${trackingNumber}/status`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
       })
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
 
@@ -166,6 +219,14 @@ export default class SamedayClient extends CarrierClient {
       isDelivered = expeditionSummary.delivered
     }
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Sameday tracking events and delivery status`,
+      deliveryStatus: isDelivered,
+      trackingEvents,
+    })
+
     return {
       isDelivered,
       events: trackingEvents,
@@ -175,17 +236,29 @@ export default class SamedayClient extends CarrierClient {
   public async deleteAWB({
     settings,
     trackingNumber,
+    logger,
   }: DeleteTrackingRequest): Promise<boolean> {
     const { token } = await this.getAuthToken(settings)
 
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Sameday',
+      message: `Sameday tracking number to delete AWB`,
+      trackingNumber,
+    })
+
     return this.http
-      .delete(`/api/awb/${trackingNumber}`, {
+      .delete(`/awb/${trackingNumber}`, {
         headers: {
           'X-AUTH-TOKEN': token,
         },
       })
       .then(({ status }) => status === 204)
       .catch((error) => {
+        logger?.error({
+          data: formatError(error),
+        })
+
         throw UnhandledError.fromError(error)
       })
   }

@@ -1,4 +1,4 @@
-import type { IOContext } from '@vtex/api'
+import type { IOContext, InstanceOptions, Logger } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
@@ -7,8 +7,9 @@ import type { TrackingInfoDTO } from '../../vtex/dto/track-and-invoice.dto'
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
 import type { PaperSize } from '../enums/paper-size.enum'
 
-interface CarrierClientRequest {
+export interface CarrierClientRequest {
   settings: IOContext['settings']
+  logger?: Logger
 }
 
 export interface CreateTrackingRequest extends CarrierClientRequest {
@@ -43,7 +44,19 @@ interface TrackingStatusDTO {
 }
 
 export abstract class CarrierClient extends ExternalClient {
-  protected static ENABLED_SETTING_NAME: string
+  protected requiredSettingsFields: string[] = []
+
+  constructor(ctx: IOContext, baseURL: string, options?: InstanceOptions) {
+    super(baseURL, ctx, {
+      ...options,
+      headers: {
+        ...options?.headers,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Vtex-Use-Https': 'true',
+      },
+    })
+  }
 
   protected abstract requestAWB(
     request: CreateTrackingRequest
@@ -60,6 +73,12 @@ export abstract class CarrierClient extends ExternalClient {
   abstract deleteAWB(request: DeleteTrackingRequest): Promise<boolean>
 
   abstract trackingLabel(request: GetTrackingLabelRequest): unknown
-  abstract isActive(settings: ObjectLiteral): boolean
+
+  public isActive(settings: ObjectLiteral): boolean {
+    return this.requiredSettingsFields.every((field) => {
+      return settings[field]
+    })
+  }
+
   abstract throwIfDisabled(settings: ObjectLiteral): never | void
 }

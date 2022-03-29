@@ -3,14 +3,12 @@ import type {
   ICargusAwbPayload,
 } from '../dto/cargus-awb.dto'
 import { shipmentPaymentMethod } from './cargus-constants.helper'
-import {
-  getPaymentMethod,
-  getTotalDiscount,
-} from '../../core/helpers/order-dto.helper'
+import { getTotalDiscount } from '../../core/helpers/order-dto.helper'
 import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import formatPackageAttachments from './cargus-format-package-attachment.helper'
 import localitiesMapper from '../../../../libs/localities-mapper'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
 import { isString } from '../../core/utils/type-guards'
 
 export async function createCargusOrderPayload({
@@ -45,7 +43,9 @@ export async function createCargusOrderPayload({
     .filter(Boolean)
     .join(', ')
 
-  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+  const typeOfPayment = getPaymentMethodFromTextField(
+    order.openTextField?.value
+  )
 
   const payment =
     typeOfPayment?.toLowerCase() === TypeOfPayment.CARD

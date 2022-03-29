@@ -25,7 +25,9 @@ import type { StatsOrderData } from '../../typings/orderStats'
 import TablePagination from '../../components/OrderList/TablePagination'
 import TableFilters from '../../components/OrderList/TableFilters'
 import '../../public/style.css'
-import { deliveryStatus } from '../../utils/constants'
+import { alwaysAvailableProviders, deliveryStatus } from '../../utils/constants'
+import type { Providers } from '../../typings/Providers'
+import { retrieveActiveProviders } from '../../utils/providers.util'
 
 const OrdersList: FC = () => {
   const [totalizerData, setTotalizerData] = useState<TableTotalizerData>({
@@ -33,6 +35,8 @@ const OrdersList: FC = () => {
     ordersAverageValue: 0,
     ordersTotalValue: 0,
   })
+
+  const [orderAwbModalsOpen, setOrderAwbModalsOpen] = useState('')
 
   const intl = useIntl()
   const paramPage =
@@ -61,6 +65,9 @@ const OrdersList: FC = () => {
   })
 
   const [awbUpdated, setAwbUpdated] = useState(false)
+  const [activeProviders, setActiveProviders] = useState<Providers>(
+    alwaysAvailableProviders
+  )
 
   const getOrdersDetails = async (orderList: [StatsOrderData]) => {
     const ordersPromises: Array<Promise<IOrder>> = orderList.map((order) =>
@@ -85,6 +92,21 @@ const OrdersList: FC = () => {
       ordersTotalValue,
     })
   }
+
+  useEffect(() => {
+    retrieveActiveProviders().then(
+      ({ activeAwbCouriers, activeInvoiceCouriers }) => {
+        setActiveProviders({
+          ...activeProviders,
+          awbServices: [...activeAwbCouriers, ...activeProviders.awbServices],
+          invoiceServices: [
+            ...activeInvoiceCouriers,
+            ...activeProviders.invoiceServices,
+          ],
+        })
+      }
+    )
+  }, [])
 
   const tableOrdersSchema = {
     properties: {
@@ -117,7 +139,7 @@ const OrdersList: FC = () => {
           )
         },
       },
-      elefantOrderId: {
+      vendorOrderId: {
         title: intl.formatMessage({
           id: 'seller-dashboard.table-column.market-place',
         }),
@@ -271,7 +293,13 @@ const OrdersList: FC = () => {
                 if (e.key === 'Enter') e.stopPropagation()
               }}
             >
-              <RequestAwbModal order={rowData} onAwbUpdate={setAwbUpdated} />
+              <RequestAwbModal
+                modalOpenId={orderAwbModalsOpen}
+                setOpenModalId={setOrderAwbModalsOpen}
+                order={rowData}
+                onAwbUpdate={setAwbUpdated}
+                availableProviders={activeProviders}
+              />
             </div>
           )
         },

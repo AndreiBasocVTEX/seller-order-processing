@@ -1,8 +1,8 @@
+import type { IOContext } from '@vtex/api'
+
 import localitiesMapper from '../../../../libs/localities-mapper'
-import {
-  getTotalDiscount,
-  getPaymentMethod,
-} from '../../core/helpers/order-dto.helper'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
+import { getTotalDiscount } from '../../core/helpers/order-dto.helper'
 import { isNumber, isString } from '../../core/utils/type-guards'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
 import { priceMultiplier } from '../../shared/enums/constants'
@@ -10,16 +10,30 @@ import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { ISamedayAwbPayload } from '../dto/sameday-awb.dto'
 import {
-  selectedPickup,
-  pickupServiceId,
   pickup,
+  defaultPickupServiceName,
+  defaultSamedayPickupPoint,
 } from './sameday-constants.helper'
 import formatPackageAttachments from './sameday-format-package-attachment.helper'
 
+const samedayPickupService: Record<string, number> = {
+  '2H': 1,
+  '3H': 2,
+  '6H': 3,
+  '24H': 7,
+  Exclusive: 4,
+}
+
 export async function createOrderPayload(
   order: IVtexOrder,
-  trackingParams: CreateTrackingRequestParams
+  trackingParams: CreateTrackingRequestParams,
+  settings: IOContext['settings']
 ): Promise<ISamedayAwbPayload> {
+  const {
+    sameday__pickUpServiceName: pickupService,
+    sameday__pickupPoint: pickupPoint,
+  } = settings
+
   const totalOrderDiscount = getTotalDiscount(order)
   let { value } = order
 
@@ -50,7 +64,9 @@ export async function createOrderPayload(
     address.city
   )
 
-  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+  const typeOfPayment = getPaymentMethodFromTextField(
+    order.openTextField?.value
+  )
 
   const payment =
     typeOfPayment?.toLowerCase() === TypeOfPayment.CARD
@@ -77,10 +93,10 @@ export async function createOrderPayload(
     packageNumber: trackingParams.numberOfPackages,
     packageWeight: totalWeight,
     parcels: packages,
-    // TODO or not TODO add selectePickup function
-    pickupPoint: selectedPickup,
-    // TODO or not TODO selectService functions
-    service: pickupServiceId,
+    pickupPoint: pickupPoint || defaultSamedayPickupPoint,
+    service:
+      samedayPickupService[pickupService] ||
+      samedayPickupService[defaultPickupServiceName],
     thirdPartyPickup: 0,
   }
 

@@ -1,4 +1,4 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
+import type { IOContext, InstanceOptions } from '@vtex/api'
 import ObjectsToCsv from 'objects-to-csv'
 
 import type { VtexTrackingEvent } from '../../vtex/dto/tracking.dto'
@@ -12,27 +12,22 @@ import { CarrierClient } from '../../shared/clients/carrier-client'
 import { createFancourierOrderPayload } from '../helpers/fancourier-create-payload.helper'
 import type { IAuthDataFancourier } from '../models/fancourier-auth.model'
 import { CarriersEnum } from '../../shared/enums/carriers.enum'
-import {
-  payloadToFormData,
-  transformResponseToBuffer,
-  transformResponseToText,
-} from '../../core/helpers/body-parser.helper'
+import { payloadToFormData } from '../../core/helpers/body-parser.helper'
 import type { FormDataPayload } from '../../core/models/form-data.model'
-import {
-  UnhandledError,
-  ValidationError,
-} from '../../core/helpers/error.helper'
+import { ValidationError } from '../../core/helpers/error.helper'
 import type { ObjectLiteral } from '../../core/models/object-literal.model'
 
 export default class FancourierClient extends CarrierClient {
-  protected static ENABLED_SETTING_NAME = 'fancourier__isEnabled'
+  protected requiredSettingsFields = [
+    'fancourier__isEnabled',
+    'fancourier__username',
+    'fancourier__password',
+    'fancourier__clientId',
+    'fancourier__warehouseId',
+  ]
 
   constructor(ctx: IOContext, options?: InstanceOptions) {
-    super('', ctx, options)
-  }
-
-  public isActive(settings: ObjectLiteral): boolean {
-    return !!settings[FancourierClient.ENABLED_SETTING_NAME]
+    super(ctx, 'http://www.selfawb.ro/', options)
   }
 
   public throwIfDisabled(settings: ObjectLiteral): void | never {
@@ -47,17 +42,32 @@ export default class FancourierClient extends CarrierClient {
     settings,
     order,
     params,
+    logger,
   }: CreateTrackingRequest): Promise<{
     resStatus: string
     lineNumber: string
     rate: string
     trackingNumber: string
   }> {
+    logger?.info({
+      function: 'Request AWB',
+      carrier: 'Fancourier',
+      message: `Fancourier data to create payload`,
+      trackingParams: params,
+    })
+
     const fancourierOrderPayload = await createFancourierOrderPayload(
       order,
       settings.fancourier__warehouseId,
       params
     )
+
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Fancourier',
+      message: `Payload to generate AWB for order with ID ${order.orderId}`,
+      fancourierOrderPayload,
+    })
 
     // Order of the keys in fileData is important because of the generation column flow for the csv-object
     const fileData = [
@@ -97,8 +107,22 @@ export default class FancourierClient extends CarrierClient {
       },
     ]
 
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Fancourier',
+      message: `Fancourier file data`,
+      fileData,
+    })
+
     const csv = new ObjectsToCsv(fileData)
     const csvData = await csv.toString()
+
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Fancourier',
+      message: `Fancourier CSV data`,
+      csvData,
+    })
 
     const res = await this.requestToFanCourier(
       'import_awb_integrat.php',
@@ -131,6 +155,16 @@ export default class FancourierClient extends CarrierClient {
 
     const [lineNumber, resStatus, trackingNumber, rate] = res?.split(',') ?? []
 
+    logger?.info({
+      function: 'RequestAWB',
+      carrier: 'Fancourier',
+      message: `Fancourier generate AWB response`,
+      lineNumber,
+      resStatus,
+      trackingNumber,
+      rate,
+    })
+
     if (resStatus === '0') {
       // If there is an error, then on the third position of the response array (trackingNumber)
       // will be an error message
@@ -149,7 +183,16 @@ export default class FancourierClient extends CarrierClient {
     settings,
     trackingNumber,
     paperSize,
+    logger,
   }: GetTrackingLabelRequest): Promise<unknown> {
+    logger?.info({
+      function: 'trackingLabel',
+      carrier: 'Fancourier',
+      message: `Request to create tracking label`,
+      trackingNumber,
+      paperSize,
+    })
+
     return this.requestToFanCourier(
       'view_awb_integrat_pdf.php',
       {
@@ -159,12 +202,28 @@ export default class FancourierClient extends CarrierClient {
         nr: trackingNumber,
         page: paperSize,
       },
-      { responseType: 'blob' }
+      { responseType: 'arraybuffer' }
     )
   }
 
   public async createTracking(request: CreateTrackingRequest) {
+    const { logger } = request
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Fancourier',
+      message: `Request to create tracking`,
+      request,
+    })
+
     const { trackingNumber } = await this.requestAWB(request)
+
+    logger?.info({
+      function: 'createTracking',
+      carrier: 'Fancourier',
+      message: `Fancourier AWB tracking number`,
+      trackingNumber,
+    })
 
     return {
       trackingNumber,
@@ -177,6 +236,7 @@ export default class FancourierClient extends CarrierClient {
     settings,
     trackingNumber,
     invoiceNumber,
+    logger,
   }: GetTrackingStatusRequest) {
     const formData: IAuthDataFancourier = {
       client_id: settings.fancourier__clientId,
@@ -193,6 +253,13 @@ export default class FancourierClient extends CarrierClient {
       },
       { responseType: 'text' }
     )) as string
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Fancourier',
+      message: `Fancourier tracking history`,
+      AWBHistory: updatedAwbInfo,
+    })
 
     const trackingHistory = updatedAwbInfo.split('\n').filter(Boolean)
 
@@ -211,6 +278,14 @@ export default class FancourierClient extends CarrierClient {
 
       isDelivered = trackingHistory.some((event) => event.split(',')[0] === '2')
     }
+
+    logger?.info({
+      function: 'getTrackingStatus',
+      carrier: 'Fancourier',
+      message: `Fancourier tracking events and delivery status`,
+      deliveryStatus: isDelivered,
+      trackingEvents,
+    })
 
     return {
       isDelivered,
@@ -242,28 +317,27 @@ export default class FancourierClient extends CarrierClient {
   private requestToFanCourier(
     url: string,
     payload: FormDataPayload,
-    options: { responseType: 'text' | 'blob' }
+    options: { responseType: 'text' | 'arraybuffer' }
   ) {
     if (!url) {
       throw new ValidationError({ message: 'URL is required' })
     }
 
+    const acceptTypeByResponse = {
+      text: 'text/html',
+      arraybuffer: 'application/pdf',
+    }
+
     const form = payloadToFormData(payload)
+    const formBody = form.getBuffer().toString()
+    const formBoundary = form.getBoundary()
 
-    return new Promise((resolve, reject) => {
-      form.submit(`https://www.selfawb.ro/${url}`, (error, response) => {
-        if (options.responseType === 'blob') {
-          return transformResponseToBuffer(error, response)
-            .then(resolve)
-            .catch(reject)
-        }
-
-        return transformResponseToText(error, response)
-          .then(resolve)
-          .catch(reject)
-      })
-    }).catch((error) => {
-      throw UnhandledError.fromError(error)
+    return this.http.post<string | Buffer>(url, formBody, {
+      ...options,
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formBoundary}`,
+        'Accept-Type': acceptTypeByResponse[options.responseType],
+      },
     })
   }
 }

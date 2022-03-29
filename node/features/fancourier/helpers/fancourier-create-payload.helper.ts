@@ -6,10 +6,7 @@ import {
   awbSourceChannel,
   pickupServiceId,
 } from './fancourier-constants.helper'
-import {
-  getTotalDiscount,
-  getPaymentMethod,
-} from '../../core/helpers/order-dto.helper'
+import { getTotalDiscount } from '../../core/helpers/order-dto.helper'
 import type { IFancourierAwbPayload } from '../dto/fancourier-awb.dto'
 import type { IVtexOrder } from '../../vtex/dto/order.dto'
 import type { CreateTrackingRequestParams } from '../../shared/clients/carrier-client'
@@ -17,6 +14,7 @@ import { priceMultiplier } from '../../shared/enums/constants'
 import { TypeOfPayment } from '../../shared/enums/type-of-payment.enum'
 import formatPackageAttachments from './fancourier-format-package-attachment.helper'
 import localitiesMapper from '../../../../libs/localities-mapper'
+import { getPaymentMethodFromTextField } from '../../../../libs/common-utils/object.utils'
 import { isString } from '../../core/utils/type-guards'
 
 /**
@@ -42,7 +40,9 @@ export async function createFancourierOrderPayload(
   // totalDiscount could be 0 or a negative number
   value += totalDiscount
 
-  const typeOfPayment = getPaymentMethod(order.openTextField?.value)
+  const typeOfPayment = getPaymentMethodFromTextField(
+    order.openTextField?.value
+  )
 
   const payment =
     typeOfPayment?.toLowerCase() === TypeOfPayment.CARD

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   ActionMenu,
   Button,
@@ -16,42 +16,23 @@ import { useIntl } from 'react-intl'
 
 import type { IOrderAwbProps } from '../../types/awbModal'
 import ErrorPopUpMessage from '../ErrorPopUpMessage'
-import {
-  createAwbShipping,
-  downloadAwb,
-  getActiveProviders,
-} from '../../utils/api'
+import { createAwbShipping, downloadAwb } from '../../utils/api'
 import type { OrderDetailsData } from '../../typings/normalizedOrder'
-import type { Providers } from '../../typings/Providers'
 import {
   courierIcons,
-  courierListData,
   couriersDropDownList,
   disabledCouriers,
-  invoiceListData,
 } from '../../utils/constants'
 
 const RequestAwbModal: FC<IOrderAwbProps> = ({
+  modalOpenId,
+  setOpenModalId,
   updateAwbData,
   order,
   onAwbUpdate,
   refreshOrderDetails,
+  availableProviders,
 }) => {
-  const [availableProviders, setAvailableProviders] = useState<Providers>({
-    awbServices: [
-      {
-        src: 'download',
-        service: 'manual',
-      },
-    ],
-    invoiceServices: [
-      {
-        src: 'download',
-        service: 'manual',
-      },
-    ],
-  })
-
   const [service, setService] = useState('')
   const [courier, setCourier] = useState('')
   const [packageAmount, setPackageAmount] = useState(1)
@@ -63,7 +44,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
   const [manualAwb, setManualAwb] = useState('')
   const [manualUrl, setManualUrl] = useState('')
   const [orderData, setOrderData] = useState<OrderDetailsData>()
-  const [modalOpen, setModalOpen] = useState(false)
   const [courierSetManually, setCourierManually] = useState('')
 
   const [invoiceDate, setInvoiceDate] = useState(
@@ -102,31 +82,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     })
   }
 
-  const retrieveActiveProviders = async () => {
-    const allActiveProviders = await getActiveProviders()
-
-    const activeAwbCouriers = courierListData.filter(
-      (el) => !!allActiveProviders[el.service]
-    )
-
-    const activeInvoiceCouriers = invoiceListData.filter(
-      (el) => !!allActiveProviders[el.service]
-    )
-
-    setAvailableProviders({
-      ...availableProviders,
-      awbServices: [...activeAwbCouriers, ...availableProviders.awbServices],
-      invoiceServices: [
-        ...activeInvoiceCouriers,
-        ...availableProviders.invoiceServices,
-      ],
-    })
-  }
-
-  useEffect(() => {
-    retrieveActiveProviders()
-  }, [])
-
   const dropDownOptions = availableProviders.awbServices.map((_courier) => {
     return {
       label: (
@@ -148,10 +103,6 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
       },
     }
   })
-
-  const handlePopUpToggle = () => {
-    setModalOpen(!modalOpen)
-  }
 
   const getOrderData = async (orderId: string) => {
     setIsLoading(true)
@@ -199,7 +150,7 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
 
   const formHandler = (e: React.SyntheticEvent<EventTarget>) => {
     e.preventDefault()
-    setModalOpen(!modalOpen)
+    setOpenModalId('')
     setInvoiceNum('')
     orderData?.orderId && getOrderData(orderData?.orderId)
   }
@@ -223,6 +174,15 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
     setOrderData(order)
     setIsLoading(false)
   }, [])
+
+  const isProvidersListEmpty = useMemo(() => {
+    const allProviders = [
+      ...availableProviders.awbServices,
+      ...availableProviders.invoiceServices,
+    ].filter((provider) => provider.service !== 'manual')
+
+    return allProviders.length === 0
+  }, [availableProviders])
 
   const awbButton = () =>
     orderData?.packageAttachment.packages && (
@@ -297,10 +257,14 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
           <Button
             block
             variation="primary"
-            disabled={isLoading || orderData?.status === 'canceled'}
-            isLoading={isLoading}
+            disabled={
+              isLoading ||
+              isProvidersListEmpty ||
+              orderData?.status === 'canceled'
+            }
+            isLoading={isLoading || isProvidersListEmpty}
             onClick={() => {
-              setModalOpen(!modalOpen)
+              orderData && setOpenModalId(orderData.orderId)
             }}
           >
             <span className="f6 mw-100 truncate">
@@ -312,13 +276,13 @@ const RequestAwbModal: FC<IOrderAwbProps> = ({
         </Tooltip>
       )}
       <Modal
-        isOpen={modalOpen}
+        isOpen={modalOpenId === orderData?.orderId}
         responsiveFullScreen
         showCloseIcon
         onClose={() => {
-          handlePopUpToggle()
           setCourier('')
           setService('')
+          setOpenModalId('')
         }}
         closeOnOverlayClick
         closeOnEsc

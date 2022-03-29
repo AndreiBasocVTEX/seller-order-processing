@@ -5,6 +5,7 @@ import type { IVtexOrder } from '../../vtex/dto/order.dto'
 export async function updateTrackingStatusHandler(ctx: Context) {
   const {
     vtex: {
+      logger,
       route: { params },
     },
     clients: { orderApi, carrier: carrierClient },
@@ -15,6 +16,13 @@ export async function updateTrackingStatusHandler(ctx: Context) {
   const settings = await getVtexAppSettings(ctx)
 
   const order: IVtexOrder = await orderApi.getVtexOrderData(orderId)
+
+  logger.info({
+    handler: 'updateTrackingStatusHandler',
+    message: 'Request from the user + VTEX Order',
+    orderId,
+    order,
+  })
 
   const {
     courier: carrierName,
@@ -27,12 +35,27 @@ export async function updateTrackingStatusHandler(ctx: Context) {
     carrierName.toLowerCase() as CarrierValues
   )
 
+  logger.info({
+    handler: 'updateTrackingStatusHandler',
+    message: 'Invoice and tracking numbers from the order ',
+    carrier,
+    invoiceNumber,
+    trackingNumber,
+  })
+
   carrier.throwIfDisabled(settings)
 
   const trackingStatus = await carrier.getTrackingStatus({
     settings,
     invoiceNumber,
     trackingNumber,
+    logger,
+  })
+
+  logger.info({
+    handler: 'updateTrackingStatusHandler',
+    message: 'Get tracking status from the carrier',
+    trackingStatus,
   })
 
   // Do not send events at all if there are no events to send
@@ -40,10 +63,16 @@ export async function updateTrackingStatusHandler(ctx: Context) {
     trackingStatus.events = undefined
   }
 
-  await orderApi.updateTrackingStatus({
+  const res = await orderApi.updateTrackingStatus({
     payload: trackingStatus,
     orderId,
     invoiceNumber,
+  })
+
+  logger.info({
+    handler: 'updateTrackingStatusHandler',
+    message: 'Update tracking status in VTEX system',
+    res,
   })
 
   return trackingStatus
