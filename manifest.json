@@ -1,7 +1,7 @@
 {
   "vendor": "vtex",
   "name": "seller-order-processing",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "title": "Seller Order Processing",
   "description": "",
   "builders": {
@@ -16,7 +16,9 @@
     "vtex.search-graphql": "0.x",
     "vtex.format-currency": "0.x"
   },
-  "registries": ["smartcheckout"],
+  "registries": [
+    "smartcheckout"
+  ],
   "policies": [
     {
       "name": "outbound-access",
@@ -75,7 +77,9 @@
     },
     "free": true,
     "type": "free",
-    "availableCountries": ["*"]
+    "availableCountries": [
+      "*"
+    ]
   },
   "settingsSchema": {
     "title": "Order Processing",
@@ -212,7 +216,13 @@
       },
       "sameday__pickUpServiceName": {
         "title": "Sameday Service",
-        "enum": ["2H", "3H", "6H", "24H", "Exclusive"],
+        "enum": [
+          "2H",
+          "3H",
+          "6H",
+          "24H",
+          "Exclusive"
+        ],
         "default": "24H"
       },
       "sameday__pickupPoint": {
