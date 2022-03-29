@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.2] - 2022-03-29
+
 ## [0.2.1] - 2022-03-29
 ### Changed
 - Setup current linter and prettier presets.
